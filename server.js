@@ -34,31 +34,40 @@ io.on('connection', function(socket) {
         var player = players[socket.id] || {};
         if (data.a) {
             player.x -= 5;
+            player.status = 2;
             if(checkCollision(player,64,64,10)){
                 player.x += 5;
                 console.log("Collision")
+                player.status = 0;
             }
-
         }
         if (data.w) {
             player.y -= 5;
+            player.status = 1;
             if(checkCollision(player,64,64,10)){
                 player.y += 5;
                 console.log("Collision")
+                player.status = 0;
             }
+
         }
         if (data.d) {
             player.x += 5;
+            player.status = 4;
             if(checkCollision(player,64,64,10)){
                 player.x -= 5;
                 console.log("Collision")
+                player.status = 0;
+
             }
         }
         if (data.s) {
             player.y += 5;
+            player.status = 3;
             if(checkCollision(player,64,64,10)){
                 player.y -= 5;
                 console.log("Collision")
+                player.status = 0;
             }
         }
     });
