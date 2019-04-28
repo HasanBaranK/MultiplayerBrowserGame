@@ -1,11 +1,10 @@
 // Dependencies
-let express = require('express');
-let http = require('http');
 let path = require('path');
 let socketIO = require('socket.io');
-let app = express();
-let server = http.Server(app);
+let app = require('express')();
+let server = require('http').createServer(app);
 let io = socketIO(server);
+
 
 
 app.set('port', 5000);
@@ -22,6 +21,7 @@ server.listen(5000, function() {
 
 var players = {};
 io.on('connection', function(socket) {
+  console.log('Player ' + socket.id + ' has joined the game');
     socket.on('new player', function() {
         players[socket.id] = {
             x: 300,
@@ -30,18 +30,23 @@ io.on('connection', function(socket) {
     });
     socket.on('movement', function(data) {
         var player = players[socket.id] || {};
-        if (data.left) {
+        console.log(data)
+        if (data.a) {
             player.x -= 5;
         }
-        if (data.up) {
+        if (data.w) {
             player.y -= 5;
         }
-        if (data.right) {
+        if (data.d) {
             player.x += 5;
         }
-        if (data.down) {
+        if (data.s) {
             player.y += 5;
         }
+    });
+    socket.on('disconnect', function(some) {
+
+      console.log('Player ' + socket.id + ' has disconnected.');
     });
 });
 
