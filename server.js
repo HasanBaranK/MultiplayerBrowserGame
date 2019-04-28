@@ -35,7 +35,6 @@ io.on('connection', function(socket) {
     });
     socket.on('movement', function(data) {
         var player = players[socket.id] || {};
-        console.log(data)
         if (data.a) {
             player.x -= 5;
         }
@@ -52,6 +51,7 @@ io.on('connection', function(socket) {
     socket.on('disconnect', function(some) {
 
       console.log('Player ' + socket.id + ' has disconnected.');
+      players[socket.id] = 0
     });
 });
 
