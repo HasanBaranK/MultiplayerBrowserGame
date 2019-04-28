@@ -29,8 +29,8 @@ io.on('connection', function(socket) {
   console.log('Player ' + socket.id + ' has joined the game');
     socket.on('new player', function() {
         players[socket.id] = {
-            x: 300,
-            y: 300
+            x: 320,
+            y: 320
         };
     });
     socket.on('movement', function(data) {
@@ -49,7 +49,6 @@ io.on('connection', function(socket) {
         }
     });
     socket.on('disconnect', function(some) {
-
       console.log('Player ' + socket.id + ' has disconnected.');
       players[socket.id] = 0
     });
