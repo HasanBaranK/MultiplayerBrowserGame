@@ -1,4 +1,4 @@
-let imageNames = ['bird','wings','heart']
+let imageNames = ['dwarf1']
 let images = {}
 let promises = []
 
@@ -15,25 +15,54 @@ for(let image in imageNames){
 
 Promise.all(promises).then(whenImagesLoad)
 
-class Sprite {
-  constructor(img){
+class Animation {
+
+  constructor(img, sx, ex, sy, ey, iw, ih, aw, ah, speed){
     this.img = img
+    this.sx = sx
+    this.ex = ex
+    this.sy = sy
+    this.ey = ey
+    this.cx = sx
+    this.cy = sy
+    this.iw = iw
+    this.ih = ih
+    this.aw = aw
+    this.ah = ah
+    this.speed = speed
+    this.animTime = new Date().getTime()
+  }
+  draw(ctx, x, y){
+    let t = new Date().getTime()
+    if(t > this.animTime){
+      this.cx++
+      this.animTime = t + this.speed
+    }
+    if(this.cx >= this.ex){
+      this.cx = this.sx
+    }
+    if(this.cy > this.ey){
+      this.cy = this.sy
+    }
+    ctx.drawImage(this.img,this.cx * this.iw,this.cy * this.ih,this.iw,this.ih, x, y, this.aw, this.ah)
+    console.log(this.ah);
   }
 }
 
 class Player {
-  constructor(rds, cds){
-    this.rds = rds
+  constructor(cds){
     this.cds = cds
+    this.animations = []
   }
   draw(ctx){
-    ctx.beginPath();
-    ctx.arc(this.cds['x'], this.cds['y'], this.rds, 0, 2 * Math.PI);
-    ctx.fill();
+    this.animations[0].draw(ctx, this.cds['x'], this.cds['y'])
   }
   update(cdsN){
     this.cds['x'] += cdsN['x']
     this.cds['y'] += cdsN['y']
+  }
+  addAnimation(img, sx, ex, sy, ey, iw, ih, aw, ah, speed){
+    this.animations.push(new Animation(img, sx, ex, sy, ey, iw, ih, aw, ah, speed))
   }
 }
 
@@ -50,8 +79,6 @@ function whenImagesLoad(){
   cvs.width = 640
   cvs.height = 640
   cvs.style.border = 'solid black 1px'
-  let sprite = new Sprite()
-  ctx.drawImage(images['heart'], 0, 0, images['heart'].width, images['heart'].height, cvs.width/2 - 25, cvs.height/2 - 25, 50, 50)
 
   document.getElementById('connect').onclick = () =>{
     socket = io.connect('http://localhost:5000', {reconnection: false})
@@ -64,16 +91,18 @@ function whenImagesLoad(){
       }
       socket.on('state', (playersM) => {
         for(let player in playersM){
-          if(!players[player]){
-            players[player] = new Player(20, playersM[player])
-          }
-          else{
-            if(playersM[player] == 0){
-              delete players[player]
+          if(playersM[player] != 0){
+            if (!players[player]){
+              players[player] = new Player(playersM[player])
+              players[player].addAnimation(images['dwarf1'],0,6,2,2,32,32,64,64,100)
+              console.log('New Player joined');
             }
             else{
               players[player].cds = playersM[player]
             }
+          }
+          else if(players[player]!=null){
+            delete players[player]
           }
         }
       });
