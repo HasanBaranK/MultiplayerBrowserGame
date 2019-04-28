@@ -1,18 +1,23 @@
 // Dependencies
 let path = require('path');
 let socketIO = require('socket.io');
-let app = require('express')();
+let express = require('express');
+
+
+
+
+
+
+
+const app = express();
+
 let server = require('http').createServer(app);
 let io = socketIO(server);
-
-
-
 app.set('port', 5000);
 
-// Routing
-app.get('/', function(request, response) {
-    response.sendFile(path.join(__dirname, 'index.html'));
-});
+//Directory of static files
+const static_dir = 'static';
+app.use(express.static(static_dir));
 
 // Starts the server.
 server.listen(5000, function() {
