@@ -45,7 +45,6 @@ class Animation {
       this.cy = this.sy
     }
     ctx.drawImage(this.img,this.cx * this.iw,this.cy * this.ih,this.iw,this.ih, x, y, this.aw, this.ah)
-    console.log(this.ah);
   }
 }
 
@@ -135,18 +134,18 @@ function game(){
   socket.emit('movement', keys)
   ctx.clearRect(0, 0, cvs.width, cvs.height);
   for(let player in players){
-    switch (players[player]['status']) {
-      case 0: player[player].idle()
+    switch (players[player].state.status) {
+      case 0: players[player].idle(ctx)
         break;
-      case 1: player[player].up()
+      case 1: players[player].up(ctx)
         break;
-      case 2: player[player].left()
+      case 2: players[player].left(ctx)
         break;
-      case 3: player[player].down()
+      case 3: players[player].down(ctx)
         break;
-      case 3: player[player].right()
+      case 4: players[player].right(ctx)
         break;
-      default: console.log('asd');
+      default: ;
 
     }
   }
