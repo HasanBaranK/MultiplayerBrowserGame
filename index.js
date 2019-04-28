@@ -47,8 +47,8 @@ ws.onerror = (e) => {
 }
 
 player1 = new Player(20, [cvs.width / 2, cvs.height / 2])
-
-setInterval(game, 23)
+fps = 60
+setInterval(game, 1000/fps)
 
 
 function game(){
