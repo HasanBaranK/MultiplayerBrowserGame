@@ -28,18 +28,19 @@ io.on('connection', function(socket) {
         players[socket.id] = {
             x: 320,
             y: 320,
-            status:0
+            status: 0
         };
     });
     socket.on('movement', function(data) {
         var player = players[socket.id] || {};
+        var today = new Date();
+        player.time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         if (data.a) {
             player.x -= 5;
             player.status = 2;
             if(checkCollision(player,64,64,10)){
                 player.x += 5;
                 console.log("Collision")
-                player.status = 0;
             }
         }
         if (data.w) {
@@ -48,7 +49,6 @@ io.on('connection', function(socket) {
             if(checkCollision(player,64,64,10)){
                 player.y += 5;
                 console.log("Collision")
-                player.status = 0;
             }
 
         }
@@ -58,7 +58,6 @@ io.on('connection', function(socket) {
             if(checkCollision(player,64,64,10)){
                 player.x -= 5;
                 console.log("Collision")
-                player.status = 0;
 
             }
         }
@@ -68,7 +67,6 @@ io.on('connection', function(socket) {
             if(checkCollision(player,64,64,10)){
                 player.y -= 5;
                 console.log("Collision")
-                player.status = 0;
             }
         }
     });
