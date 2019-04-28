@@ -27,7 +27,8 @@ io.on('connection', function(socket) {
     socket.on('new player', function() {
         players[socket.id] = {
             x: 320,
-            y: 320
+            y: 320,
+            status:0
         };
     });
     socket.on('movement', function(data) {

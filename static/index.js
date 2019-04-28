@@ -50,16 +50,29 @@ class Animation {
 }
 
 class Player {
-  constructor(cds){
-    this.cds = cds
+  constructor(state){
+    this.state = state
     this.animations = []
   }
-  draw(ctx){
-    this.animations[0].draw(ctx, this.cds['x'], this.cds['y'])
+  idle(ctx){
+    this.animations[0].draw(ctx, this.state['x'], this.state['y'])
   }
+  up(ctx){
+    this.animations[1].draw(ctx, this.state['x'], this.state['y'])
+  }
+  left(ctx){
+    this.animations[2].draw(ctx, this.state['x'], this.state['y'])
+  }
+  down(ctx){
+    this.animations[3].draw(ctx, this.state['x'], this.state['y'])
+  }
+  right(ctx){
+    this.animations[4].draw(ctx, this.state['x'], this.state['y'])
+  }
+
   update(cdsN){
-    this.cds['x'] += cdsN['x']
-    this.cds['y'] += cdsN['y']
+    this.state['x'] += cdsN['x']
+    this.state['y'] += cdsN['y']
   }
   addAnimation(img, sx, ex, sy, ey, iw, ih, aw, ah, speed){
     this.animations.push(new Animation(img, sx, ex, sy, ey, iw, ih, aw, ah, speed))
@@ -94,11 +107,15 @@ function whenImagesLoad(){
           if(playersM[player] != 0){
             if (!players[player]){
               players[player] = new Player(playersM[player])
-              players[player].addAnimation(images['dwarf1'],0,6,2,2,32,32,64,64,100)
+              players[player].addAnimation(images['dwarf1'],0,4,0,0,32,32,64,64,100)//idle
+              players[player].addAnimation(images['dwarf1'],0,7,1,1,32,32,64,64,100)//up
+              players[player].addAnimation(images['dwarf1'],0,7,6,6,32,32,64,64,100)//left
+              players[player].addAnimation(images['dwarf1'],0,7,6,6,32,32,64,64,100)//down
+              players[player].addAnimation(images['dwarf1'],0,7,1,1,32,32,64,64,100)//right
               console.log('New Player joined');
             }
             else{
-              players[player].cds = playersM[player]
+              players[player].state = playersM[player]
             }
           }
           else if(players[player]!=null){
@@ -118,6 +135,19 @@ function game(){
   socket.emit('movement', keys)
   ctx.clearRect(0, 0, cvs.width, cvs.height);
   for(let player in players){
-    players[player].draw(ctx)
+    switch (players[player]['status']) {
+      case 0: player[player].idle()
+        break;
+      case 1: player[player].up()
+        break;
+      case 2: player[player].left()
+        break;
+      case 3: player[player].down()
+        break;
+      case 3: player[player].right()
+        break;
+      default: console.log('asd');
+
+    }
   }
 }
