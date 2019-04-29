@@ -30,44 +30,47 @@ io.on('connection', function(socket) {
             y: 320,
             status: 0
         };
+        io.sockets.emit('map', map);
     });
     socket.on('movement', function(data) {
         var player = players[socket.id] || {};
-        var today = new Date();
-        player.time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        if (data.a) {
-            player.x -= 5;
-            player.status = 2;
-            if(checkCollision(player,64,64,10)){
-                player.x += 5;
-                console.log("Collision")
-            }
-        }
-        if (data.w) {
-            player.y -= 5;
-            player.status = 1;
-            if(checkCollision(player,64,64,10)){
-                player.y += 5;
-                console.log("Collision")
-            }
-
-        }
-        if (data.d) {
-            player.x += 5;
-            player.status = 4;
-            if(checkCollision(player,64,64,10)){
+        if(data.a || data.w || data.d || data.s) {
+            if (data.a) {
                 player.x -= 5;
-                console.log("Collision")
+                player.status = 2;
+                if (checkCollision(player, 64, 64, 10)) {
+                    player.x += 5;
+                    console.log("Collision")
+                }
+            }
+            if (data.w) {
+                player.y -= 5;
+                player.status = 1;
+                if (checkCollision(player, 64, 64, 10)) {
+                    player.y += 5;
+                    console.log("Collision")
+                }
 
             }
-        }
-        if (data.s) {
-            player.y += 5;
-            player.status = 3;
-            if(checkCollision(player,64,64,10)){
-                player.y -= 5;
-                console.log("Collision")
+            if (data.d) {
+                player.x += 5;
+                player.status = 4;
+                if (checkCollision(player, 64, 64, 10)) {
+                    player.x -= 5;
+                    console.log("Collision")
+
+                }
             }
+            if (data.s) {
+                player.y += 5;
+                player.status = 3;
+                if (checkCollision(player, 64, 64, 10)) {
+                    player.y -= 5;
+                    console.log("Collision")
+                }
+            }
+        }else {
+            player.status = 0;
         }
     });
     socket.on('disconnect', function(some) {
@@ -101,7 +104,6 @@ function autoMapgenerator(startX,amount,gridSize){
 
     }
     console.log(blocks);
-    console.log(collisonMap);
     return blocks;
 }
 
@@ -134,6 +136,18 @@ function checkCollision(player,sizex,sizey,gridSize){
 }
 
 
+function gravity() {
+    for(let player in players){
+        let currentPlayer = players[player];
+        currentPlayer.y += 3;
+        if(checkCollision(currentPlayer,32,32,10)){
+            currentPlayer.y -= 3;
+        }
+    }
+}
+
 setInterval(function() {
+    gravity();
     io.sockets.emit('state', players);
+
 }, 1000 / 60);
