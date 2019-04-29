@@ -4,7 +4,7 @@ let socketIO = require('socket.io');
 let express = require('express');
 
 const app = express();
-
+const gridSize = 32;
 let server = require('http').createServer(app);
 let io = socketIO(server);
 app.set('port', 5000);
@@ -20,14 +20,14 @@ server.listen(5000, function() {
 
 var players = {};
 var collisonMap = {};
-let map = autoMapgenerator(-10,75,10);
+let map = autoMapgenerator(0,32,gridSize);
 
 io.on('connection', function(socket) {
   console.log('Player ' + socket.id + ' has joined the game');
     socket.on('new player', function() {
         players[socket.id] = {
             x: 320,
-            y: 320,
+            y: 200,
             status: 0
         };
         io.sockets.emit('map', map);
@@ -38,7 +38,7 @@ io.on('connection', function(socket) {
             if (data.a) {
                 player.x -= 5;
                 player.status = 2;
-                if (checkCollision(player, 32, 32, 10)) {
+                if (checkCollision(player, 32, 32, gridSize)) {
                     player.x += 5;
                     console.log("Collision")
                 }
@@ -49,7 +49,7 @@ io.on('connection', function(socket) {
                     player.y -= 50;
                     player.status = 1;
 
-                    if (checkCollision(player, 32, 32, 10)) {
+                    if (checkCollision(player, 32, 32, gridSize)) {
                         player.y += 50;
                         console.log("Collision")
                         console.log("cant Jump")
@@ -61,7 +61,7 @@ io.on('connection', function(socket) {
             if (data.d) {
                 player.x += 5;
                 player.status = 4;
-                if (checkCollision(player, 32, 32, 10)) {
+                if (checkCollision(player, 32, 32, gridSize)) {
                     player.x -= 5;
                     console.log("Collision")
 
@@ -70,7 +70,7 @@ io.on('connection', function(socket) {
             if (data.s) {
                 player.y += 5;
                 player.status = 3;
-                if (checkCollision(player, 32, 32, 10)) {
+                if (checkCollision(player, 32, 32, gridSize)) {
                     player.y -= 5;
                     console.log("Collision")
                 }
@@ -96,10 +96,8 @@ function autoMapgenerator(startX,amount,gridSize){
     let blocks = [];
     for(let i=startX;i<startX+amount;i++){
         collisonMap[i*gridSize] = {};
-        for(let k=64;k>25;k--){
+        for(let k=20;k>10;k--){
             let block = {};
-
-
             collisonMap[i *gridSize][k*gridSize] = true;
             block["x"] = i * gridSize;
             block["y"] = k * gridSize;
@@ -110,6 +108,7 @@ function autoMapgenerator(startX,amount,gridSize){
 
     }
     console.log(blocks);
+    console.log(collisonMap);
     return blocks;
 }
 
@@ -149,7 +148,7 @@ function gravity() {
         let currentPlayer = players[player];
         currentPlayer.y += 3;
         currentPlayer.onair = true;
-        if(checkCollision(currentPlayer,32,32,10)){
+        if(checkCollision(currentPlayer,32,32,gridSize)){
             currentPlayer.y -= 3;
             currentPlayer.onair = false;
             console.log("In land");
