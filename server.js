@@ -20,7 +20,7 @@ server.listen(5000, function() {
 
 var players = {};
 var collisonMap = {};
-let map = autoMapgenerator(0,32,gridSize);
+let map = autoMapgenerator(3,10,gridSize);
 
 io.on('connection', function(socket) {
   console.log('Player ' + socket.id + ' has joined the game');
@@ -95,10 +95,10 @@ function autoMapgenerator(startX,amount,gridSize){
     //no extreme changes (a tower of 2000 in an instant should not be possible)
     let blocks = [];
     for(let i=startX;i<startX+amount;i++){
-        collisonMap[i*gridSize] = {};
+        collisonMap[i*gridSize-32] = {};
         for(let k=20;k>10;k--){
             let block = {};
-            collisonMap[i *gridSize][k*gridSize] = true;
+            collisonMap[i *gridSize-32][k*gridSize-32] = true;
             block["x"] = i * gridSize;
             block["y"] = k * gridSize;
             block["type"] = "dirt";
@@ -115,12 +115,15 @@ function autoMapgenerator(startX,amount,gridSize){
 //64px 64px
 function checkCollision(player,sizex,sizey,gridSize){
 
+    let xcoordinate = player.x + sizex;
+    let ycoordinate = player.y - sizey;
 
-    let MAXX = player.x + sizex + (gridSize - ((player.x + sizex) % gridSize )) ;
-    let MINX = player.x - sizex - ((player.x - sizex) % gridSize ) ;
-    let MAXY = player.y + sizey + (gridSize - ((player.y + sizey) % gridSize )) ;
-    let MINY = player.y-sizey - ((player.y - sizey) % gridSize ) ;
-    console.log("Checking collision for = " + player.x+ "," + player.y);
+
+    let MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize )) ;
+    let MINX = xcoordinate - sizex - ((xcoordinate- sizex) % gridSize ) ;
+    let MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize )) ;
+    let MINY = ycoordinate -sizey - ((ycoordinate - sizey) % gridSize ) ;
+    console.log("Checking collision for = " + xcoordinate+ "," + ycoordinate);
     console.log(MAXX+ "," + MINX);
     console.log(MAXY+ "," + MINY);
 
