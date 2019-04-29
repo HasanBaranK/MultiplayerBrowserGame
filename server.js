@@ -20,7 +20,7 @@ server.listen(5000, function() {
 
 var players = {};
 var collisonMap = {};
-let map = autoMapgenerator(0,1000,10);
+let map = autoMapgenerator(-10,640,10);
 
 io.on('connection', function(socket) {
   console.log('Player ' + socket.id + ' has joined the game');
@@ -44,11 +44,17 @@ io.on('connection', function(socket) {
                 }
             }
             if (data.w) {
-                player.y -= 5;
-                player.status = 1;
-                if (checkCollision(player, 64, 64, 10)) {
-                    player.y += 5;
-                    console.log("Collision")
+                if(player.onair === false) {
+                    console.log("Jumped")
+                    player.y -= 50;
+                    player.status = 1;
+
+                    if (checkCollision(player, 64, 64, 10)) {
+                        player.y += 50;
+                        console.log("Collision")
+                        console.log("cant Jump")
+                    }
+                    player.onair = true;
                 }
 
             }
@@ -109,6 +115,8 @@ function autoMapgenerator(startX,amount,gridSize){
 
 //64px 64px
 function checkCollision(player,sizex,sizey,gridSize){
+
+
     let MAXX = player.x + sizex + (gridSize - ((player.x + sizex) % gridSize )) ;
     let MINX = player.x - sizex - ((player.x - sizex) % gridSize ) ;
     let MAXY = player.y + sizey + (gridSize - ((player.y + sizey) % gridSize )) ;
@@ -140,8 +148,11 @@ function gravity() {
     for(let player in players){
         let currentPlayer = players[player];
         currentPlayer.y += 3;
-        if(checkCollision(currentPlayer,32,32,10)){
+        currentPlayer.onair = true;
+        if(checkCollision(currentPlayer,10,10,10)){
             currentPlayer.y -= 3;
+            currentPlayer.onair = false;
+            console.log("In land");
         }
     }
 }
