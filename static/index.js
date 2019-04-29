@@ -83,11 +83,14 @@ let socket, cvs, fps, ctx = undefined
 keys = {}
 players = {}
 var map;
+let health = 100
+let energy = 100
 function whenImagesLoad(){
   socket = null
   fps = 60
   cvs = document.getElementById('canvas')
   ctx = cvs.getContext('2d')
+  ctx.font = '50px serif'
   cvs.width = 640
   cvs.height = 640
   cvs.style.border = 'solid black 1px'
@@ -135,7 +138,6 @@ function whenImagesLoad(){
 }
 function drawMap(map) {
   for(let block in map){
-    console.log()
     ctx.drawImage(images.dirtBlock,map[block].x,map[block].y+90);
   }
 }
@@ -167,6 +169,7 @@ function game(){
         break;
       default: ;
     }
+    ctx.fillText(player, players[player].state.x, players[player].state.y);
   }
   drawMap(map);
 }
