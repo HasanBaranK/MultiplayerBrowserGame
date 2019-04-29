@@ -139,18 +139,20 @@ function drawMap(map) {
     ctx.drawImage(images.dirtBlock,map[block].x,map[block].y+90);
   }
 }
-let currentX = 0
+let currentCoords = {x:320,y:200}
+let currentTransform = {x:0,y:0}
+let movespeed = 5
 function game(){
   socket.emit('movement', keys)
-  if(keys['a']){
-    currentX -= 4
-    ctx.translate(4, 0)
+
+  if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
+    currentTransform.x += currentCoords.x - players[socket.id].state.x
+    currentTransform.y += currentCoords.y - players[socket.id].state.y
+    ctx.translate(currentCoords.x - players[socket.id].state.x,currentCoords.y - players[socket.id].state.y)
+    currentCoords.x = players[socket.id].state.x
+    currentCoords.y = players[socket.id].state.y
   }
-  if(keys['d']){
-    currentX += 4
-    ctx.translate(-4, 0)
-  }
-  ctx.clearRect(currentX, 0, cvs.width, cvs.height);
+  ctx.clearRect(-currentTransform.x, -currentTransform.y, cvs.width, cvs.height);
   for(let player in players){
     switch (players[player].state.status) {
       case 0: players[player].idle(ctx)
