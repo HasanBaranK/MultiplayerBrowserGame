@@ -139,11 +139,18 @@ function drawMap(map) {
     ctx.drawImage(images.dirtBlock,map[block].x,map[block].y+90);
   }
 }
-
+let currentX = 0
 function game(){
   socket.emit('movement', keys)
-
-  ctx.clearRect(0, 0, cvs.width, cvs.height);
+  if(keys['a']){
+    currentX -= 4
+    ctx.translate(4, 0)
+  }
+  if(keys['d']){
+    currentX += 4
+    ctx.translate(-4, 0)
+  }
+  ctx.clearRect(currentX, 0, cvs.width, cvs.height);
   for(let player in players){
     switch (players[player].state.status) {
       case 0: players[player].idle(ctx)
@@ -157,7 +164,6 @@ function game(){
       case 4: players[player].right(ctx)
         break;
       default: ;
-
     }
   }
   drawMap(map);
