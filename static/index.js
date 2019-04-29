@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1']
+let imageNames = ['dwarf1','dirtBlock']
 let images = {}
 let promises = []
 
@@ -82,7 +82,7 @@ let socket, cvs, fps, ctx = undefined
 
 keys = {}
 players = {}
-
+var map;
 function whenImagesLoad(){
   socket = null
   fps = 60
@@ -123,15 +123,26 @@ function whenImagesLoad(){
         }
       });
       socket.emit('new player')
+      socket.on('map', (map) => {
+        this.map = map;
+          drawMap(map);
+      });
       console.log('Connected to server');
+
       setInterval(game, 1000/fps)
     });
   }
 }
-
+function drawMap(map) {
+  for(let block in map){
+    console.log()
+    ctx.drawImage(images.dirtBlock,map[block].x,map[block].y+90);
+  }
+}
 
 function game(){
   socket.emit('movement', keys)
+
   ctx.clearRect(0, 0, cvs.width, cvs.height);
   for(let player in players){
     switch (players[player].state.status) {
@@ -149,4 +160,5 @@ function game(){
 
     }
   }
+  drawMap(map);
 }

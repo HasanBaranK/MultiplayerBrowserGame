@@ -20,7 +20,7 @@ server.listen(5000, function() {
 
 var players = {};
 var collisonMap = {};
-let map = autoMapgenerator(-10,640,10);
+let map = autoMapgenerator(-10,75,10);
 
 io.on('connection', function(socket) {
   console.log('Player ' + socket.id + ' has joined the game');
@@ -38,7 +38,7 @@ io.on('connection', function(socket) {
             if (data.a) {
                 player.x -= 5;
                 player.status = 2;
-                if (checkCollision(player, 64, 64, 10)) {
+                if (checkCollision(player, 32, 32, 10)) {
                     player.x += 5;
                     console.log("Collision")
                 }
@@ -49,7 +49,7 @@ io.on('connection', function(socket) {
                     player.y -= 50;
                     player.status = 1;
 
-                    if (checkCollision(player, 64, 64, 10)) {
+                    if (checkCollision(player, 32, 32, 10)) {
                         player.y += 50;
                         console.log("Collision")
                         console.log("cant Jump")
@@ -61,7 +61,7 @@ io.on('connection', function(socket) {
             if (data.d) {
                 player.x += 5;
                 player.status = 4;
-                if (checkCollision(player, 64, 64, 10)) {
+                if (checkCollision(player, 32, 32, 10)) {
                     player.x -= 5;
                     console.log("Collision")
 
@@ -70,7 +70,7 @@ io.on('connection', function(socket) {
             if (data.s) {
                 player.y += 5;
                 player.status = 3;
-                if (checkCollision(player, 64, 64, 10)) {
+                if (checkCollision(player, 32, 32, 10)) {
                     player.y -= 5;
                     console.log("Collision")
                 }
@@ -149,7 +149,7 @@ function gravity() {
         let currentPlayer = players[player];
         currentPlayer.y += 3;
         currentPlayer.onair = true;
-        if(checkCollision(currentPlayer,10,10,10)){
+        if(checkCollision(currentPlayer,32,32,10)){
             currentPlayer.y -= 3;
             currentPlayer.onair = false;
             console.log("In land");
