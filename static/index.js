@@ -147,7 +147,7 @@ function drawMap(map) {
 }
 function drawItems(items){
   for(let item in items){
-    ctx.drawImage(images.coin_1,items[item].x-3,items[item].y+70);
+    ctx.drawImage(images.coin_1,items[item].x-3,items[item].y+50);
   }
 }
 let currentCoords = {x:320,y:200}

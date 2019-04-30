@@ -226,51 +226,50 @@ function checkCollision(player, sizex, sizey, gridSize) {
 
 function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter) {
 
-    let xcoordinate = player.x + sizex;
-    let ycoordinate = player.y - sizey;
 
-
-    let MAXX = xcoordinate + sizePerimeter;
-    let MINX = xcoordinate - sizePerimeter;
-    let MAXY = ycoordinate + sizePerimeter;
-    let MINY = ycoordinate - sizePerimeter;
-
-    // console.log("Currently in " + xcoordinate +","+ ycoordinate)
-    // console.log("Max/MIN X " + MAXX +","+ MINX)
-    // console.log("Max/MIN Y " + MAXY +","+ MINY)
     let arrayLength = items.length;
+    if(arrayLength > 0) {
+        let xcoordinate = player.x + sizex;
+        let ycoordinate = player.y - sizey;
 
-    for (let i = 0; i < arrayLength; i++) {
-        let item = items[i]
-        console.log(arrayLength)
-        console.log(items)
-        if(item != undefined) {
-            if (item.x <= MAXX && item.x >= MINX && item.y < MAXY && item.y > MINY) {
-                let difx = xcoordinate - item.x;
-                let dify = ycoordinate - item.y;
-                if (difx <= 1 && difx >= -1 && dify <= 1 && dify >= -1) {
-                    player.Inventory.push(item)
-                    items.splice(i,1);
-                    arrayLength = items.length;
-                    continue;
-                } else {
-                    if (difx > 0) {
-                        item.x = item.x + 1
+
+        let MAXX = xcoordinate + sizePerimeter;
+        let MINX = xcoordinate - sizePerimeter;
+        let MAXY = ycoordinate + sizePerimeter;
+        let MINY = ycoordinate - sizePerimeter;
+        for (let i = 0; i < arrayLength; i++) {
+            let item = items[i];
+            if (item !== undefined) {
+                if (item.x <= MAXX && item.x >= MINX && item.y < MAXY && item.y > MINY) {
+                    let difx = xcoordinate - item.x;
+                    let dify = ycoordinate - item.y;
+                    if (difx <= 1 && difx >= -1 && dify <= 1 && dify >= -1) {
+                        item.x = "Inventory";
+                        item.y = "Inventory";
+                        player.Inventory.push(item)
+                        items.splice(i, 1);
+                        arrayLength = items.length;
                     } else {
-                        item.x = item.x - 1
+                        if (difx > 0) {
+                            item.x = item.x + 1
+                        } else {
+                            item.x = item.x - 1
+                        }
+                        if (dify > 0) {
+                            item.y = item.y + 1
+                        } else {
+                            item.y = item.y - 1
+                        }
                     }
-                    if (dify > 0) {
-                        item.y = item.y + 1
-                    } else {
-                        item.y = item.y - 1
+                } else {
+                    //gravity for the item
+                    item.y += 3;
+                    if (checkCollision(item, 32, 32, gridSize)) {
+                        item.y -= 3;
                     }
                 }
-
-
-                //console.log("I am close to item")
             }
         }
-        //Do something
     }
 
 
@@ -295,6 +294,7 @@ function gravity() {
             // console.log("In land");
         }
     }
+
 }
 
 setInterval(function () {
