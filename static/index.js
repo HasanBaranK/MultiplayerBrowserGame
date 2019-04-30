@@ -94,10 +94,17 @@ class UIDisplay{
     this.height = height
   }
 
-  draw(ctx,ctX,ctY){
+  draw(ctx,ctX,ctY,inventory){
     ctx.save()
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(this.x+ctX, this.y+ctY, this.width, this.height)
+    console.log(inventory);
+    let add = 0
+    for(let item in inventory){
+      ctx.fillStyle = "rgba(255, 0, 0, 1)";
+      ctx.fillRect(this.x+ctX + item*20 + add, this.y+ctY,20,20)
+      add += 2
+    }
     ctx.restore()
   }
 }
@@ -113,7 +120,7 @@ class UIButton {
   }
   isHovered(){
     if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
-      console.log(this.name + ': I am being hovered over');
+      // console.log(this.name + ': I am being hovered over');
       return true
     }
   }
@@ -121,7 +128,7 @@ class UIButton {
     if(!inInventory){
       if(this.isHovered() && mousePressed){
         inInventory = true
-        console.log(this.name + ': I got clicked!');
+        // console.log(this.name + ': I got clicked!');
       }
     }
   }
@@ -136,6 +143,9 @@ var map;
 var items;
 let health = 100
 let energy = 100
+let currentTransform = {x:0,y:0}
+
+
 function whenImagesLoad(){
   socket = null
   fps = 60
@@ -150,7 +160,8 @@ function whenImagesLoad(){
 
   cvs.addEventListener('mousedown', function(event) {
     mousePressed = true;
-    socket.emit('mouseclick', mousePosition)
+    socket.emit('mouseclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+    console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
   });
   cvs.addEventListener('mouseup', function(event) {
     mousePressed = false;
@@ -167,6 +178,9 @@ function whenImagesLoad(){
       document.onkeydown = (key) => {
         if(key.key == 'Escape'){
           inInventory = false
+        }
+        if(key.key == 'i'){
+          inInventory = !inInventory
         }
         if(!inInventory){
           keys[key.key] = true
@@ -214,7 +228,6 @@ function drawMap(map) {
   for(let block in map){
     ctx.drawImage(images.dirtBlock,map[block].x,map[block].y+90);
   }
-
 }
 function drawItems(items){
   for(let item in items){
@@ -222,7 +235,6 @@ function drawItems(items){
   }
 }
 let currentCoords = {x:320,y:200}
-let currentTransform = {x:0,y:0}
 let movespeed = 5
 function game(){
   socket.emit('movement', keys)
@@ -249,7 +261,9 @@ function game(){
       default: ;
     }
     ctx.font = "10px serif"
-    ctx.fillText(player, players[player].state.x, players[player].state.y);
+    if(player != socket.id){
+      ctx.fillText(player, players[player].state.x, players[player].state.y);
+    }
   }
   drawMap(map);
   drawItems(items);
@@ -261,7 +275,6 @@ function game(){
     buttons[button].draw(ctx,currentTransform.x,currentTransform.y)
   }
   if(inInventory){
-    displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y)
+    displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
   }
-  console.log(inInventory);
 }
