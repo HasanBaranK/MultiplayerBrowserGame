@@ -98,7 +98,6 @@ class UIDisplay{
     ctx.save()
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(this.x+ctX, this.y+ctY, this.width, this.height)
-    console.log(inventory);
     let add = 0
     for(let item in inventory){
       ctx.fillStyle = "rgba(255, 0, 0, 1)";
@@ -125,12 +124,10 @@ class UIButton {
     }
   }
   isClicked(){
-    if(!inInventory){
-      if(this.isHovered() && mousePressed){
-        inInventory = true
-        // console.log(this.name + ': I got clicked!');
-      }
+    if(this.isHovered() && mousePressed){
+      console.log(this.name + ': I got clicked!');
     }
+    return true
   }
   draw(ctx,ctX,ctY){
     ctx.drawImage(this.img, this.x+ctX, this.y+ctY, this.width, this.height)
@@ -154,11 +151,16 @@ function whenImagesLoad(){
   cvs.width = 640
   cvs.height = 640
   cvs.style.border = 'solid black 1px'
+  cvs.style.position = 'absolute';
 
+  $('body').on('contextmenu', '#canvas', function(e){ return false; });
   buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
   displays['inventory'] = new UIDisplay('Inventory', 100, 100, 400, 400)
 
   cvs.addEventListener('mousedown', function(event) {
+    if(buttons['inventory'].isClicked()){
+      inInventory = !inInventory
+    }
     mousePressed = true;
     socket.emit('mouseclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
     console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
@@ -271,7 +273,6 @@ function game(){
   ctx.fillText('Health: '+health, currentTransform.x + 0, currentTransform.y + 600);
   ctx.fillText('Energy: '+energy, currentTransform.x + 0, currentTransform.y + 620);
   for(let button in buttons){
-    buttons[button].isClicked()
     buttons[button].draw(ctx,currentTransform.x,currentTransform.y)
   }
   if(inInventory){
