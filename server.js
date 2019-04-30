@@ -23,17 +23,20 @@ var collisonMap = {};
 let items = [];
 let map = autoMapGenerator(0, 100, gridSize);
 generateItem(320, 200, "Health Potion", "Consumable", 0, 0, 1)
+generateItem(220, 200, "Health Potion", "Consumable", 0, 0, 1)
+generateItem(120, 200, "Health Potion", "Consumable", 0, 0, 1)
+generateItem(420, 200, "Health Potion", "Consumable", 0, 0, 1)
 io.on('connection', function (socket) {
     console.log('Player ' + socket.id + ' has joined the game');
     socket.on('new player', function () {
-
+        let Inventory = []
         players[socket.id] = {
             x: 320,
             y: 200,
             status: 0,
             health: 100,
             energy: 100,
-            items
+            Inventory
         };
         io.sockets.emit('map', map);
     });
@@ -239,28 +242,33 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter) {
 
     for (let i = 0; i < arrayLength; i++) {
         let item = items[i]
-        if (item.x <= MAXX && item.x >= MINX && item.y < MAXY && item.y > MINY) {
-            let difx = xcoordinate - item.x;
-            let dify = ycoordinate - item.y;
-            if (difx <= 6 && difx >= -6 && dify <= 6 && dify >= -6) {
-                item.x = xcoordinate
-                item.y = ycoordinate
-            } else {
-                if (difx > 0) {
-                    item.x = item.x + 3
+        console.log(arrayLength)
+        console.log(items)
+        if(item != undefined) {
+            if (item.x <= MAXX && item.x >= MINX && item.y < MAXY && item.y > MINY) {
+                let difx = xcoordinate - item.x;
+                let dify = ycoordinate - item.y;
+                if (difx <= 1 && difx >= -1 && dify <= 1 && dify >= -1) {
+                    player.Inventory.push(item)
+                    items.splice(i,1);
+                    arrayLength = items.length;
+                    continue;
                 } else {
-                    item.x = item.x - 3
+                    if (difx > 0) {
+                        item.x = item.x + 1
+                    } else {
+                        item.x = item.x - 1
+                    }
+                    if (dify > 0) {
+                        item.y = item.y + 1
+                    } else {
+                        item.y = item.y - 1
+                    }
                 }
-                if (dify > 0) {
-                    item.y = item.y + 3
-                } else {
-                    item.y = item.y - 3
-                }
+
+
+                //console.log("I am close to item")
             }
-
-
-
-            //console.log("I am close to item")
         }
         //Do something
     }
