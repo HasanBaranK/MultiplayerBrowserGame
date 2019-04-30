@@ -32,7 +32,7 @@ async function jump(player, amount) {
     for (let i = 0; i < amount ; i++) {
             player.y -= 3
         if(checkCollision(player,32,32,32)){
-            player.y -= 3
+            player.y += 3
             break;
         }
         await sleep(5);
@@ -261,7 +261,7 @@ function mineBlock(player,x,y,gridSize) {
 
                     if (map[block].x === gridx && map[block].y === gridy) {
                         map.splice(block, 1);
-                        collisonMap[gridx][gridy-32] =false;
+                        collisonMap[gridx-gridSize][gridy-32] =false;
                         console.log("deleting: " + gridx +","+ gridy)
                         console.log("destroyed");
                         return true;
