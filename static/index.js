@@ -90,7 +90,6 @@ function whenImagesLoad(){
   fps = 60
   cvs = document.getElementById('canvas')
   ctx = cvs.getContext('2d')
-  ctx.font = '50px serif'
   cvs.width = 640
   cvs.height = 640
   cvs.style.border = 'solid black 1px'
@@ -146,7 +145,6 @@ let currentTransform = {x:0,y:0}
 let movespeed = 5
 function game(){
   socket.emit('movement', keys)
-
   if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
     currentTransform.x += currentCoords.x - players[socket.id].state.x
     currentTransform.y += currentCoords.y - players[socket.id].state.y
@@ -169,7 +167,11 @@ function game(){
         break;
       default: ;
     }
+    ctx.font = "10px serif"
     ctx.fillText(player, players[player].state.x, players[player].state.y);
   }
   drawMap(map);
+  ctx.font = "bold 16px serif"
+  ctx.fillText('Health: '+health, players[socket.id].state.x - 320, players[socket.id].state.y + 400);
+  ctx.fillText('Energy: '+energy, players[socket.id].state.x - 320, players[socket.id].state.y + 425);
 }
