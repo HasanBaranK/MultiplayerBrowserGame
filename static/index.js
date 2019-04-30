@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirtBlock']
+let imageNames = ['dwarf1','dirtBlock','coin_1']
 let images = {}
 let promises = []
 
@@ -83,6 +83,7 @@ let socket, cvs, fps, ctx = undefined
 keys = {}
 players = {}
 var map;
+var items;
 let health = 100
 let energy = 100
 function whenImagesLoad(){
@@ -129,6 +130,9 @@ function whenImagesLoad(){
         this.map = map;
           drawMap(map);
       });
+      socket.on('items', (items) => {
+        this.items = items;
+      });
       console.log('Connected to server');
 
       setInterval(game, 1000/fps)
@@ -138,6 +142,12 @@ function whenImagesLoad(){
 function drawMap(map) {
   for(let block in map){
     ctx.drawImage(images.dirtBlock,map[block].x,map[block].y+90);
+  }
+
+}
+function drawItems(items){
+  for(let item in items){
+    ctx.drawImage(images.coin_1,items[item].x-3,items[item].y+70);
   }
 }
 let currentCoords = {x:320,y:200}
@@ -171,6 +181,7 @@ function game(){
     ctx.fillText(player, players[player].state.x, players[player].state.y);
   }
   drawMap(map);
+  drawItems(items);
   ctx.font = "bold 16px serif"
   ctx.fillText('Health: '+health, players[socket.id].state.x - 320, players[socket.id].state.y + 400);
   ctx.fillText('Energy: '+energy, players[socket.id].state.x - 320, players[socket.id].state.y + 425);
