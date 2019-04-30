@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirtBlock','coin_1']
+let imageNames = ['dwarf1','dirtBlock','coin_1','inventory']
 let images = {}
 let promises = []
 
@@ -78,10 +78,60 @@ class Player {
   }
 }
 
-let socket, cvs, fps, ctx = undefined
+let socket, cvs, fps, ctx, mousePressed = undefined
+let mousePosition = {}
+let buttons = []
+let displays = {}
+let inInventory = false
 
-keys = {}
-players = {}
+class UIDisplay{
+
+  constructor(name,x,y,width,height){
+    this.name = name
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+  }
+
+  draw(ctx,ctX,ctY){
+    ctx.save()
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(this.x+ctX, this.y+ctY, this.width, this.height)
+    ctx.restore()
+  }
+}
+
+class UIButton {
+  constructor(name,x,y,img,width,height){
+    this.name = name
+    this.x = x
+    this.y = y
+    this.img = img
+    this.width = width
+    this.height = height
+  }
+  isHovered(){
+    if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
+      console.log(this.name + ': I am being hovered over');
+      return true
+    }
+  }
+  isClicked(){
+    if(!inInventory){
+      if(this.isHovered() && mousePressed){
+        inInventory = true
+        console.log(this.name + ': I got clicked!');
+      }
+    }
+  }
+  draw(ctx,ctX,ctY){
+    ctx.drawImage(this.img, this.x+ctX, this.y+ctY, this.width, this.height)
+  }
+}
+
+let keys = {}
+let players = {}
 var map;
 var items;
 let health = 100
@@ -95,11 +145,32 @@ function whenImagesLoad(){
   cvs.height = 640
   cvs.style.border = 'solid black 1px'
 
+  buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
+  displays['inventory'] = new UIDisplay('Inventory', 100, 100, 400, 400)
+
+  cvs.addEventListener('mousedown', function(event) {
+    mousePressed = true;
+    socket.emit('mouseclick', mousePosition)
+  });
+  cvs.addEventListener('mouseup', function(event) {
+    mousePressed = false;
+  });
+
+  cvs.addEventListener('mousemove', function(event) {
+   mousePosition.x = event.offsetX || event.layerX;
+   mousePosition.y = event.offsetY || event.layerY;
+  });
+
   document.getElementById('connect').onclick = () =>{
     socket = io.connect('http://localhost:5000', {reconnection: false})
     socket.on('connect', () => {
       document.onkeydown = (key) => {
-        keys[key.key] = true
+        if(key.key == 'Escape'){
+          inInventory = false
+        }
+        if(!inInventory){
+          keys[key.key] = true
+        }
       }
       document.onkeyup = (key) => {
         keys[key.key] = false
@@ -156,13 +227,13 @@ let movespeed = 5
 function game(){
   socket.emit('movement', keys)
   if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
-    currentTransform.x += currentCoords.x - players[socket.id].state.x
-    currentTransform.y += currentCoords.y - players[socket.id].state.y
+    currentTransform.x -= currentCoords.x - players[socket.id].state.x
+    currentTransform.y -= currentCoords.y - players[socket.id].state.y
     ctx.translate(currentCoords.x - players[socket.id].state.x,currentCoords.y - players[socket.id].state.y)
     currentCoords.x = players[socket.id].state.x
     currentCoords.y = players[socket.id].state.y
   }
-  ctx.clearRect(-currentTransform.x, -currentTransform.y, cvs.width, cvs.height);
+  ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
   for(let player in players){
     switch (players[player].state.status) {
       case 0: players[player].idle(ctx)
@@ -183,6 +254,14 @@ function game(){
   drawMap(map);
   drawItems(items);
   ctx.font = "bold 16px serif"
-  ctx.fillText('Health: '+health, players[socket.id].state.x - 320, players[socket.id].state.y + 400);
-  ctx.fillText('Energy: '+energy, players[socket.id].state.x - 320, players[socket.id].state.y + 425);
+  ctx.fillText('Health: '+health, currentTransform.x + 0, currentTransform.y + 600);
+  ctx.fillText('Energy: '+energy, currentTransform.x + 0, currentTransform.y + 620);
+  for(let button in buttons){
+    buttons[button].isClicked()
+    buttons[button].draw(ctx,currentTransform.x,currentTransform.y)
+  }
+  if(inInventory){
+    displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y)
+  }
+  console.log(inInventory);
 }
