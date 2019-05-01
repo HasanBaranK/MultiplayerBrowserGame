@@ -29,8 +29,6 @@ let map;
 let maps = mapFunctions.autoMapGenerator(0, 70, gridSize,collisionMap);
 map = maps.map;
 collisionMap  = maps.collisionMap;
-console.log(map)
-console.log(collisionMap)
 playerFunctions.generateItem(320, 200, "Health Potion", "Consumable", 0,0, 0, 1,items)
 playerFunctions.generateItem(220, 200, "Health Potion", "Consumable", 0,0, 0, 1,items)
 playerFunctions.generateItem(120, 200, "Health Potion", "Consumable", 0,0, 0, 1,items)
@@ -97,6 +95,14 @@ io.on('connection', function (socket) {
     });
     socket.on('mouseclick', function (click) {
         maps = mapFunctions.mineBlock(players[socket.id],click.x,click.y,32,collisionMap,map)
+        map = maps.map;
+        collisionMap = maps.collisionMap;
+        io.sockets.emit('map', map);
+        io.sockets.emit('mapCollision', collisionMap);
+        console.log(players[socket.id].x +" " + players[socket.id].y)
+    });
+    socket.on('rightclick', function (click) {
+        maps = mapFunctions.addBlock(map,collisionMap,gridSize,click.x,click.y)
         map = maps.map;
         collisionMap = maps.collisionMap;
         io.sockets.emit('map', map);

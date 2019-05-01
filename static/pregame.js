@@ -103,7 +103,10 @@ function whenImagesLoad(){
   cvs.addEventListener('mouseup', function(event) {
     mousePressed = false;
   });
-
+    cvs.addEventListener('contextmenu', function(event) {
+        socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+        console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
+    });
   cvs.addEventListener('mousemove', function(event) {
    mousePosition.x = event.offsetX || event.layerX;
    mousePosition.y = event.offsetY || event.layerY;

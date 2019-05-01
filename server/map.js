@@ -1,6 +1,7 @@
 module.exports={
     autoMapGenerator,
-    mineBlock
+    mineBlock,
+    addBlock
 }
 
 
@@ -100,8 +101,8 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
 
 function mineBlock(player,x,y,gridSize,collisionMap,map) {
     try {
-        let gridx = x - x % gridSize
-        let gridy = y - y % gridSize //-(3 * gridSize ); //fix later
+        let gridx = x - (x % gridSize)
+        let gridy = y - (y % gridSize) //-(3 * gridSize ); //fix later
         console.log(player.x +"," + player.y)
         console.log("attemting to destroy: " + x + " " + y)
         console.log("attemting to destroy: " + gridx + " " + gridy)
@@ -143,4 +144,26 @@ function mineBlock(player,x,y,gridSize,collisionMap,map) {
         }
         return maps;
     }
+}
+
+function addBlock(map,collisionMap,gridSize,x,y) {
+    let i = x - (x % gridSize)
+    let k = y - (y % gridSize)
+    if (collisionMap[i][k] === undefined||collisionMap[i][k] === false) {
+        let block = {};
+        console.log(i)
+        console.log(k)
+        collisionMap[i ][k] = true;
+        block["x"] = i ;
+        block["y"] = k ;
+        block["type"] = "dirt";
+        block["health"] = 100;
+        map.push(block);
+    }
+
+    let maps  = {
+        map: map,
+        collisionMap: collisionMap
+    }
+    return maps;
 }
