@@ -1,11 +1,12 @@
 function drawMap(map) {
   for(let block in map){
-    ctx.drawImage(images.dirtBlock,map[block].x,map[block].y+90);
+    ctx.drawImage(images.dirtBlock,map[block].x,map[block].y);
   }
 }
+
 function drawItems(items){
   for(let item in items){
-    ctx.drawImage(images.coin_1,items[item].x-3,items[item].y+50);
+    ctx.drawImage(images.coin_1,items[item].x-3,items[item].y);
   }
 }
 let currentCoords = {x:320,y:200}
