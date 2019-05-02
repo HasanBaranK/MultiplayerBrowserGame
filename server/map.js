@@ -1,4 +1,7 @@
-const {generateItem,inPlayerInventory,deleteItemInventory} = require("./player");
+const {inPlayerInventory} = require("./Player/inventory");
+const {deleteItemInventory} = require("./Player/inventory");
+const {generateItem} = require("./Player/items");
+
 module.exports={
     autoMapGenerator,
     mineBlock,

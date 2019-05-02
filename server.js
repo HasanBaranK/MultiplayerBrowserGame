@@ -19,7 +19,9 @@ server.listen(5000, function () {
 
 let mapFunctions = require("./server/map");
 let collisionFunctions = require("./server/collision");
-let playerFunctions = require("./server/player");
+let attackFunctions = require("./server/Player/attack");
+let inventoryFunctions = require("./server/Player/inventory");
+let itemFunctions = require("./server/Player/items");
 
 
 var players = {};
@@ -30,10 +32,10 @@ let mapChanged = false;
 let maps = mapFunctions.autoMapGenerator(0, 70, gridSize,collisionMap);
 map = maps.map;
 collisionMap  = maps.collisionMap;
-playerFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
-playerFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
-playerFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
-playerFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+itemFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
 
 
 io.on('connection', function (socket) {
@@ -71,7 +73,7 @@ io.on('connection', function (socket) {
                 if (player.onair === false) {
                    player.y -= 4;
                     player.status = 1;
-                    playerFunctions.jump(player,50,collisionMap,gridSize);
+                    collisionFunctions.jump(player,50,collisionMap,gridSize);
                     // if (checkCollision(player, 32, 32, gridSize)) {
                     //     player.y += 250;
                     // }
@@ -104,8 +106,8 @@ io.on('connection', function (socket) {
     });
     socket.on('stopattack', function (evt) {
         console.log("Socket id:" +socket.id)
-        let sword = playerFunctions.generateItem(players[socket.id].x,players[socket.id].y,"sword","melee",50,50,0,0,items)
-        playerFunctions.meleeAttack(players,socket.id,sword)
+        let sword = itemFunctions.generateItem(players[socket.id].x,players[socket.id].y,"sword_item","melee",50,50,0,0,items)
+        attackFunctions.meleeAttack(players,socket.id,sword)
       players[socket.id].attacking = false
     });
     socket.on('leftclick', function (click) {

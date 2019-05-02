@@ -1,3 +1,4 @@
+const {addItemInventory} = require("./Player/inventory");
 
 
 module.exports={
@@ -5,10 +6,24 @@ module.exports={
     checkPlayerPerimeter,
     checkPlayerCloseToItems,
     gravity,
-    addItemInventory
+    jump
 }
 
-
+async function jump(player, amount,collisionMap,gridSize) {
+    for (let i = 0; i < amount ; i++) {
+        player.y -= 3
+        if(checkCollision(player,player.sizex,player.sizey,gridSize,collisionMap)){
+            player.y += 3
+            break;
+        }
+        await sleep(5);
+    }
+    function sleep(ms){
+        return new Promise(resolve=>{
+            setTimeout(resolve,ms)
+        })
+    }
+}
 
 function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
 
@@ -204,16 +219,3 @@ function gravity(players,gridSize,collisionMap) {
 
 }
 
-function addItemInventory(player,item,items) {
-
-    for(let inventoryItem in player.inventory){
-        if(player.inventory[inventoryItem].name === item.name){
-            player.inventory[inventoryItem].amount += item.amount
-            items.splice(items.indexOf(item), 1);
-            return 0;
-        }
-    }
-    player.inventory.push(item)
-    items.splice(items.indexOf(item), 1);
-    return 0;
-}
