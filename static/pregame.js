@@ -153,9 +153,10 @@ function whenImagesLoad(){
             players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,64,64,100)
             players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,64,64,100)
             players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,64,64,100)
-            players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,50)
+            players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,100)
             players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,50)
             players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,50)
+            players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,64,64,50)
           }
           else{
             if(players[player].state.status != playersServer[player].status){

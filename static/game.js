@@ -39,26 +39,31 @@ function game(){
     }
     ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
     for(let player in players){
-      if(players[player].state.attacking){
-        if(players[player].facing == 'right'){
-          if(players[player].drawOnce(ctx, 'attackR')){
-            if(player == socket.id){
-              socket.emit('stopattack', players[player].facing)
-              }
-            determineAnimation(players[player])
-            }
-          }
-        else {
-          if(players[player].drawOnce(ctx, 'attackL')){
-            if(player == socket.id){
-              socket.emit('stopattack', players[player].facing)
-              }
-            determineAnimation(players[player])
-            }
-          }
+      if(players[player].state.isDead){
+        players[player].drawFinal(ctx, 'dieR')
       }
-      else {
-        determineAnimation(players[player])
+      else{
+        if(players[player].state.attacking){
+          if(players[player].facing == 'right'){
+            if(players[player].drawOnce(ctx, 'attackR')){
+              if(player == socket.id){
+                socket.emit('stopattack', players[player].facing)
+                }
+              determineAnimation(players[player])
+              }
+            }
+          else {
+            if(players[player].drawOnce(ctx, 'attackL')){
+              if(player == socket.id){
+                socket.emit('stopattack', players[player].facing)
+                }
+              determineAnimation(players[player])
+              }
+            }
+        }
+        else {
+          determineAnimation(players[player])
+        }
       }
       ctx.font = "10px serif"
       if(player != socket.id){
