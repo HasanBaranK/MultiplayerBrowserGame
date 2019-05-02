@@ -10,10 +10,7 @@ class Player {
     this.animations[name].draw(ctx, this.state.x, this.state.y)
   }
   drawOnce(ctx, name){
-    if(this.animationsOnce[name].draw(ctx, this.state.x, this.state.y)){
-      return true
-    }
-    return false
+    return this.animationsOnce[name].draw(ctx, this.state.x, this.state.y)
   }
   addAnimation(name, img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed){
     this.animations[name] = new Animation(img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed)
