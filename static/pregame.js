@@ -40,7 +40,7 @@ class UIDisplay{
     let xoffset = 15
     let add = 0
     for(let item in inventory){
-      ctx.drawImage(images['coin_1'], this.x+ctX + item*30 + add + xoffset, this.y+ctY + 220,sizeOfItem,sizeOfItem)
+      ctx.drawImage(images[inventory[item].name], this.x+ctX + item*30 + add + xoffset, this.y+ctY + 220,sizeOfItem,sizeOfItem)
       add += spaceBetween
     }
     ctx.restore()
