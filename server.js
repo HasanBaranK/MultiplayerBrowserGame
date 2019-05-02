@@ -108,7 +108,8 @@ io.on('connection', function (socket) {
         playerFunctions.meleeAttack(players,socket.id,sword)
       players[socket.id].attacking = false
     });
-    socket.on('mouseclick', function (click) {
+    socket.on('leftclick', function (click) {
+        console.log("clikcked")
         maps = mapFunctions.mineBlock(players[socket.id],click.x,click.y,32,collisionMap,map,items)
         map = maps.map;
         collisionMap = maps.collisionMap;
