@@ -29,6 +29,7 @@ function heal(player, amount) {
     }
 }
 function meleeAttack(players,playerKey,item) {
+    let peopleHit = []
     let range = item.range;
     console.log(playerKey +  "Attacking")
     for(let otherPlayer in players){
@@ -38,10 +39,11 @@ function meleeAttack(players,playerKey,item) {
             if(checkPlayerInRange(players[playerKey].x + players[playerKey].sizex,players[playerKey].y + players[playerKey].sizey,players[otherPlayer],range,players[playerKey].facing,players[playerKey].sizey) ){
                 console.log("damaged: " + otherPlayer)
                 lowerHealth(players[otherPlayer],item.damage);
+                peopleHit.push(otherPlayer)
             }
         }
     }
-    return players
+    return peopleHit
 }
 function checkPlayerInRange(x,y,player,range,facing,attackingSizey) {
     console.log(x)
