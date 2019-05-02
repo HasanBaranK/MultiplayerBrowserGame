@@ -38,7 +38,6 @@ playerFunctions.generateItem(420, 200, "Health Potion", "Consumable", 0,0, 0, 1,
 io.on('connection', function (socket) {
     console.log('Player ' + socket.id + ' has joined the game');
     socket.on('new player', function () {
-        let Inventory = []
         players[socket.id] = {
             x: 320,
             y: 200,
@@ -48,8 +47,9 @@ io.on('connection', function (socket) {
             sizex: 32,
             sizey: 32,
             isDead: false,
-            inventory:Inventory,
-            attacking:false
+            inventory:[],
+            attacking:false,
+            equipped:null
         };
         io.sockets.emit('map', map);
         io.sockets.emit('mapCollision', collisionMap);
@@ -131,5 +131,4 @@ setInterval(function () {
     collisionFunctions.checkPlayerCloseToItems(players,items,gridSize,collisionMap);
     io.sockets.emit('state', players);
     io.sockets.emit('items', items);
-    console.log(players)
 }, 1000 / 60);

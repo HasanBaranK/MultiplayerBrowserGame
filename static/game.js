@@ -42,12 +42,18 @@ function game(){
       if(players[player].state.attacking){
         if(players[player].facing == 'right'){
           if(players[player].drawOnce(ctx, 'attackR')){
-            socket.emit('stopattack', null);determineAnimation(players[player])
+            if(player == socket.id){
+              socket.emit('stopattack', players[player].facing)
+              }
+            determineAnimation(players[player])
             }
           }
         else {
           if(players[player].drawOnce(ctx, 'attackL')){
-            socket.emit('stopattack', null);determineAnimation(players[player])
+            if(player == socket.id){
+              socket.emit('stopattack', players[player].facing)
+              }
+            determineAnimation(players[player])
             }
           }
       }

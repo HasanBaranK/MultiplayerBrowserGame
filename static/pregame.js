@@ -38,7 +38,7 @@ class UIDisplay{
     let add = 0
     for(let item in inventory){
       ctx.fillStyle = "rgba(255, 0, 0, 1)";
-      ctx.fillRect(this.x+ctX + item*20 + add, this.y+ctY,20,20)
+      ctx.drawImage(images['coin_1'], this.x+ctX + item*20 + add, this.y+ctY,20,20)
       add += 2
     }
     ctx.restore()
