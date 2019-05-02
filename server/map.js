@@ -41,7 +41,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
             collisionMap[i * gridSize ][k * gridSize] = true;
             block["x"] = i * gridSize;
             block["y"] = k * gridSize;
-            block["type"] = "dirt";
+            block["type"] = "dirt_block";
             block["health"] = 100;
             blocks.push(block);
         }
@@ -157,7 +157,7 @@ function addBlock(player,map,collisionMap,gridSize,x,y) {
         collisionMap[i ][k] = true;
         block["x"] = i ;
         block["y"] = k ;
-        block["type"] = "dirt";
+        block["type"] = "dirt_block";
         block["health"] = 100;
         map.push(block);
         deleteItemInventory(player,"dirt_item")

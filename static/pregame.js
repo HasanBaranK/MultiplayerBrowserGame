@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventoryGUI','dirt_item','healthpotion_item']
+let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventory_UI','dirt_item','healthpotion_item']
 let images = {}
 let promises = []
 
@@ -34,7 +34,7 @@ class UIDisplay{
   draw(ctx,ctX,ctY,inventory){
     ctx.save()
     // ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.drawImage(images['inventoryGUI'],this.x+ctX, this.y+ctY)
+    ctx.drawImage(images['inventory_UI'],this.x+ctX, this.y+ctY)
     let spaceBetween = 0
     let sizeOfItem = 20
     let xoffset = 15
@@ -58,13 +58,11 @@ class UIButton {
   }
   isHovered(){
     if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
-      console.log(this.name + ': I am being hovered over');
       return true
     }
   }
   isClicked(){
     if(this.isHovered() && mousePressed){
-      console.log(this.name + ': I got clicked!');
       inInventory = true
     }
     return true

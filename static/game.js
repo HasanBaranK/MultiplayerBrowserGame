@@ -1,6 +1,6 @@
 function drawMap(map) {
   for(let block in map){
-    ctx.drawImage(images.dirtBlock,map[block].x,map[block].y);
+    ctx.drawImage(images[map[block].type],map[block].x,map[block].y);
   }
 }
 
