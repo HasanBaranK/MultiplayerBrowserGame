@@ -11,6 +11,22 @@ function drawItems(items){
 }
 let currentCoords = {x:320,y:200}
 
+function determineAnimation(player){
+  switch (player.state.status) {
+    case 0: if(player.facing == 'right'){player.draw(ctx, 'idleR')}else{player.draw(ctx, 'idleL')}
+      break;
+    case 1: player.draw(ctx, 'up')
+      break;
+    case 2: player.draw(ctx, 'runL');player.facing = 'left'
+      break;
+    case 3: player.draw(ctx, 'down')
+      break;
+    case 4: player.draw(ctx, 'runR');player.facing = 'right';
+      break;
+    default:
+  }
+}
+
 function game(){
   socket.emit('movement', keys)
   if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
@@ -23,50 +39,19 @@ function game(){
   ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
   for(let player in players){
     if(players[player].state.attacking){
-      if(players[player].facing == 'right'){if(players[player].drawOnce(ctx, 'attackR')){socket.emit('stopattack', null);
-      switch (players[player].state.status) {
-        case 0: if(players[player].facing == 'right'){players[player].draw(ctx, 'idleR')}else{players[player].draw(ctx, 'idleL')}
-          break;
-        case 1: players[player].draw(ctx, 'up')
-          break;
-        case 2: players[player].draw(ctx, 'runL');players[player].facing = 'left'
-          break;
-        case 3: players[player].draw(ctx, 'down')
-          break;
-        case 4: players[player].draw(ctx, 'runR');players[player].facing = 'right';
-          break;
-        default:
-      }
-    }}else {if(players[player].drawOnce(ctx, 'attackL')){socket.emit('stopattack', null);
-    switch (players[player].state.status) {
-      case 0: if(players[player].facing == 'right'){players[player].draw(ctx, 'idleR')}else{players[player].draw(ctx, 'idleL')}
-        break;
-      case 1: players[player].draw(ctx, 'up')
-        break;
-      case 2: players[player].draw(ctx, 'runL');players[player].facing = 'left'
-        break;
-      case 3: players[player].draw(ctx, 'down')
-        break;
-      case 4: players[player].draw(ctx, 'runR');players[player].facing = 'right';
-        break;
-      default:
-    }
-  }}
+      if(players[player].facing == 'right'){
+        if(players[player].drawOnce(ctx, 'attackR')){
+          socket.emit('stopattack', null);determineAnimation(players[player])
+          }
+        }
+      else {
+        if(players[player].drawOnce(ctx, 'attackL')){
+          socket.emit('stopattack', null);determineAnimation(players[player])
+          }
+        }
     }
     else {
-      switch (players[player].state.status) {
-        case 0: if(players[player].facing == 'right'){players[player].draw(ctx, 'idleR')}else{players[player].draw(ctx, 'idleL')}
-          break;
-        case 1: players[player].draw(ctx, 'up')
-          break;
-        case 2: players[player].draw(ctx, 'runL');players[player].facing = 'left'
-          break;
-        case 3: players[player].draw(ctx, 'down')
-          break;
-        case 4: players[player].draw(ctx, 'runR');players[player].facing = 'right';
-          break;
-        default:
-      }
+      determineAnimation(players[player])
     }
     ctx.font = "10px serif"
     if(player != socket.id){
@@ -76,8 +61,8 @@ function game(){
   drawMap(map);
   drawItems(items);
   ctx.font = "bold 16px serif"
-  ctx.fillText('Health: '+health, currentTransform.x + 0, currentTransform.y + 600);
-  ctx.fillText('Energy: '+energy, currentTransform.x + 0, currentTransform.y + 620);
+  ctx.fillText('Health: '+ players[socket.id].state.health, currentTransform.x + 0, currentTransform.y + 600);
+  ctx.fillText('Energy: '+ players[socket.id].state.energy, currentTransform.x + 0, currentTransform.y + 620);
   for(let button in buttons){
     buttons[button].isClicked()
     buttons[button].draw(ctx,currentTransform.x,currentTransform.y)
