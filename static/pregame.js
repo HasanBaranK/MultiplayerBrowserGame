@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirtBlock','coin_1','inventory']
+let imageNames = ['dwarf1','dirtBlock','coin_1','inventory','inventoryGUI']
 let images = {}
 let promises = []
 
@@ -33,13 +33,15 @@ class UIDisplay{
 
   draw(ctx,ctX,ctY,inventory){
     ctx.save()
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(this.x+ctX, this.y+ctY, this.width, this.height)
+    // ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.drawImage(images['inventoryGUI'],this.x+ctX, this.y+ctY)
+    let spaceBetween = 0
+    let sizeOfItem = 20
+    let xoffset = 15
     let add = 0
     for(let item in inventory){
-      ctx.fillStyle = "rgba(255, 0, 0, 1)";
-      ctx.drawImage(images['coin_1'], this.x+ctX + item*20 + add, this.y+ctY,20,20)
-      add += 2
+      ctx.drawImage(images['coin_1'], this.x+ctX + item*30 + add + xoffset, this.y+ctY + 220,sizeOfItem,sizeOfItem)
+      add += spaceBetween
     }
     ctx.restore()
   }
@@ -93,16 +95,20 @@ function whenImagesLoad(){
   buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
   displays['inventory'] = new UIDisplay('Inventory', 100, 100, 400, 400)
 
-  cvs.addEventListener('mousedown', function(event) {
+  cvs.addEventListener('mousedown', function(evt) {
     mousePressed = true;
-    socket.emit('mouseclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+    if(evt.button == 0){
+      socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+    }
+    else{
+      socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+    }
     console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
   });
   cvs.addEventListener('mouseup', function(event) {
     mousePressed = false;
   });
   cvs.addEventListener('contextmenu', function(event) {
-      socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
       console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
   });
   cvs.addEventListener('mousemove', function(event) {
