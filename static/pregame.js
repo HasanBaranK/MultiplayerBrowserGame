@@ -79,6 +79,8 @@ var items;
 let health = 100
 let energy = 100
 let currentTransform = {x:0,y:0}
+let isAttacking = false
+let endedAttacking = false
 
 
 function whenImagesLoad(){
@@ -103,68 +105,67 @@ function whenImagesLoad(){
   cvs.addEventListener('mouseup', function(event) {
     mousePressed = false;
   });
-    cvs.addEventListener('contextmenu', function(event) {
-        socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
-        console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
-    });
+  cvs.addEventListener('contextmenu', function(event) {
+      socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
+  });
   cvs.addEventListener('mousemove', function(event) {
    mousePosition.x = event.offsetX || event.layerX;
    mousePosition.y = event.offsetY || event.layerY;
   });
 
-    socket = io.connect('http://localhost:5000', {reconnection: false})
-    socket.on('connect', () => {
-      document.onkeydown = (key) => {
-        for(let player in players){
-          players[player].resetAnimations()
-        }
-        if(key.key == 'Escape'){
-          inInventory = false
-        }
-        if(key.key == 'i'){
-          inInventory = !inInventory
-        }
-        if(!inInventory){
-          keys[key.key] = true
-        }
-      }
-      document.onkeyup = (key) => {
-        keys[key.key] = false
-      }
-      socket.on('state', (playersM) => {
-        for(let player in playersM){
-          if(playersM[player] != 0){
-            if (!players[player]){
-              players[player] = new Player(playersM[player])
-              players[player].addAnimation(images['dwarf1'],0,4,0,0,32,32,64,64,100)//idle right
-              players[player].addAnimation(images['dwarf1'],0,4,5,5,32,32,64,64,100)//idle left
-              players[player].addAnimation(images['dwarf1'],0,7,1,1,32,32,64,64,100)//up
-              players[player].addAnimation(images['dwarf1'],0,7,6,6,32,32,64,64,100)//left
-              players[player].addAnimation(images['dwarf1'],0,7,6,6,32,32,64,64,100)//down
-              players[player].addAnimation(images['dwarf1'],0,7,1,1,32,32,64,64,100)//right
-              players[player].addAnimation1(images['dwarf1'],0,6,2,2,32,32,64,64,100)//attack right
-              players[player].addAnimation1(images['dwarf1'],0,6,7,7,32,32,64,64,100)//attack right
-              console.log('New Player joined');
-            }
-            else{
-              players[player].state = playersM[player]
-            }
-          }
-          else if(players[player]!=null){
-            delete players[player]
-          }
-        }
-      });
-      socket.emit('new player')
-      socket.on('map', (map) => {
-        this.map = map;
-          drawMap(map);
-      });
-      socket.on('items', (items) => {
-        this.items = items;
-      });
-      console.log('Connected to server');
+  document.onkeydown = (key) => {
+    if(key.key == 'i'){
+      inInventory = !inInventory
+    }
+    if(key.key == 'Escape'){
+      inInventory = false
+    }
+    if(key.key == ' '){
+      socket.emit('attack', null)
+    }
+    keys[key.key] = true
+  }
+  document.onkeyup = (key) => {
+    keys[key.key] = false
+  }
 
-      setInterval(game, 1000/fps)
+  socket = io.connect('http://localhost:5000', {reconnection: false})
+  socket.on('connect', () => {
+    socket.emit('new player')
+    setInterval(game, 1000/fps)
+    socket.on('state', (playersServer) => {
+      for(let player in playersServer){
+        if(playersServer[player] != 0){
+          if (!players[player]){
+            console.log('New Player joined');
+            players[player] = new Player(playersServer[player])
+            players[player].addAnimation('idleR',images['dwarf1'],0,4,0,32,32,64,64,100)
+            players[player].addAnimation('idleL',images['dwarf1'],0,4,5,32,32,64,64,100)
+            players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,64,64,100)
+            players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,64,64,100)
+            players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,64,64,100)
+            players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,50)
+            players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,100)
+            players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,100)
+          }
+          else{
+            if(players[player].state.status != playersServer[player].status){
+              players[player].resetAnimations()
+            }
+            players[player].state = playersServer[player]
+          }
+        }
+        else if(players[player]){
+          delete players[player]
+        }
+      }
     });
+    socket.on('map', (map) => {
+      this.map = map;
+    });
+    socket.on('items', (items) => {
+      this.items = items;
+    });
+  });
 }

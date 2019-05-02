@@ -4,46 +4,22 @@ class Player {
     this.facing = 'right'
     this.attacking = false
     this.animations = []
+    this.animationsOnce = []
   }
-  idle(ctx){
-    this.animations[0].draw(ctx, this.state['x'], this.state['y'])
+  draw(ctx, name){
+    this.animations[name].draw(ctx, this.state.x, this.state.y)
   }
-  idleL(ctx){
-    this.animations[1].draw(ctx, this.state['x'], this.state['y'])
-  }
-  up(ctx){
-    this.animations[2].draw(ctx, this.state['x'], this.state['y'])
-  }
-  left(ctx){
-    this.animations[3].draw(ctx, this.state['x'], this.state['y'])
-  }
-  down(ctx){
-    this.animations[4].draw(ctx, this.state['x'], this.state['y'])
-  }
-  right(ctx){
-    this.animations[5].draw(ctx, this.state['x'], this.state['y'])
-  }
-  attack(ctx){
-    if(this.animations[6].ended){
-      this.attacking = false
+  drawOnce(ctx, name){
+    if(this.animationsOnce[name].draw(ctx, this.state.x, this.state.y)){
+      return true
     }
-    else{
-      this.animations[6].draw(ctx, this.state['x'], this.state['y'])
-    }
+    return false
   }
-  attackL(ctx){
-    if(this.animations[7].ended){
-      this.attacking = false
-    }
-    else{
-      this.animations[7].draw(ctx, this.state['x'], this.state['y'])
-    }
+  addAnimation(name, img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed){
+    this.animations[name] = new Animation(img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed)
   }
-  addAnimation(img, sx, ex, sy, ey, iw, ih, aw, ah, speed){
-    this.animations.push(new Animation(img, sx, ex, sy, ey, iw, ih, aw, ah, speed))
-  }
-  addAnimation1(img, sx, ex, sy, ey, iw, ih, aw, ah, speed){
-    this.animations.push(new Animation1(img, sx, ex, sy, ey, iw, ih, aw, ah, speed))
+  addAnimationOnce(name, img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed){
+    this.animationsOnce[name] = new AnimationOnce(img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed)
   }
   resetAnimations(){
     for(let animation in this.animations){

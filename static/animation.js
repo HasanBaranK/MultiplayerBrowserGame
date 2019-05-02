@@ -1,77 +1,62 @@
 class Animation {
-  constructor(img, sx, ex, sy, ey, iw, ih, aw, ah, speed){
+  constructor(img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed){
     this.img = img
-    this.sx = sx
-    this.ex = ex
-    this.sy = sy
-    this.ey = ey
-    this.cx = sx
-    this.cy = sy
-    this.iw = iw
-    this.ih = ih
-    this.aw = aw
-    this.ah = ah
+    this.startColumn = startColumn
+    this.endColumn = endColumn
+    this.row = row
+    this.width = width
+    this.height = height
+    this.cWidth = cWidth
+    this.cHeight = cHeight
     this.speed = speed
+
+    this.currentColumn = this.startColumn
     this.animTime = new Date().getTime()
   }
   draw(ctx, x, y){
+    if(this.currentColumn > this.endColumn){
+      this.currentColumn = this.startColumn
+    }
+    ctx.drawImage(this.img, this.currentColumn * this.width, this.row * this.height,
+                  this.width, this.height, x, y, this.cWidth, this.cHeight)
     let t = new Date().getTime()
     if(t > this.animTime){
-      this.cx++
+      this.currentColumn++
       this.animTime = t + this.speed
     }
-    if(this.cx >= this.ex){
-      this.cx = this.sx
-    }
-    if(this.cy >= this.ey){
-      this.cy = this.sy
-    }
-    ctx.drawImage(this.img,this.cx * this.iw,this.cy * this.ih,this.iw,this.ih, x, y, this.aw, this.ah)
   }
   reset(){
-    this.cx = this.sx
-    this.cy = this.sy
+    this.currentColumn = this.startColumn
   }
 }
 
-class Animation1 {
-  constructor(img, sx, ex, sy, ey, iw, ih, aw, ah, speed){
+class AnimationOnce {
+  constructor(img, startColumn, endColumn, row, width, height, cWidth, cHeight, speed){
     this.img = img
-    this.sx = sx
-    this.ex = ex
-    this.sy = sy
-    this.ey = ey
-    this.cx = sx
-    this.cy = sy
-    this.iw = iw
-    this.ih = ih
-    this.aw = aw
-    this.ah = ah
+    this.startColumn = startColumn
+    this.endColumn = endColumn
+    this.row = row
+    this.width = width
+    this.height = height
+    this.cWidth = cWidth
+    this.cHeight = cHeight
     this.speed = speed
-    this.ended = false
+
+    this.currentColumn = this.startColumn
     this.animTime = new Date().getTime()
+    this.ended = false
   }
   draw(ctx, x, y){
+    if(this.currentColumn > this.endColumn){
+      this.currentColumn = this.startColumn
+      return true
+    }
+    ctx.drawImage(this.img, this.currentColumn * this.width, this.row * this.height,
+                  this.width, this.height, x, y, this.cWidth, this.cHeight)
     let t = new Date().getTime()
     if(t > this.animTime){
-      this.cx++
+      this.currentColumn++
       this.animTime = t + this.speed
     }
-    if(this.cx >= this.ex){
-      this.cx = this.sx
-    }
-    if(this.cy >= this.ey){
-      this.cy = this.sy
-    }
-    ctx.drawImage(this.img,this.cx * this.iw,this.cy * this.ih,this.iw,this.ih, x, y, this.aw, this.ah)
-
-    if(this.cx == this.ex - 1){
-      this.ended = true
-      this.reset()
-    }
-  }
-  reset(){
-    this.cx = this.sx
-    this.cy = this.sy
   }
 }

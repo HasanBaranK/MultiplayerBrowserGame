@@ -22,27 +22,22 @@ function game(){
   }
   ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
   for(let player in players){
-    if(!players[player].attacking){
-      switch (players[player].state.status) {
-        case 0: if(players[player].facing == 'right'){players[player].idle(ctx)}else{players[player].idleL(ctx)}
-          break;
-        case 1: players[player].up(ctx)
-          break;
-        case 2: players[player].left(ctx);players[player].facing = 'left'
-          break;
-        case 3: players[player].down(ctx)
-          break;
-        case 4: players[player].right(ctx);players[player].facing = 'right';
-          break;
-        default: ;
-      }
+    if(players[player].state.attacking){
+      if(players[player].facing == 'right'){if(players[player].drawOnce(ctx, 'attackR')){socket.emit('stopattack', null)}}else {if(players[player].drawOnce(ctx, 'attackL')){socket.emit('stopattack', null)}}
     }
     else{
-      if(players[player].facing == 'right'){
-        players[player].attack(ctx)
-      }
-      else{
-        players[player].attackL(ctx)
+      switch (players[player].state.status) {
+        case 0: if(players[player].facing == 'right'){players[player].draw(ctx, 'idleR')}else{players[player].draw(ctx, 'idleL')}
+          break;
+        case 1: players[player].draw(ctx, 'up')
+          break;
+        case 2: players[player].draw(ctx, 'runL');players[player].facing = 'left'
+          break;
+        case 3: players[player].draw(ctx, 'down')
+          break;
+        case 4: players[player].draw(ctx, 'runR');players[player].facing = 'right';
+          break;
+        default:
       }
     }
     ctx.font = "10px serif"

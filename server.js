@@ -47,7 +47,8 @@ io.on('connection', function (socket) {
             energy: 100,
             sizex: 32,
             sizey: 32,
-            inventory:Inventory
+            inventory:Inventory,
+            attacking:false
         };
         io.sockets.emit('map', map);
         io.sockets.emit('mapCollision', collisionMap);
@@ -92,6 +93,12 @@ io.on('connection', function (socket) {
         } else {
             player.status = 0;
         }
+    });
+    socket.on('attack', function (evt) {
+      players[socket.id].attacking = true
+    });
+    socket.on('stopattack', function (evt) {
+      players[socket.id].attacking = false
     });
     socket.on('mouseclick', function (click) {
         maps = mapFunctions.mineBlock(players[socket.id],click.x,click.y,32,collisionMap,map)
