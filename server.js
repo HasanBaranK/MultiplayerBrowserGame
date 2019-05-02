@@ -47,6 +47,7 @@ io.on('connection', function (socket) {
             energy: 100,
             sizex: 32,
             sizey: 32,
+            isDead: false,
             inventory:Inventory,
             attacking:false
         };
@@ -98,6 +99,8 @@ io.on('connection', function (socket) {
       players[socket.id].attacking = true
     });
     socket.on('stopattack', function (evt) {
+        let item = playerFunctions.generateItem(players[socket.id],players[socket.id],"sword","melee",1000,1000,0,0,items)
+        playerFunctions.meleeAttack(players,players[socket.id],item)
       players[socket.id].attacking = false
     });
     socket.on('mouseclick', function (click) {
@@ -105,7 +108,6 @@ io.on('connection', function (socket) {
         map = maps.map;
         collisionMap = maps.collisionMap;
         io.sockets.emit('map', map);
-        io.sockets.emit('mapCollision', collisionMap);
         console.log(players[socket.id].x +" " + players[socket.id].y)
     });
     socket.on('rightclick', function (click) {
@@ -129,4 +131,5 @@ setInterval(function () {
     collisionFunctions.checkPlayerCloseToItems(players,items,gridSize,collisionMap);
     io.sockets.emit('state', players);
     io.sockets.emit('items', items);
+    console.log(players)
 }, 1000 / 60);

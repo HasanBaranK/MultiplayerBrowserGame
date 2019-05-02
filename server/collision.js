@@ -12,10 +12,10 @@ function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
     let xcoordinate = player.x  + sizex;
     let ycoordinate = player.y  + sizey;
 
-    let MAXX
-    let MINX
-    let MAXY
-    let MINY
+    let MAXX;
+    let MINX;
+    let MAXY;
+    let MINY;
     if(xcoordinate > 0 && ycoordinate > 0 ) {
         MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize)) - gridSize;
         MINX = xcoordinate - sizex - ((xcoordinate - sizex) % gridSize) + gridSize;
