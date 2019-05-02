@@ -5,7 +5,7 @@ module.exports={
     meleeAttack,
     generateItem,
     inPlayerInventory,
-    deleteItemInventory
+    deleteItemInventory,
 }
 
 async function jump(player, amount,collisionMap,gridSize) {
@@ -18,12 +18,14 @@ async function jump(player, amount,collisionMap,gridSize) {
         await sleep(5);
     }
 }
+
 function sleep(ms){
     return new Promise(resolve=>{
         setTimeout(resolve,ms)
     })
 }
-function generateItem(x, y, name, type, damage,range, defence, health,items) {
+
+function generateItem(x, y, name, type, damage,range, defence, health,items,amount) {
     let item = {
         x: x,
         y: y,
@@ -32,7 +34,8 @@ function generateItem(x, y, name, type, damage,range, defence, health,items) {
         damage: damage,
         range: range,
         defence: defence,
-        health: health
+        health: health,
+        amount: amount
     };
     items.push(item);
     return item
@@ -119,7 +122,10 @@ function deleteItemInventory(player,name) {
     for(let item in player.inventory){
         if(player.inventory[item].name === name){
             console.log(player)
-            player.inventory.splice(item,1);
+            player.inventory[item].amount -= 1;
+            if(player.inventory[item].amount === 0) {
+                player.inventory.splice(item, 1);
+            }
             console.log(player)
             return true
         }

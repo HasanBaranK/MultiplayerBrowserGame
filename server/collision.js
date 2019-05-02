@@ -1,8 +1,11 @@
+
+
 module.exports={
     checkCollision,
     checkPlayerPerimeter,
     checkPlayerCloseToItems,
-    gravity
+    gravity,
+    addItemInventory
 }
 
 
@@ -149,10 +152,8 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
                     let difx = xcoordinate - item.x;
                     let dify = ycoordinate - item.y;
                     if (difx <= 16 && difx >= -16 && dify <= 16 && dify >= -16) {
-                        item.x = "Inventory";
-                        item.y = "Inventory";
-                        player.inventory.push(item)
-                        items.splice(i, 1);
+
+                        addItemInventory(player,item,items);
                         arrayLength = items.length;
                     } else {
                         if (difx > 0) {
@@ -201,4 +202,18 @@ function gravity(players,gridSize,collisionMap) {
         }
     }
 
+}
+
+function addItemInventory(player,item,items) {
+
+    for(let inventoryItem in player.inventory){
+        if(player.inventory[inventoryItem].name === item.name){
+            player.inventory[inventoryItem].amount += item.amount
+            items.splice(items.indexOf(item), 1);
+            return 0;
+        }
+    }
+    player.inventory.push(item)
+    items.splice(items.indexOf(item), 1);
+    return 0;
 }

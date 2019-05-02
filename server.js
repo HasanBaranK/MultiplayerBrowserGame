@@ -30,10 +30,10 @@ let mapChanged = false;
 let maps = mapFunctions.autoMapGenerator(0, 70, gridSize,collisionMap);
 map = maps.map;
 collisionMap  = maps.collisionMap;
-playerFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
-playerFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
-playerFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
-playerFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
+playerFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+playerFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+playerFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+playerFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
 
 
 io.on('connection', function (socket) {
@@ -117,7 +117,7 @@ io.on('connection', function (socket) {
         console.log(players[socket.id].x +" " + players[socket.id].y)
     });
     socket.on('rightclick', function (click) {
-        maps = mapFunctions.addBlock(players[socket.id],map,collisionMap,gridSize,click.x,click.y)
+        maps = mapFunctions.addBlock(players[socket.id],map,collisionMap,gridSize,click.x,click.y,"dirt_block")
         map = maps.map;
         collisionMap = maps.collisionMap;
         mapChanged = true
@@ -128,7 +128,6 @@ io.on('connection', function (socket) {
         players[socket.id] = 0
     });
 });
-//64px 64px
 
 
 setInterval(function () {
