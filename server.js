@@ -110,18 +110,11 @@ io.on('connection', function (socket) {
     });
     socket.on('leftclick', function (click) {
         console.log("clikcked")
-        maps = mapFunctions.mineBlock(players[socket.id],click.x,click.y,32,collisionMap,map,items)
-        map = maps.map;
-        collisionMap = maps.collisionMap;
-        mapChanged = true
-        console.log(players[socket.id].x +" " + players[socket.id].y)
+        mapChanged = mapFunctions.mineBlock(players[socket.id],click.x,click.y,32,collisionMap,map,items,128)
     });
     socket.on('rightclick', function (click) {
-        maps = mapFunctions.addBlock(players[socket.id],map,collisionMap,gridSize,click.x,click.y,"dirt_block")
-        map = maps.map;
-        collisionMap = maps.collisionMap;
-        mapChanged = true
-        console.log(players[socket.id].x +" " + players[socket.id].y)
+        mapChanged  = mapFunctions.addBlock(players[socket.id],map,collisionMap,gridSize,click.x,click.y,"dirt_block",128)
+
     });
     socket.on('disconnect', function (some) {
         console.log('Player ' + socket.id + ' has disconnected.');

@@ -100,83 +100,75 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
     return maps;
 }
 
-function mineBlock(player,x,y,gridSize,collisionMap,map,items) {
-
-
+function mineBlock(player,x,y,gridSize,collisionMap,map,items,range) {
 
     try {
         let gridx = x - (x % gridSize)
-        let gridy = y - (y % gridSize) //-(3 * gridSize ); //fix later
-        console.log(player.x +"," + player.y)
-        console.log("attemting to destroy: " + x + " " + y)
-        console.log("attemting to destroy: " + gridx + " " + gridy)
-        if (collisionMap[gridx][gridy] !== undefined) {
-            if (collisionMap[gridx][gridy] === true) {
-                console.log("found")
-                for (let block in map) {
+        let gridy = y - (y % gridSize)
 
-                    if (map[block].x === gridx && map[block].y === gridy) {
-                        let  blockType = map[block].type
-                        blockType = blockType.split("_")[0];
-                        let itemName = blockType + "_item";
-                        map.splice(block, 1);
-                        collisionMap[gridx][gridy] =false;
-                        generateItem(gridx+gridSize/2,gridy+gridSize/2,itemName,"block",0,0,0,100,items,1);
-                        console.log("deleting: " + gridx +","+ gridy)
-                        console.log("destroyed");
-                        let maps  = {
-                            map: map,
-                            collisionMap: collisionMap
+        if(calculateDistance(gridx,gridy,player.x,player.y)<= range) {
+            console.log(player.x + "," + player.y)
+            console.log("attemting to destroy: " + x + " " + y)
+            console.log("attemting to destroy: " + gridx + " " + gridy)
+            if (collisionMap[gridx][gridy] !== undefined) {
+                if (collisionMap[gridx][gridy] === true) {
+                    console.log("found")
+                    for (let block in map) {
+
+                        if (map[block].x === gridx && map[block].y === gridy) {
+                            let blockType = map[block].type
+                            blockType = blockType.split("_")[0];
+                            let itemName = blockType + "_item";
+                            map.splice(block, 1);
+                            collisionMap[gridx][gridy] = false;
+                            generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
+                            console.log("deleting: " + gridx + "," + gridy)
+                            console.log("destroyed");
+                            return true
                         }
-                        return maps;
                     }
-                }
 
-            }else {
-                console.log("already false")
+                } else {
+                    console.log("already false")
+                    return false
+                }
+            } else {
+                console.log("undefined")
+                return false
             }
-        }else{
-            console.log("undefined")
         }
-        let maps  = {
-            map: map,
-            collisionMap: collisionMap
-        }
-        return maps;
+        return false
     }catch (e) {
         console.log("error")
-        let maps  = {
-            map: map,
-            collisionMap: collisionMap
-        }
-        return maps;
+        return false;
     }
 }
 
-function addBlock(player,map,collisionMap,gridSize,x,y,blockType) {
+function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
     let i = x - (x % gridSize)
     let k = y - (y % gridSize)
+    if(calculateDistance(i,y,player.x,player.y)<= range) {
+        blockType = blockType.split("_")[0];
+        let blockName = blockType + "_block";
+        let itemName = blockType + "_item";
 
-    blockType = blockType.split("_")[0];
-    let blockName = blockType + "_block";
-    let itemName = blockType + "_item";
-
-    if ((collisionMap[i][k] === undefined||collisionMap[i][k] === false) && inPlayerInventory(player,itemName)) {
-        let block = {};
-        console.log(i)
-        console.log(k)
-        collisionMap[i ][k] = true;
-        block["x"] = i ;
-        block["y"] = k ;
-        block["type"] = blockName;
-        block["health"] = 100;
-        map.push(block);
-        deleteItemInventory(player,itemName)
+        if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
+            let block = {};
+            console.log(i)
+            console.log(k)
+            collisionMap[i][k] = true;
+            block["x"] = i;
+            block["y"] = k;
+            block["type"] = blockName;
+            block["health"] = 100;
+            map.push(block);
+            deleteItemInventory(player, itemName)
+        }
+        return true;
     }
+    return false
+}
 
-    let maps  = {
-        map: map,
-        collisionMap: collisionMap
-    }
-    return maps;
+function calculateDistance(x1,y1,x2,y2) {
+    return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
 }
