@@ -15,7 +15,7 @@ for(let image in imageNames){
 
 Promise.all(promises).then(whenImagesLoad)
 
-let socket, cvs, fps, ctx, mousePressed = undefined
+let socket, cvs, ctx, mousePressed = undefined
 let mousePosition = {}
 let buttons = []
 let displays = {}
@@ -82,7 +82,6 @@ let currentTransform = {x:0,y:0}
 
 function whenImagesLoad(){
   socket = null
-  fps = 60
   cvs = document.getElementById('canvas')
   ctx = cvs.getContext('2d')
   cvs.width = 640
@@ -130,7 +129,7 @@ function whenImagesLoad(){
   socket = io.connect('http://localhost:5000', {reconnection: false})
   socket.on('connect', () => {
     socket.emit('new player')
-    setInterval(game, 1000/fps)
+    requestAnimationFrame(game)
     socket.on('state', (playersServer) => {
       for(let player in playersServer){
         if(playersServer[player] != 0){

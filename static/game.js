@@ -28,46 +28,51 @@ function determineAnimation(player){
 }
 
 function game(){
-  socket.emit('movement', keys)
-  if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
-    currentTransform.x -= currentCoords.x - players[socket.id].state.x
-    currentTransform.y -= currentCoords.y - players[socket.id].state.y
-    ctx.translate(currentCoords.x - players[socket.id].state.x,currentCoords.y - players[socket.id].state.y)
-    currentCoords.x = players[socket.id].state.x
-    currentCoords.y = players[socket.id].state.y
-  }
-  ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
-  for(let player in players){
-    if(players[player].state.attacking){
-      if(players[player].facing == 'right'){
-        if(players[player].drawOnce(ctx, 'attackR')){
-          socket.emit('stopattack', null);determineAnimation(players[player])
+  try {
+    socket.emit('movement', keys)
+    if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
+      currentTransform.x -= currentCoords.x - players[socket.id].state.x
+      currentTransform.y -= currentCoords.y - players[socket.id].state.y
+      ctx.translate(currentCoords.x - players[socket.id].state.x,currentCoords.y - players[socket.id].state.y)
+      currentCoords.x = players[socket.id].state.x
+      currentCoords.y = players[socket.id].state.y
+    }
+    ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
+    for(let player in players){
+      if(players[player].state.attacking){
+        if(players[player].facing == 'right'){
+          if(players[player].drawOnce(ctx, 'attackR')){
+            socket.emit('stopattack', null);determineAnimation(players[player])
+            }
           }
-        }
+        else {
+          if(players[player].drawOnce(ctx, 'attackL')){
+            socket.emit('stopattack', null);determineAnimation(players[player])
+            }
+          }
+      }
       else {
-        if(players[player].drawOnce(ctx, 'attackL')){
-          socket.emit('stopattack', null);determineAnimation(players[player])
-          }
-        }
+        determineAnimation(players[player])
+      }
+      ctx.font = "10px serif"
+      if(player != socket.id){
+        ctx.fillText(player, players[player].state.x, players[player].state.y);
+      }
     }
-    else {
-      determineAnimation(players[player])
+    drawMap(map);
+    drawItems(items);
+    ctx.font = "bold 16px serif"
+    ctx.fillText('Health: '+ players[socket.id].state.health, currentTransform.x + 0, currentTransform.y + 600);
+    ctx.fillText('Energy: '+ players[socket.id].state.energy, currentTransform.x + 0, currentTransform.y + 620);
+    for(let button in buttons){
+      buttons[button].isClicked()
+      buttons[button].draw(ctx,currentTransform.x,currentTransform.y)
     }
-    ctx.font = "10px serif"
-    if(player != socket.id){
-      ctx.fillText(player, players[player].state.x, players[player].state.y);
+    if(inInventory){
+      displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
     }
-  }
-  drawMap(map);
-  drawItems(items);
-  ctx.font = "bold 16px serif"
-  ctx.fillText('Health: '+ players[socket.id].state.health, currentTransform.x + 0, currentTransform.y + 600);
-  ctx.fillText('Energy: '+ players[socket.id].state.energy, currentTransform.x + 0, currentTransform.y + 620);
-  for(let button in buttons){
-    buttons[button].isClicked()
-    buttons[button].draw(ctx,currentTransform.x,currentTransform.y)
-  }
-  if(inInventory){
-    displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
+    requestAnimationFrame(game)
+  } catch (e) {
+    requestAnimationFrame(game)
   }
 }
