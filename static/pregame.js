@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventory_UI','dirt_item','healthpotion_item']
+let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventory_UI','dirt_item','healthpotion_item','sword_item']
 let images = {}
 let promises = []
 
@@ -21,29 +21,34 @@ let buttons = []
 let displays = {}
 let inInventory = false
 
-class UIDisplay{
-
-  constructor(name,x,y,width,height){
+class Inventory{
+  constructor(name,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
     this.name = name
     this.x = x
     this.y = y
-    this.width = width
-    this.height = height
+    this.xOffset = xOffset
+    this.yOffset = yOffset
+    this.columnCount = columnCount
+    this.rowCount = rowCount
+    this.gridSize = gridSize
+    this.currentRow = 0
+    this.actualSizeOffset = actualSizeOffset
   }
-
   draw(ctx,ctX,ctY,inventory){
-    ctx.save()
-    // ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    this.currentRow = 0
     ctx.drawImage(images['inventory_UI'],this.x+ctX, this.y+ctY)
-    let spaceBetween = 0
-    let sizeOfItem = 20
-    let xoffset = 15
-    let add = 0
     for(let item in inventory){
-      ctx.drawImage(images[inventory[item].name], this.x+ctX + item*30 + add + xoffset, this.y+ctY + 220,sizeOfItem,sizeOfItem)
-      add += spaceBetween
+      if(item % this.columnCount == 0 && item != 0){
+        this.currentRow++
+      }
+      let xOfItem = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + this.actualSizeOffset/2
+      let yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
+      ctx.drawImage(images[inventory[item].name],xOfItem,yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
+      ctx.save()
+      ctx.font = '24px red'
+      ctx.fillText(inventory[item].amount, xOfItem + 8, yOfItem + 18)
+      ctx.restore()
     }
-    ctx.restore()
   }
 }
 
@@ -91,23 +96,23 @@ function whenImagesLoad(){
 
   $('body').on('contextmenu', '#canvas', function(e){ return false; });
   buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
-  displays['inventory'] = new UIDisplay('Inventory', 100, 100, 400, 400)
+  displays['inventory'] = new Inventory('Inventory',80,50,1,9,13,5,32,6)
 
   cvs.addEventListener('mousedown', function(evt) {
     mousePressed = true;
-    if(evt.button == 0){
-      socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+    if(!inInventory){
+      if(evt.button == 0){
+        socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      }
+      else{
+        socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      }
     }
-    else{
-      socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
-    }
-    console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
   });
   cvs.addEventListener('mouseup', function(event) {
     mousePressed = false;
   });
   cvs.addEventListener('contextmenu', function(event) {
-      console.log({x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y});
   });
   cvs.addEventListener('mousemove', function(event) {
    mousePosition.x = event.offsetX || event.layerX;
@@ -121,10 +126,12 @@ function whenImagesLoad(){
     if(key.key == 'Escape'){
       inInventory = false
     }
-    if(key.key == ' ' && !players[socket.id].attacking){
-      socket.emit('attack', null)
+    if(!inInventory){
+      if(key.key == ' ' && !players[socket.id].attacking){
+        socket.emit('attack', null)
+      }
+      keys[key.key] = true
     }
-    keys[key.key] = true
   }
   document.onkeyup = (key) => {
     keys[key.key] = false
