@@ -106,7 +106,7 @@ io.on('connection', function (socket) {
     });
     socket.on('stopattack', function (evt) {
         console.log("Socket id:" +socket.id)
-        let sword = itemFunctions.generateItem(players[socket.id].x,players[socket.id].y,"sword_item","melee",50,50,0,0,items)
+        let sword = itemFunctions.generateItem(players[socket.id].x,players[socket.id].y,"sword_item","melee",50,50,0,0,items,1)
         attackFunctions.meleeAttack(players,socket.id,sword)
       players[socket.id].attacking = false
     });

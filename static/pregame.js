@@ -45,8 +45,9 @@ class Inventory{
       let yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
       ctx.drawImage(images[inventory[item].name],xOfItem,yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
       ctx.save()
-      ctx.font = '24px red'
-      ctx.fillText(inventory[item].amount, xOfItem + 8, yOfItem + 18)
+      ctx.font = '16px bold'
+      ctx.fillStyle = 'white'
+      ctx.fillText(inventory[item].amount, xOfItem + 14, yOfItem + 29)
       ctx.restore()
     }
   }
