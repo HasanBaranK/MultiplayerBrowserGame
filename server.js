@@ -30,10 +30,10 @@ let mapChanged = false;
 let maps = mapFunctions.autoMapGenerator(0, 70, gridSize,collisionMap);
 map = maps.map;
 collisionMap  = maps.collisionMap;
-playerFunctions.generateItem(320, 200, "Health Potion", "Consumable", 0,0, 0, 1,items)
-playerFunctions.generateItem(220, 200, "Health Potion", "Consumable", 0,0, 0, 1,items)
-playerFunctions.generateItem(120, 200, "Health Potion", "Consumable", 0,0, 0, 1,items)
-playerFunctions.generateItem(420, 200, "Health Potion", "Consumable", 0,0, 0, 1,items)
+playerFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
+playerFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
+playerFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
+playerFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items)
 
 
 io.on('connection', function (socket) {
