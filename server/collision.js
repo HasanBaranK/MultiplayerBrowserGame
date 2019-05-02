@@ -6,7 +6,8 @@ module.exports={
     checkPlayerPerimeter,
     checkPlayerCloseToItems,
     gravity,
-    jump
+    jump,
+    move
 }
 
 async function jump(player, amount,collisionMap,gridSize) {
@@ -24,7 +25,30 @@ async function jump(player, amount,collisionMap,gridSize) {
         })
     }
 }
+function move(direction,player,gridSize,collisionMap){
+    if(direction === "left") {
+        player.x -= 5;
+        player.status = 2;
+        player.facing = "left"
+        if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
+            player.x += 5;
+        }
+    }if(direction === "right"){
+        player.x += 5;
+        player.status = 4;
+        player.facing = "right"
+        if (checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
+            player.x -= 5;
 
+        }
+    }if(direction === "down"){
+        player.y += 5;
+        player.status = 3;
+        if (checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
+            player.y -= 5;
+        }
+    }
+}
 function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
 
     let xcoordinate = player.x  + sizex;
