@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventory_UI','dirt_item','healthpotion_item','sword_item']
+let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventoryopen','inventory_UI','dirt_item','healthpotion_item','sword_item']
 let images = {}
 let promises = []
 
@@ -97,6 +97,7 @@ function whenImagesLoad(){
 
   $('body').on('contextmenu', '#canvas', function(e){ return false; });
   buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
+  buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images.inventoryopen, 32, 32)
   displays['inventory'] = new Inventory('Inventory',80,50,1,9,13,5,32,12)
 
   cvs.addEventListener('mousedown', function(evt) {
