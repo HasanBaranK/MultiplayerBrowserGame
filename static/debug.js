@@ -76,3 +76,20 @@ function drawMapCollision(map) {
     }
     ctx.restore()
 }
+
+function rangeVisualizer(players,range){
+    ctx.save()
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+
+    console.log(players)
+    for(let player in players) {
+        player = players[player]
+        if (player.facing === "left") {
+            ctx.fillRect(player.state.x + player.state.sizex - range, player.state.y, range, 2*player.state.sizey);
+        }
+        if (player.facing === "right") {
+            ctx.fillRect(player.state.x + player.state.sizex, player.state.y , range, 2*player.state.sizey);
+        }
+    }
+    ctx.restore()
+}

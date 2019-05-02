@@ -26,6 +26,7 @@ var players = {};
 var collisionMap = {};
 let items = [];
 let map;
+let mapChanged = false;
 let maps = mapFunctions.autoMapGenerator(0, 70, gridSize,collisionMap);
 map = maps.map;
 collisionMap  = maps.collisionMap;
@@ -49,6 +50,7 @@ io.on('connection', function (socket) {
             isDead: false,
             inventory:[],
             attacking:false,
+            facing:"right",
             equipped:null
         };
         io.sockets.emit('map', map);
@@ -60,6 +62,7 @@ io.on('connection', function (socket) {
             if (data.a) {
                 player.x -= 5;
                 player.status = 2;
+                player.facing = "left"
                 if (collisionFunctions.checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
                     player.x += 5;
                 }
@@ -79,6 +82,7 @@ io.on('connection', function (socket) {
             if (data.d) {
                 player.x += 5;
                 player.status = 4;
+                player.facing = "right"
                 if (collisionFunctions.checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
                     player.x -= 5;
 
@@ -99,23 +103,23 @@ io.on('connection', function (socket) {
       players[socket.id].attacking = true
     });
     socket.on('stopattack', function (evt) {
-        let item = playerFunctions.generateItem(players[socket.id],players[socket.id],"sword","melee",1000,1000,0,0,items)
-        playerFunctions.meleeAttack(players,players[socket.id],item)
+        console.log("Socket id:" +socket.id)
+        let sword = playerFunctions.generateItem(players[socket.id].x,players[socket.id].y,"sword","melee",50,50,0,0,items)
+        playerFunctions.meleeAttack(players,socket.id,sword)
       players[socket.id].attacking = false
     });
     socket.on('mouseclick', function (click) {
-        maps = mapFunctions.mineBlock(players[socket.id],click.x,click.y,32,collisionMap,map)
+        maps = mapFunctions.mineBlock(players[socket.id],click.x,click.y,32,collisionMap,map,items)
         map = maps.map;
         collisionMap = maps.collisionMap;
-        io.sockets.emit('map', map);
+        mapChanged = true
         console.log(players[socket.id].x +" " + players[socket.id].y)
     });
     socket.on('rightclick', function (click) {
-        maps = mapFunctions.addBlock(map,collisionMap,gridSize,click.x,click.y)
+        maps = mapFunctions.addBlock(players[socket.id],map,collisionMap,gridSize,click.x,click.y)
         map = maps.map;
         collisionMap = maps.collisionMap;
-        io.sockets.emit('map', map);
-        io.sockets.emit('mapCollision', collisionMap);
+        mapChanged = true
         console.log(players[socket.id].x +" " + players[socket.id].y)
     });
     socket.on('disconnect', function (some) {
@@ -131,4 +135,8 @@ setInterval(function () {
     collisionFunctions.checkPlayerCloseToItems(players,items,gridSize,collisionMap);
     io.sockets.emit('state', players);
     io.sockets.emit('items', items);
+    if(mapChanged){
+        io.sockets.emit('map', map);
+        mapChanged = false
+    }
 }, 1000 / 60);

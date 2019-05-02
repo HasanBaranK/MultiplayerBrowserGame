@@ -135,7 +135,7 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
     let arrayLength = items.length;
     if(arrayLength > 0) {
         let xcoordinate = player.x + sizex;
-        let ycoordinate = player.y - sizey;
+        let ycoordinate = player.y + sizey;
 
 
         let MAXX = xcoordinate + sizePerimeter;
@@ -148,7 +148,7 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
                 if (item.x <= MAXX && item.x >= MINX && item.y < MAXY && item.y > MINY) {
                     let difx = xcoordinate - item.x;
                     let dify = ycoordinate - item.y;
-                    if (difx <= 1 && difx >= -1 && dify <= 1 && dify >= -1) {
+                    if (difx <= 3 && difx >= -3 && dify <= 3 && dify >= -3) {
                         item.x = "Inventory";
                         item.y = "Inventory";
                         player.inventory.push(item)
@@ -156,14 +156,14 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
                         arrayLength = items.length;
                     } else {
                         if (difx > 0) {
-                            item.x = item.x + 2
+                            item.x = item.x + 3
                         } else {
-                            item.x = item.x - 2
+                            item.x = item.x - 3
                         }
                         if (dify > 0) {
-                            item.y = item.y + 2
+                            item.y = item.y + 3
                         } else {
-                            item.y = item.y - 2
+                            item.y = item.y - 3
                         }
                     }
                 } else {
