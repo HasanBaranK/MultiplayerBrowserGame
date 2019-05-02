@@ -97,7 +97,7 @@ function whenImagesLoad(){
 
   $('body').on('contextmenu', '#canvas', function(e){ return false; });
   buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
-  displays['inventory'] = new Inventory('Inventory',80,50,1,9,13,5,32,6)
+  displays['inventory'] = new Inventory('Inventory',80,50,1,9,13,5,32,12)
 
   cvs.addEventListener('mousedown', function(evt) {
     mousePressed = true;
@@ -156,6 +156,8 @@ function whenImagesLoad(){
             players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,100)
             players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,50)
             players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,50)
+            players[player].addAnimationOnce('gothitR',images['dwarf1'],0,3,3,32,32,64,64,100)
+            players[player].addAnimationOnce('gothitL',images['dwarf1'],0,3,8,32,32,64,64,100)
             players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,64,64,50)
           }
           else{
@@ -176,5 +178,10 @@ function whenImagesLoad(){
     socket.on('items', (items) => {
       this.items = items;
     });
+    socket.on('peoplegothit', (peoplewhogothit) => {
+      for(let player in peoplewhogothit){
+        players[peoplewhogothit[player]].isHit = true
+      }
+    })
   });
 }

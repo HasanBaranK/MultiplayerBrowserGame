@@ -100,7 +100,7 @@ io.on('connection', function (socket) {
             let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, sword)
             if(peopleGotHit.length > 0){
                 console.log(peopleGotHit)
-                io.sockets.emit('peopleGotHit', peopleGotHit);
+                io.sockets.emit('peoplegothit', peopleGotHit);
             }
             player.attacking = false
         }

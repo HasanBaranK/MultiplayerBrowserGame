@@ -43,7 +43,21 @@ function game(){
         players[player].drawFinal(ctx, 'dieR')
       }
       else{
-        if(players[player].state.attacking){
+        if(players[player].isHit){
+          if(players[player].facing == 'right'){
+            if(players[player].drawOnce(ctx, 'gothitR')){
+              players[player].isHit = false
+              determineAnimation(players[player])
+            }
+          }
+          if(players[player].facing == 'left'){
+            if(players[player].drawOnce(ctx, 'gothitL')){
+              players[player].isHit = false
+              determineAnimation(players[player])
+            }
+          }
+        }
+        else if(players[player].state.attacking){
           if(players[player].facing == 'right'){
             if(players[player].drawOnce(ctx, 'attackR')){
               if(player == socket.id){
