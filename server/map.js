@@ -65,7 +65,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
                     collisionMap[i * gridSize][k * gridSize] = true;
                     block["x"] = i * gridSize;
                     block["y"] = k * gridSize;
-                    block["type"] = "dirt";
+                    block["type"] = "dirt_block";
                     block["health"] = 100;
                     blocks.push(block);
                 }
@@ -82,7 +82,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
                     collisionMap[i * gridSize][k * gridSize] = true;
                     block["x"] = i * gridSize;
                     block["y"] = k * gridSize;
-                    block["type"] = "dirt";
+                    block["type"] = "dirt_block";
                     block["health"] = 100;
                     blocks.push(block);
                 }
@@ -115,7 +115,7 @@ function mineBlock(player,x,y,gridSize,collisionMap,map,items) {
                     if (map[block].x === gridx && map[block].y === gridy) {
                         map.splice(block, 1);
                         collisionMap[gridx][gridy] =false;
-                        generateItem(gridx+gridSize/2,gridy+gridSize/2,"dirt","block",0,0,0,100,items);
+                        generateItem(gridx+gridSize/2,gridy+gridSize/2,"dirt_item","block",0,0,0,100,items);
                         console.log("deleting: " + gridx +","+ gridy)
                         console.log("destroyed");
                         let maps  = {
@@ -150,8 +150,7 @@ function mineBlock(player,x,y,gridSize,collisionMap,map,items) {
 function addBlock(player,map,collisionMap,gridSize,x,y) {
     let i = x - (x % gridSize)
     let k = y - (y % gridSize)
-    console.log(inPlayerInventory(player,"dirt"))
-    if ((collisionMap[i][k] === undefined||collisionMap[i][k] === false) && inPlayerInventory(player,"dirt")) {
+    if ((collisionMap[i][k] === undefined||collisionMap[i][k] === false) && inPlayerInventory(player,"dirt_item")) {
         let block = {};
         console.log(i)
         console.log(k)
@@ -161,7 +160,7 @@ function addBlock(player,map,collisionMap,gridSize,x,y) {
         block["type"] = "dirt";
         block["health"] = 100;
         map.push(block);
-        deleteItemInventory(player,"dirt")
+        deleteItemInventory(player,"dirt_item")
     }
 
     let maps  = {

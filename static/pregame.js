@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirtBlock','coin_1','inventory','inventoryGUI']
+let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventoryGUI','dirt_item','healthpotion_item']
 let images = {}
 let promises = []
 
