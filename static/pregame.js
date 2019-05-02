@@ -79,9 +79,6 @@ var items;
 let health = 100
 let energy = 100
 let currentTransform = {x:0,y:0}
-let isAttacking = false
-let endedAttacking = false
-
 
 function whenImagesLoad(){
   socket = null
@@ -121,7 +118,7 @@ function whenImagesLoad(){
     if(key.key == 'Escape'){
       inInventory = false
     }
-    if(key.key == ' '){
+    if(key.key == ' ' && !players[socket.id].attacking){
       socket.emit('attack', null)
     }
     keys[key.key] = true
@@ -146,8 +143,8 @@ function whenImagesLoad(){
             players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,64,64,100)
             players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,64,64,100)
             players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,50)
-            players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,100)
-            players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,100)
+            players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,50)
+            players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,50)
           }
           else{
             if(players[player].state.status != playersServer[player].status){
