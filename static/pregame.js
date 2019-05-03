@@ -12,17 +12,16 @@ let currentTransform = {x:0,y:0}
 
 cvs = document.getElementById('canvas')
 ctx = cvs.getContext('2d')
-cvs.width = 640
-cvs.height = 640
+cvs.width  = 1280;
+cvs.height = 700;
 cvs.style.border = 'solid black 1px'
-cvs.style.position = 'absolute';
 
 $('body').on('contextmenu', '#canvas', function (e) {
   return false;
 });
 
 class Inventory{
-  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
+  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset,textOffsetX,textOffsetY){
     this.name = name
     this.img = img
     this.x = x
@@ -34,6 +33,8 @@ class Inventory{
     this.gridSize = gridSize
     this.currentRow = 0
     this.actualSizeOffset = actualSizeOffset
+    this.textOffsetX = textOffsetX
+    this.textOffsetY = textOffsetY
   }
   draw(ctx,ctX,ctY,inventory){
     this.currentRow = 0
@@ -48,7 +49,7 @@ class Inventory{
       ctx.save()
       ctx.font = '16px bold'
       ctx.fillStyle = 'white'
-      ctx.fillText(inventory[item].amount, xOfItem + 14, yOfItem + 29)
+      ctx.fillText(inventory[item].amount, xOfItem + this.textOffsetX, yOfItem + this.textOffsetY)
       ctx.restore()
     }
   }
@@ -70,7 +71,7 @@ class UIButton {
   }
   isClicked(){
     if(this.isHovered() && mousePressed){
-      inInventory = true
+      inInventory = !inInventory
     }
     return true
   }
@@ -97,7 +98,8 @@ function loadImagesThen(folders){
   Promise.all(promises).then(() => {
     buttons['inventory'] = new UIButton('Inventory', 0, 0, images['inventory'], 32, 32)
     buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen'], 32, 32)
-    displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 12)
+    displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 12,14,29)
+    displays['quickselect'] = new Inventory('Quickselect', images['quickselect_UI'], 100,100,0,0,1,5,32,12,3,17)
     console.log('Finished loading images');
     socket.emit('new player')
     window.requestAnimationFrame(game)
@@ -170,6 +172,16 @@ document.body.onload = () => {
           socket.emit('attack', null)
         }
         keys[key.key] = true
+      }
+      let item = players[socket.id].state.inventory[key.key-1]
+      if(item){
+        players[socket.id].state.holding = item
+        console.log(item);
+        socket.emit('holding', players[socket.id])
+      } else if (!isNaN(key.key-0)){
+        players[socket.id].state.holding = item
+        console.log(item);
+        socket.emit('holding', players[socket.id])
       }
     }
 

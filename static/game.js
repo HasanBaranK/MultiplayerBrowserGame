@@ -9,7 +9,7 @@ function drawItems(items){
     ctx.drawImage(images[items[item].name],items[item].x,items[item].y);
   }
 }
-let currentCoords = {x:320,y:200}
+let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 100}
 
 function determineAnimation(player){
   switch (player.state.status) {
@@ -31,9 +31,11 @@ function game(){
   try {
     socket.emit('movement', keys)
     if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
-      currentTransform.x -= currentCoords.x - players[socket.id].state.x
-      currentTransform.y -= currentCoords.y - players[socket.id].state.y
-      ctx.translate(currentCoords.x - players[socket.id].state.x,currentCoords.y - players[socket.id].state.y)
+      let xDifference = (currentCoords.x - players[socket.id].state.x)
+      let yDifference = (currentCoords.y - players[socket.id].state.y)
+      currentTransform.x -= xDifference
+      currentTransform.y -= yDifference
+      ctx.translate(xDifference, yDifference)
       currentCoords.x = players[socket.id].state.x
       currentCoords.y = players[socket.id].state.y
     }
@@ -87,9 +89,10 @@ function game(){
     drawMap(map);
     drawItems(items);
     ctx.font = "bold 16px serif"
-    ctx.fillText('Health: '+ players[socket.id].state.health, currentTransform.x + 0, currentTransform.y + 600);
-    ctx.fillText('Energy: '+ players[socket.id].state.energy, currentTransform.x + 0, currentTransform.y + 620);
+    ctx.fillText('Health: '+ players[socket.id].state.health, currentTransform.x + 2, currentTransform.y + cvs.height - 20);
+    ctx.fillText('Energy: '+ players[socket.id].state.energy, currentTransform.x + 2, currentTransform.y + cvs.height - 40);
     buttons['inventory'].isClicked()
+    displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 132, currentTransform.y + cvs.height - 260 ,players[socket.id].state.inventory)
     if(inInventory){
       displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
       buttons['inventoryopen'].draw(ctx,currentTransform.x,currentTransform.y)
