@@ -235,7 +235,7 @@ public class RandomImage{
        }
     }
 
-  }//main() ends here
+  }
 
   private static BufferedImage resize(BufferedImage img, int height, int width) {
         Image tmp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
