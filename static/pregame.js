@@ -1,51 +1,7 @@
-let imageNames = []
-let images = {}
-let promises = []
-
-
-let socket, cvs, ctx, mousePressed = undefined
-let mousePosition = {}
-let buttons = []
-let displays = {}
-let inInventory = false
-
-socket = io.connect('http://localhost:5000', {reconnection: false})
-socket.on('connect', () => {
-  socket.emit('getimages')
-  socket.on('images', (images) => {
-    console.log("receivedImages")
-    for (let folder in images){
-      for(let name in images[folder]){
-        imageNames.push(folder +"/" + images[folder][name].replace(".png",""));
-        console.log(folder +"/" + images[folder][name].replace(".png",""));
-
-        console.log(name);
-      }
-    }
-    //console.log(imageNames)
-    for(let image in imageNames){
-      promises.push(new Promise((resolve, reject) => {
-        let img = new Image();
-        img.onload = function() {
-          resolve('resolved')
-        }
-        console.log(imageNames[image])
-        img.src = './images/' + imageNames[image] + '.png' ;
-        images[imageNames[image]] = img
-      }))
-    }
-
-    socket.disconnect();
-    Promise.all(promises).then();
-    console.log("images are")
-    console.log(images)
-    console.log("images finish")
-  });
-});
-
 class Inventory{
-  constructor(name,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
+  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
     this.name = name
+    this.img = img
     this.x = x
     this.y = y
     this.xOffset = xOffset
@@ -58,14 +14,14 @@ class Inventory{
   }
   draw(ctx,ctX,ctY,inventory){
     this.currentRow = 0
-    ctx.drawImage(images['inventory_UI'],this.x+ctX, this.y+ctY)
+    ctx.drawImage(this.img,this.x+ctX, this.y+ctY)
     for(let item in inventory){
       if(item % this.columnCount == 0 && item != 0){
         this.currentRow++
       }
       let xOfItem = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + this.actualSizeOffset/2
       let yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
-      ctx.drawImage(images[inventory[item].name],xOfItem,yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
+      ctx.drawImage(images[inventory[item].name + '.png'],xOfItem,yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
       ctx.save()
       ctx.font = '16px bold'
       ctx.fillStyle = 'white'
@@ -100,100 +56,76 @@ class UIButton {
   }
 }
 
+let images = {}
+let promises = []
+function loadImagesThen(folders){
+  for(let folder in folders){
+    for(let image in folders[folder]){
+      promises.push(new Promise((resolve, reject) => {
+        let img = new Image();
+        img.onload = function() {
+          resolve('resolved')
+        }
+        img.src = './images/' + folder + '/' + folders[folder][image];
+        images[folders[folder][image]] = img
+      }))
+    }
+  }
+  Promise.all(promises).then(() => {
+    buttons['inventory'] = new UIButton('Inventory', 0, 0, images['inventory.png'], 32, 32)
+    buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen.png'], 32, 32)
+    displays['inventory'] = new Inventory('Inventory',images['inventory_UI.png'], 80, 50, 1, 9, 13, 5, 32, 12)
+    console.log('Finished loading images');
+    socket.emit('new player')
+    window.requestAnimationFrame(game)
+  });
+}
+
+let socket, cvs, ctx, mousePressed = undefined
+let mousePosition = {}
+let buttons = []
+let displays = {}
+let inInventory = false
+
 let keys = {}
 let players = {}
 let map;
 let items;
-let health = 100
-let energy = 100
 let currentTransform = {x:0,y:0}
 
-whenImagesLoad()
-function whenImagesLoad(){
-  console.log("hello")
-  socket = null
-  cvs = document.getElementById('canvas')
-  ctx = cvs.getContext('2d')
-  cvs.width = 640
-  cvs.height = 640
-  cvs.style.border = 'solid black 1px'
-  cvs.style.position = 'absolute';
+cvs = document.getElementById('canvas')
+ctx = cvs.getContext('2d')
+cvs.width = 640
+cvs.height = 640
+cvs.style.border = 'solid black 1px'
+cvs.style.position = 'absolute';
 
-  try {
-    $('body').on('contextmenu', '#canvas', function (e) {
-      return false;
-    });
-    buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
-    buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images.inventoryopen, 32, 32)
-    displays['inventory'] = new Inventory('Inventory', 80, 50, 1, 9, 13, 5, 32, 12)
-  }catch (e) {
-    
-  }
-  cvs.addEventListener('mousedown', function(evt) {
-    mousePressed = true;
-    if(!inInventory){
-      if(evt.button == 0){
-        socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
-      }
-      else{
-        socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
-      }
-    }
-  });
-  cvs.addEventListener('mouseup', function(event) {
-    mousePressed = false;
-  });
-  cvs.addEventListener('contextmenu', function(event) {
-  });
-  cvs.addEventListener('mousemove', function(event) {
-   mousePosition.x = event.offsetX || event.layerX;
-   mousePosition.y = event.offsetY || event.layerY;
-  });
+$('body').on('contextmenu', '#canvas', function (e) {
+  return false;
+});
 
-  document.onkeydown = (key) => {
-    if(key.key == 'i'){
-      inInventory = !inInventory
-    }
-    if(key.key == 'Escape'){
-      inInventory = false
-    }
-    if(!inInventory){
-      if(key.key == ' ' && !players[socket.id].attacking){
-        socket.emit('attack', null)
-      }
-      keys[key.key] = true
-    }
-  }
-  document.onkeyup = (key) => {
-    keys[key.key] = false
-  }
+document.body.onload = () => {
 
-  socket = io.connect('http://localhost:5000', {reconnection: false})
+  socket = io.connect('http://localhost:5000')
+
   socket.on('connect', () => {
-    socket.emit('new player')
-    socket.emit('getimages')
-    console.log("I think this starts")
-      console.log("finally")
-      requestAnimationFrame(game)
-    //console.log("I think this starts")
     socket.on('state', (playersServer) => {
-      try {
         for(let player in playersServer){
           if(playersServer[player] != 0){
             if (!players[player]){
               console.log('New Player joined');
               players[player] = new Player(playersServer[player])
-              players[player].addAnimation('idleR',images['dwarf1'],0,4,0,32,32,64,64,100)
-              players[player].addAnimation('idleL',images['dwarf1'],0,4,5,32,32,64,64,100)
-              players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,64,64,100)
-              players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,64,64,100)
-              players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,64,64,100)
-              players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,100)
-              players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,50)
-              players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,50)
-              players[player].addAnimationOnce('gothitR',images['dwarf1'],0,3,3,32,32,64,64,100)
-              players[player].addAnimationOnce('gothitL',images['dwarf1'],0,3,8,32,32,64,64,100)
-              players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,64,64,50)
+              players[player].addAnimation('idleR',images['dwarf1.png'],0,4,0,32,32,64,64,100)
+              players[player].addAnimation('idleL',images['dwarf1.png'],0,4,5,32,32,64,64,100)
+              players[player].addAnimation('up',images['dwarf1.png'],0,7,1,32,32,64,64,100)
+              players[player].addAnimation('runL',images['dwarf1.png'],0,7,6,32,32,64,64,100)
+              players[player].addAnimation('down',images['dwarf1.png'],0,7,6,32,32,64,64,100)
+              players[player].addAnimation('runR',images['dwarf1.png'],0,7,1,32,32,64,64,100)
+              players[player].addAnimationOnce('attackR',images['dwarf1.png'],0,6,2,32,32,64,64,50)
+              players[player].addAnimationOnce('attackL',images['dwarf1.png'],0,6,7,32,32,64,64,50)
+              players[player].addAnimationOnce('gothitR',images['dwarf1.png'],0,3,3,32,32,64,64,100)
+              players[player].addAnimationOnce('gothitL',images['dwarf1.png'],0,3,8,32,32,64,64,100)
+              players[player].addAnimationFinal('dieR',images['dwarf1.png'],0,6,4,32,32,64,64,50)
             }
             else{
               if(players[player].state.status != playersServer[player].status){
@@ -205,42 +137,68 @@ function whenImagesLoad(){
           else if(players[player]){
             delete players[player]
           }
-        } 
-      }catch (e) {
-
-      }
-    });
-    socket.on('map', (map) => {
-      this.map = map;
-    });
-    socket.on('items', (items) => {
-      this.items = items;
-    });
-    socket.on('images', (images) => {
-      console.log("receivedImages")
-      for (let folder in images){
-        for(let name in images[folder]){
-          imageNames.push('./images/' + folder +"/" + images[folder][name]);
         }
-      }
-
-      for(let image in imageNames){
-        promises.push(new Promise((resolve, reject) => {
-          let img = new Image();
-          img.onload = function() {
-            resolve('resolved')
-          }
-          img.src =  imageNames[image];
-          images[imageNames[image]] = img
-        }))
-      }
-      socket.disconnect();
-      Promise.all(promises).then(whenImagesLoad);
     });
+
+    socket.on('map', (mapServer) => {
+      map = mapServer
+    });
+
+    socket.on('items', (itemsServer) => {
+      items = itemsServer
+    });
+
     socket.on('peoplegothit', (peoplewhogothit) => {
       for(let player in peoplewhogothit){
         players[peoplewhogothit[player]].isHit = true
       }
-    })
+    });
+
+    socket.on('images', (folders) => {
+      loadImagesThen(folders)
+    });
+
+    document.onkeydown = (key) => {
+      if(key.key == 'i'){
+        inInventory = !inInventory
+      }
+      if(key.key == 'Escape'){
+        inInventory = false
+      }
+      if(!inInventory){
+        if(key.key == ' ' && !players[socket.id].attacking){
+          socket.emit('attack', null)
+        }
+        keys[key.key] = true
+      }
+    }
+
+    document.onkeyup = (key) => {
+      keys[key.key] = false
+    }
+
+    cvs.addEventListener('mousedown', function(evt) {
+      mousePressed = true;
+      if(!inInventory){
+        if(evt.button == 0){
+          socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+        }
+        else{
+          socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+        }
+      }
+    });
+
+    cvs.addEventListener('mouseup', function(event) {
+      mousePressed = false;
+    });
+
+    cvs.addEventListener('mousemove', function(event) {
+     mousePosition.x = event.offsetX || event.layerX;
+     mousePosition.y = event.offsetY || event.layerY;
+    });
+
+    socket.emit('getimages')
   });
+
 }
