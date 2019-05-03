@@ -40,15 +40,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
 
         collisionMap[i * gridSize] = {};
         for (let k = 20; k > minHeight; k--) {
-
-
-            let block = {};
-            collisionMap[i * gridSize ][k * gridSize] = true;
-            block["x"] = i * gridSize;
-            block["y"] = k * gridSize;
-            block["type"] = "dirt0_block";
-            block["health"] = 100;
-            blocks.push(block);
+            generateBlock(i*gridSize,k*gridSize,100,blocks,"dirt",collisionMap)
         }
     }
 
@@ -66,13 +58,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
             let noise = Math.floor(Math.random() * 3)
             try {
                 for (let k = minHeight; k > lastY - noise; k--) {
-                    let block = {};
-                    collisionMap[i * gridSize][k * gridSize] = true;
-                    block["x"] = i * gridSize;
-                    block["y"] = k * gridSize;
-                    block["type"] = "dirt0_block";
-                    block["health"] = 100;
-                    blocks.push(block);
+                    generateBlock(i*gridSize,k*gridSize,100,blocks,"dirt",collisionMap)
                 }
                 lastY = lastY - noise
             } catch (e) {
@@ -83,13 +69,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
             let noise = Math.floor(Math.random() * 3)
             try {
                 for (let k = lastY + noise; k <= minHeight; k++) {
-                    let block = {};
-                    collisionMap[i * gridSize][k * gridSize] = true;
-                    block["x"] = i * gridSize;
-                    block["y"] = k * gridSize;
-                    block["type"] = "dirt0_block";
-                    block["health"] = 100;
-                    blocks.push(block);
+                    generateBlock(i*gridSize,k*gridSize,100,blocks,"dirt",collisionMap)
                 }
                 lastY = lastY + noise
             } catch (e) {
@@ -176,7 +156,6 @@ function generateBlock(x,y,health,map,blockName,collisionMap){
     let random = Math.floor(Math.random() * 9)
 
     blockName = blockName +""+ random;
-    console.log(blockName)
     blockName = blockName + "_block"
     let block = {};
     collisionMap[x][y] = true;

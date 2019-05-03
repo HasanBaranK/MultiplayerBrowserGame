@@ -131,7 +131,7 @@ io.on('connection', function (socket) {
     socket.on('rightclick', function (click) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
-            mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, "dirt_block", 128)
+            mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, "dirt0_block", 128)
         }
     });
     socket.on('getimages', function (click) {
