@@ -134,8 +134,11 @@ io.on('connection', function (socket) {
 
         if (player.isDead === false) {
             let holding = player.holding[0]
-            if(holding.type === "block"){
-                mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128)
+            console.log(holding)
+            if(player.holding != undefined) {
+                if (holding.type === "block") {
+                    mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128)
+                }
             }
 
         }
@@ -143,6 +146,10 @@ io.on('connection', function (socket) {
     socket.on('getimages', function (click) {
         socket.emit('images', images);
     });
+    socket.on('holding', function (player) {
+        players[socket.id] = player
+    });
+
     socket.on('disconnect', function (some) {
         console.log('Player ' + socket.id + ' has disconnected.');
         players[socket.id] = 0
