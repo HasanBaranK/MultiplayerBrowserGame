@@ -43,7 +43,7 @@ public class RandomImage{
       img = resize(img, 32, 32);
       //write image
       try{
-        String fileName = "static/images/new_images/dirt_block" + String.valueOf(i) + ".png";
+        String fileName = "static/images/block/dirt" + String.valueOf(i) + "_block.png";
         f = new File(fileName);
         ImageIO.write(img, "png", f);
       }catch(IOException e){
@@ -53,7 +53,7 @@ public class RandomImage{
       img = resize(img, 16, 16);
       //write image
       try{
-        String fileName = "static/images/new_images/dirt_item" + String.valueOf(i) + ".png";
+        String fileName = "static/images/item/dirt" + String.valueOf(i) + "_item.png";
         f = new File(fileName);
         ImageIO.write(img, "png", f);
       }catch(IOException e){
@@ -101,7 +101,7 @@ public class RandomImage{
 
       //write image
       try{
-        String fileName = "static/images/new_images/gold_block" + String.valueOf(i) + ".png";
+        String fileName = "static/images/block/gold" + String.valueOf(i) + "_block.png";
         f = new File(fileName);
         ImageIO.write(img, "png", f);
       }catch(IOException e){
@@ -111,7 +111,7 @@ public class RandomImage{
       img = resize(img, 16, 16);
       //write image
       try{
-        String fileName = "static/images/new_images/gold_item" + String.valueOf(i) + ".png";
+        String fileName = "static/images/item/gold" + String.valueOf(i) + "_item.png";
         f = new File(fileName);
         ImageIO.write(img, "png", f);
       }catch(IOException e){
@@ -159,7 +159,7 @@ public class RandomImage{
 
      //write image
      try{
-       String fileName = "static/images/new_images/stone_block" + String.valueOf(i) + ".png";
+       String fileName = "static/images/block/stone" + String.valueOf(i) + "_block.png";
        f = new File(fileName);
        ImageIO.write(img, "png", f);
      }catch(IOException e){
@@ -169,7 +169,7 @@ public class RandomImage{
      img = resize(img, 16, 16);
      //write image
      try{
-       String fileName = "static/images/new_images/stone_item" + String.valueOf(i) + ".png";
+       String fileName = "static/images/item/stone" + String.valueOf(i) + "_item.png";
        f = new File(fileName);
        ImageIO.write(img, "png", f);
      }catch(IOException e){
