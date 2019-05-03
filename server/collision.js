@@ -72,7 +72,6 @@ function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
 
     } else if (xcoordinate > 0 && ycoordinate <= 0) {
 
-        console.log(ycoordinate)
         MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize)) - gridSize;
         MINX = xcoordinate - sizex - ((xcoordinate - sizex) % gridSize) + gridSize;
 
