@@ -23,7 +23,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
     }
     let hills = []
     if (amount > 20) {
-        let amountOfHills = Math.floor(Math.random() * Math.floor((size / 20)));
+        let amountOfHills = 5//Math.floor(Math.random() * Math.floor((size / 20)));
         console.log("Amount of Hills: " + amountOfHills)
         for (let i = 0; i < amountOfHills; i++) {
             let hill = {}
@@ -39,7 +39,12 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
     for (let i = startX; i < size; i++) {
 
         collisionMap[i * gridSize] = {};
-        for (let k = 20; k > minHeight; k--) {
+        let k = 20
+
+        generateBlock(i*gridSize,k*gridSize,100,blocks,"stone",collisionMap)
+        k--;
+
+        for (; k > minHeight; k--) {
             generateBlock(i*gridSize,k*gridSize,100,blocks,"dirt",collisionMap)
         }
     }
@@ -57,8 +62,12 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
         for (let i = start; i < middle; i++) {
             let noise = Math.floor(Math.random() * 3)
             try {
-                for (let k = minHeight; k > lastY - noise; k--) {
+                let k = minHeight
+                for (; k > lastY+1; k--) {
                     generateBlock(i*gridSize,k*gridSize,100,blocks,"dirt",collisionMap)
+                }
+                for ( ;k > lastY - noise; k--) {
+                    generateBlock(i*gridSize,k*gridSize,100,blocks,"stone",collisionMap)
                 }
                 lastY = lastY - noise
             } catch (e) {
@@ -68,9 +77,17 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
         for (let i = middle; i < end; i++) {
             let noise = Math.floor(Math.random() * 3)
             try {
-                for (let k = lastY + noise; k <= minHeight; k++) {
+                let k = minHeight
+                console.log(k)
+                console.log(lastY)
+                for (; k > lastY +2 ; k--) {
                     generateBlock(i*gridSize,k*gridSize,100,blocks,"dirt",collisionMap)
                 }
+                console.log(k)
+                for (; k > lastY + noise; k--) {
+                    generateBlock(i*gridSize,k*gridSize,100,blocks,"stone",collisionMap)
+                }
+                console.log(k)
                 lastY = lastY + noise
             } catch (e) {
                 //map not generated for that part yet
