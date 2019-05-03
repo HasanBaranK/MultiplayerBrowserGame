@@ -89,12 +89,13 @@ function game(){
     ctx.font = "bold 16px serif"
     ctx.fillText('Health: '+ players[socket.id].state.health, currentTransform.x + 0, currentTransform.y + 600);
     ctx.fillText('Energy: '+ players[socket.id].state.energy, currentTransform.x + 0, currentTransform.y + 620);
-    for(let button in buttons){
-      buttons[button].isClicked()
-      buttons[button].draw(ctx,currentTransform.x,currentTransform.y)
-    }
+    buttons['inventory'].isClicked()
     if(inInventory){
       displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
+      buttons['inventoryopen'].draw(ctx,currentTransform.x,currentTransform.y)
+    }
+    else{
+      buttons['inventory'].draw(ctx,currentTransform.x,currentTransform.y)
     }
     requestAnimationFrame(game)
   } catch (e) {
