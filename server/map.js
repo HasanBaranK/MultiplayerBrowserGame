@@ -154,13 +154,16 @@ function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
 
 
     if(calculateDistance(i,y,player.x,player.y)<= range) {
+        console.log("distance check done")
         blockType = blockType.split("_")[0];
         let blockName = blockType + "_block";
         let itemName = blockType + "_item";
-        console.log(itemName);
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
-            generateBlock(i,k,100,map,blockName,collisionMap)
+            console.log("works")
+            generateBlock(i,k,100,map,blockType,collisionMap)
+            console.log("generated block")
             deleteItemInventory(player, itemName)
+            console.log("deleteInventory")
         }
         return true;
     }
@@ -174,8 +177,11 @@ function calculateDistance(x1,y1,x2,y2) {
 function generateBlock(x,y,health,map,blockName,collisionMap){
     let random = Math.floor(Math.random() * 9)
 
+    blockName = blockName.replace("0","");
+    console.log(blockName)
     blockName = blockName +""+ random;
     blockName = blockName + "_block"
+    console.log(blockName)
     let block = {};
     collisionMap[x][y] = true;
     block["x"] = x;
@@ -197,11 +203,9 @@ function myGrid(x,y,gridSize) {
     }
 
     if(x<0 && (0-gridSize)< x){
-        console.log("helloo")
         gridx  = x - (x % gridSize) -gridSize
     }
     if(y<0 && (0-gridSize)< y){
-        console.log("helloo")
         gridy  = y - (y % gridSize) -gridSize
     }
     let position = {

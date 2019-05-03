@@ -135,7 +135,8 @@ io.on('connection', function (socket) {
         if (player.isDead === false) {
             let holding = player.holding[0]
             console.log(holding)
-            if(player.holding != undefined) {
+            if(holding !== undefined) {
+                console.log("hello I am working")
                 if (holding.type === "block") {
                     mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128)
                 }
