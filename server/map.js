@@ -156,15 +156,8 @@ function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
         let itemName = blockType + "_item";
 
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
-            let block = {};
-            console.log(i)
-            console.log(k)
-            collisionMap[i][k] = true;
-            block["x"] = i;
-            block["y"] = k;
-            block["type"] = blockName;
-            block["health"] = 100;
-            map.push(block);
+
+            generateblock(i,k,100,map,"dirt",collisionMap)
             deleteItemInventory(player, itemName)
         }
         return true;
@@ -174,4 +167,21 @@ function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
 
 function calculateDistance(x1,y1,x2,y2) {
     return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
+}
+
+function generateblock(x,y,health,map,blockName,collisionMap){
+
+    let random = Math.floor(Math.random() * 9)
+
+    blockName = blockName + random;
+    console.log(blockName)
+    blockName = blockName + "_block"
+    let block = {};
+    collisionMap[x][y] = true;
+    block["x"] = x;
+    block["y"] = y;
+    block["type"] = blockName;
+    block["health"] = 100;
+    map.push(block);
+
 }

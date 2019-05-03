@@ -1,7 +1,7 @@
 module.exports={
     generateItem
 }
-function generateItem(x, y, name, type, damage,range, defence, health,items,amount) {
+function generateItem(x, y, name, type, damage,range, defence, health,items,amount,equipable) {
     let item = {
         x: x,
         y: y,
@@ -11,7 +11,8 @@ function generateItem(x, y, name, type, damage,range, defence, health,items,amou
         range: range,
         defence: defence,
         health: health,
-        amount: amount
+        amount: amount,
+        equipable: equipable
     };
     items.push(item);
     return item

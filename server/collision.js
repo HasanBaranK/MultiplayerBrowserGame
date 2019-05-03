@@ -209,7 +209,7 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
                 } else {
                     //gravity for the item
                     item.y += 3;
-                    if (checkCollision(item, 32,10, gridSize,collisionMap)) {
+                    if (checkCollision(item, 16,16, gridSize,collisionMap)) {
                         item.y -= 3;
                     }
                 }
@@ -227,7 +227,7 @@ function checkPlayerCloseToItems(players,items,gridSize,collisionMap) {
     }
 }
 
-function gravity(players,gridSize,collisionMap) {
+function gravity(players,gridSize,collisionMap,projectiles) {
     for (let player in players) {
 
         let currentPlayer = players[player];
@@ -239,6 +239,17 @@ function gravity(players,gridSize,collisionMap) {
             currentPlayer.onair = false;
             // console.log("In land");
         }
+    }
+    for (let projectile in projectiles){
+        let projectile = projectiles[projectile];
+        projectile.y +=3
+        if (checkCollision(projectile, projectile.sizex, projectile.sizey, gridSize,collisionMap)) {
+            //console.log(collisionMap);
+            projectile.y -= 3;
+            projectile.onair = false;
+            // console.log("In land");
+        }
+
     }
 
 }

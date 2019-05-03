@@ -1,6 +1,7 @@
 let path = require('path');
 let socketIO = require('socket.io');
 let express = require('express');
+const fs = require('fs');
 
 const app = express();
 const gridSize = 32;
@@ -22,19 +23,21 @@ let collisionFunctions = require("./server/collision");
 let attackFunctions = require("./server/Player/attack");
 let itemFunctions = require("./server/Player/items");
 
+const imageFolder = './static/images';
 
 var players = {};
 var collisionMap = {};
 let items = [];
+let projectiles = [];
 let map;
 let mapChanged = false;
-let maps = mapFunctions.autoMapGenerator(0, 70, gridSize,collisionMap);
+let maps = mapFunctions.autoMapGenerator(0, 70, gridSize, collisionMap);
 map = maps.map;
-collisionMap  = maps.collisionMap;
-itemFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
-itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
-itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
-itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0,0, 0, 1,items,1)
+collisionMap = maps.collisionMap;
+itemFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 
 
 io.on('connection', function (socket) {
@@ -49,17 +52,18 @@ io.on('connection', function (socket) {
             sizex: 32,
             sizey: 32,
             isDead: false,
-            inventory:[],
-            attacking:false,
-            facing:"right",
-            equipped:null
+            inventory: [],
+            attacking: false,
+            facing: "right",
+            equipped: [],
+            holding: []
         };
         io.sockets.emit('map', map);
         io.sockets.emit('mapCollision', collisionMap);
     });
     socket.on('movement', function (data) {
         let player = players[socket.id] || {};
-        if(player.isDead === false) {
+        if (player.isDead === false) {
             if (data.a || data.w || data.d || data.s) {
                 if (data.a) {
 
@@ -88,17 +92,17 @@ io.on('connection', function (socket) {
     });
     socket.on('attack', function (evt) {
         let player = players[socket.id] || {};
-        if(player.isDead === false) {
+        if (player.isDead === false) {
             player.attacking = true
         }
     });
     socket.on('stopattack', function (evt) {
         let player = players[socket.id] || {};
-        if(player.isDead === false) {
+        if (player.isDead === false) {
             console.log("Socket id:" + socket.id)
             let sword = itemFunctions.generateItem(player.x, player.y, "sword_item", "melee", 50, 50, 0, 0, items, 1)
             let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, sword)
-            if(peopleGotHit.length > 0){
+            if (peopleGotHit.length > 0) {
                 console.log(peopleGotHit)
                 io.sockets.emit('peoplegothit', peopleGotHit);
             }
@@ -106,16 +110,31 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('leftclick', function (click) {
+
         let player = players[socket.id] || {};
-        if(player.isDead === false) {
+        if (player.isDead === false) {
             mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128)
         }
     });
     socket.on('rightclick', function (click) {
         let player = players[socket.id] || {};
-        if(player.isDead === false) {
+        if (player.isDead === false) {
             mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, "dirt_block", 128)
         }
+    });
+    socket.on('getimages', function (click) {
+        let images = {};
+        fs.readdir(imageFolder, (err, files) => {
+            files.forEach(folder => {
+                console.log(folder)
+                fs.readdir(imageFolder +"/" +folder, (err, files) => {
+                    images[folder] = files
+                    console.log(files)
+                });
+            });
+        });
+        console.log(images)
+        io.sockets.emit('images', images);
     });
     socket.on('disconnect', function (some) {
         console.log('Player ' + socket.id + ' has disconnected.');
@@ -125,11 +144,11 @@ io.on('connection', function (socket) {
 
 
 setInterval(function () {
-    collisionFunctions.gravity(players,gridSize,collisionMap);
-    collisionFunctions.checkPlayerCloseToItems(players,items,gridSize,collisionMap);
+    collisionFunctions.gravity(players, gridSize, collisionMap, projectiles);
+    collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
     io.sockets.emit('state', players);
     io.sockets.emit('items', items);
-    if(mapChanged){
+    if (mapChanged) {
         io.sockets.emit('map', map);
         mapChanged = false
     }
