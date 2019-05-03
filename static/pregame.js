@@ -2,24 +2,46 @@ let imageNames = []
 let images = {}
 let promises = []
 
-for(let image in imageNames){
-  promises.push(new Promise((resolve, reject) => {
-    let img = new Image();
-    img.onload = function() {
-        resolve('resolved')
-    }
-    img.src =  imageNames[image];
-    images[imageNames[image]] = img
-  }))
-}
-
-Promise.all(promises).then(whenImagesLoad)
 
 let socket, cvs, ctx, mousePressed = undefined
 let mousePosition = {}
 let buttons = []
 let displays = {}
 let inInventory = false
+
+socket = io.connect('http://localhost:5000', {reconnection: false})
+socket.on('connect', () => {
+  socket.emit('getimages')
+  socket.on('images', (images) => {
+    console.log("receivedImages")
+    for (let folder in images){
+      for(let name in images[folder]){
+        imageNames.push(folder +"/" + images[folder][name].replace(".png",""));
+        console.log(folder +"/" + images[folder][name].replace(".png",""));
+
+        console.log(name);
+      }
+    }
+    //console.log(imageNames)
+    for(let image in imageNames){
+      promises.push(new Promise((resolve, reject) => {
+        let img = new Image();
+        img.onload = function() {
+          resolve('resolved')
+        }
+        console.log(imageNames[image])
+        img.src = './images/' + imageNames[image] + '.png' ;
+        images[imageNames[image]] = img
+      }))
+    }
+
+    socket.disconnect();
+    Promise.all(promises).then();
+    console.log("images are")
+    console.log(images)
+    console.log("images finish")
+  });
+});
 
 class Inventory{
   constructor(name,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
@@ -86,8 +108,9 @@ let health = 100
 let energy = 100
 let currentTransform = {x:0,y:0}
 
+whenImagesLoad()
 function whenImagesLoad(){
-  console.log(images)
+  console.log("hello")
   socket = null
   cvs = document.getElementById('canvas')
   ctx = cvs.getContext('2d')
@@ -96,11 +119,16 @@ function whenImagesLoad(){
   cvs.style.border = 'solid black 1px'
   cvs.style.position = 'absolute';
 
-  $('body').on('contextmenu', '#canvas', function(e){ return false; });
-  buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
-  buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images.inventoryopen, 32, 32)
-  displays['inventory'] = new Inventory('Inventory',80,50,1,9,13,5,32,12)
-
+  try {
+    $('body').on('contextmenu', '#canvas', function (e) {
+      return false;
+    });
+    buttons['inventory'] = new UIButton('Inventory', 0, 0, images.inventory, 32, 32)
+    buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images.inventoryopen, 32, 32)
+    displays['inventory'] = new Inventory('Inventory', 80, 50, 1, 9, 13, 5, 32, 12)
+  }catch (e) {
+    
+  }
   cvs.addEventListener('mousedown', function(evt) {
     mousePressed = true;
     if(!inInventory){
@@ -127,7 +155,6 @@ function whenImagesLoad(){
       inInventory = !inInventory
     }
     if(key.key == 'Escape'){
-
       inInventory = false
     }
     if(!inInventory){
@@ -145,35 +172,42 @@ function whenImagesLoad(){
   socket.on('connect', () => {
     socket.emit('new player')
     socket.emit('getimages')
-    requestAnimationFrame(game)
+    console.log("I think this starts")
+      console.log("finally")
+      requestAnimationFrame(game)
+    //console.log("I think this starts")
     socket.on('state', (playersServer) => {
-      for(let player in playersServer){
-        if(playersServer[player] != 0){
-          if (!players[player]){
-            console.log('New Player joined');
-            players[player] = new Player(playersServer[player])
-            players[player].addAnimation('idleR',images['dwarf1'],0,4,0,32,32,64,64,100)
-            players[player].addAnimation('idleL',images['dwarf1'],0,4,5,32,32,64,64,100)
-            players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,64,64,100)
-            players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,64,64,100)
-            players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,64,64,100)
-            players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,100)
-            players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,50)
-            players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,50)
-            players[player].addAnimationOnce('gothitR',images['dwarf1'],0,3,3,32,32,64,64,100)
-            players[player].addAnimationOnce('gothitL',images['dwarf1'],0,3,8,32,32,64,64,100)
-            players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,64,64,50)
-          }
-          else{
-            if(players[player].state.status != playersServer[player].status){
-              players[player].resetAnimations()
+      try {
+        for(let player in playersServer){
+          if(playersServer[player] != 0){
+            if (!players[player]){
+              console.log('New Player joined');
+              players[player] = new Player(playersServer[player])
+              players[player].addAnimation('idleR',images['dwarf1'],0,4,0,32,32,64,64,100)
+              players[player].addAnimation('idleL',images['dwarf1'],0,4,5,32,32,64,64,100)
+              players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,64,64,100)
+              players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,64,64,100)
+              players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,64,64,100)
+              players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,100)
+              players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,50)
+              players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,50)
+              players[player].addAnimationOnce('gothitR',images['dwarf1'],0,3,3,32,32,64,64,100)
+              players[player].addAnimationOnce('gothitL',images['dwarf1'],0,3,8,32,32,64,64,100)
+              players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,64,64,50)
             }
-            players[player].state = playersServer[player]
+            else{
+              if(players[player].state.status != playersServer[player].status){
+                players[player].resetAnimations()
+              }
+              players[player].state = playersServer[player]
+            }
           }
-        }
-        else if(players[player]){
-          delete players[player]
-        }
+          else if(players[player]){
+            delete players[player]
+          }
+        } 
+      }catch (e) {
+
       }
     });
     socket.on('map', (map) => {
@@ -183,13 +217,25 @@ function whenImagesLoad(){
       this.items = items;
     });
     socket.on('images', (images) => {
+      console.log("receivedImages")
       for (let folder in images){
         for(let name in images[folder]){
           imageNames.push('./images/' + folder +"/" + images[folder][name]);
-          console.log(folder +"/" + images[folder][name]);
-
         }
       }
+
+      for(let image in imageNames){
+        promises.push(new Promise((resolve, reject) => {
+          let img = new Image();
+          img.onload = function() {
+            resolve('resolved')
+          }
+          img.src =  imageNames[image];
+          images[imageNames[image]] = img
+        }))
+      }
+      socket.disconnect();
+      Promise.all(promises).then(whenImagesLoad);
     });
     socket.on('peoplegothit', (peoplewhogothit) => {
       for(let player in peoplewhogothit){

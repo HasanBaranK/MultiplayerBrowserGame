@@ -1,4 +1,5 @@
 function drawMap(map) {
+  console.log("running map")
   for(let block in map){
     console.log(map[block])
     ctx.drawImage(images[map[block].type],map[block].x,map[block].y);
@@ -29,6 +30,7 @@ function determineAnimation(player){
 }
 
 function game(){
+  console.log("game")
   try {
     socket.emit('movement', keys)
     if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
