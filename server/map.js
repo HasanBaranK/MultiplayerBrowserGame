@@ -99,11 +99,12 @@ function mineBlock(player,x,y,gridSize,collisionMap,map,items,range) {
                 if (collisionMap[gridx][gridy] === true) {
                     console.log("found")
                     for (let block in map) {
-
                         if (map[block].x === gridx && map[block].y === gridy) {
                             let blockType = map[block].type
                             blockType = blockType.split("_")[0];
-                            let itemName = blockType + "_item";
+                            blockType = blockType.substr(0,blockType.length-1)
+                            let itemName = blockType + "0_item";
+                            console.log(itemName)
                             map.splice(block, 1);
                             collisionMap[gridx][gridy] = false;
                             generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
@@ -135,7 +136,7 @@ function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
     if(calculateDistance(i,y,player.x,player.y)<= range) {
         blockType = blockType.split("_")[0];
         let blockName = blockType + "_block";
-        let itemName = blockType + '0' + "_item";
+        let itemName = blockType + "_item";
         console.log(itemName);
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
             generateBlock(i,k,100,map,"dirt",collisionMap)
