@@ -5,7 +5,8 @@ const {generateItem} = require("./Player/items");
 module.exports={
     autoMapGenerator,
     mineBlock,
-    addBlock
+    addBlock,
+    myGrid
 }
 
 
@@ -23,7 +24,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
     }
     let hills = []
     if (amount > 20) {
-        let amountOfHills = 5//Math.floor(Math.random() * Math.floor((size / 20)));
+        let amountOfHills = Math.floor(Math.random() * Math.floor((size / 20)));
         console.log("Amount of Hills: " + amountOfHills)
         for (let i = 0; i < amountOfHills; i++) {
             let hill = {}
@@ -78,16 +79,12 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
             let noise = Math.floor(Math.random() * 3)
             try {
                 let k = minHeight
-                console.log(k)
-                console.log(lastY)
                 for (; k > lastY +2 ; k--) {
                     generateBlock(i*gridSize,k*gridSize,100,blocks,"dirt",collisionMap)
                 }
-                console.log(k)
                 for (; k > lastY + noise; k--) {
                     generateBlock(i*gridSize,k*gridSize,100,blocks,"stone",collisionMap)
                 }
-                console.log(k)
                 lastY = lastY + noise
             } catch (e) {
                 //map not generated for that part yet
@@ -105,8 +102,9 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
 function mineBlock(player,x,y,gridSize,collisionMap,map,items,range) {
 
     try {
-        let gridx = x - (x % gridSize)
-        let gridy = y - (y % gridSize)
+        let position = myGrid(x,y,gridSize)
+        let gridx = position.x
+        let gridy = position.y
 
         if(calculateDistance(gridx,gridy,player.x,player.y)<= range) {
             console.log(player.x + "," + player.y)
@@ -148,8 +146,13 @@ function mineBlock(player,x,y,gridSize,collisionMap,map,items,range) {
 }
 
 function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
-    let i = x - (x % gridSize)
-    let k = y - (y % gridSize)
+
+    let position = myGrid(x,y,gridSize)
+
+    let i = position.x
+    let k = position.y
+
+
     if(calculateDistance(i,y,player.x,player.y)<= range) {
         blockType = blockType.split("_")[0];
         let blockName = blockType + "_block";
@@ -181,4 +184,29 @@ function generateBlock(x,y,health,map,blockName,collisionMap){
     block["health"] = 100;
     map.push(block);
 
+}
+function myGrid(x,y,gridSize) {
+    let gridx  = x - (x % gridSize)
+    let gridy  = y - (y % gridSize)
+
+    if(gridx < 0){
+        gridx = gridx - gridSize
+    }
+    if(gridy < 0){
+        gridy = gridy - gridSize
+    }
+
+    if(x<0 && (0-gridSize)< x){
+        console.log("helloo")
+        gridx  = x - (x % gridSize) -gridSize
+    }
+    if(y<0 && (0-gridSize)< y){
+        console.log("helloo")
+        gridy  = y - (y % gridSize) -gridSize
+    }
+    let position = {
+        x:gridx,
+        y: gridy
+    }
+    return position
 }
