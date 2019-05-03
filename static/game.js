@@ -1,12 +1,12 @@
 function drawMap(map) {
   for(let block in map){
-    ctx.drawImage(images[map[block].type + '.png'],map[block].x,map[block].y);
+    ctx.drawImage(images[map[block].type],map[block].x,map[block].y);
   }
 }
 
 function drawItems(items){
   for(let item in items){
-    ctx.drawImage(images[items[item].name  + '.png'],items[item].x,items[item].y);
+    ctx.drawImage(images[items[item].name],items[item].x,items[item].y);
   }
 }
 let currentCoords = {x:320,y:200}
@@ -99,7 +99,6 @@ function game(){
     }
     requestAnimationFrame(game)
   } catch (e) {
-    console.log(e);
     requestAnimationFrame(game)
   }
 }
