@@ -173,15 +173,11 @@ document.body.onload = () => {
         }
         keys[key.key] = true
       }
-      let item = players[socket.id].state.inventory[key.key-1]
-      if(item){
-        players[socket.id].state.holding = item
-        console.log(item);
-        socket.emit('holding', players[socket.id])
-      } else if (!isNaN(key.key-0)){
-        players[socket.id].state.holding = item
-        console.log(item);
-        socket.emit('holding', players[socket.id])
+      let item = key.key-1
+      if(!isNaN(item)){
+        players[socket.id].state.holding = [players[socket.id].state.inventory[item]]
+        socket.emit('holding', players[socket.id].state)
+        console.log('sent');
       }
     }
 
