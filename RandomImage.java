@@ -119,7 +119,7 @@ public class RandomImage{
       }
    }
 /*============================================================================*/
-/*================================ STONE BLOCK ===============================*/
+/*================================ WATER BLOCK ===============================*/
 /*============================================================================*/
    for (int i = 0; i < 10; i++) {
      //image dimension
@@ -131,7 +131,7 @@ public class RandomImage{
      //file object
 
      File f = null;
-     Color stone;
+     Color water;
 
      //create random image pixel by pixel
      for(int y = 0; y < height; y++){
@@ -141,17 +141,17 @@ public class RandomImage{
 
          switch(rand) {
           case 0:
-            stone = new Color(78, 78, 78);
+            water = new Color(31, 199, 250);
             break;
           case 1:
-            stone = new Color(139, 139, 139);
+            water = new Color(14, 85, 107);
             break;
           default:
-            stone = new Color(117, 117, 117);
+            water = new Color(21, 136, 171);
          }
 
-         int stoneRGB = stone.getRGB();
-         img.setRGB(x, y, stoneRGB);
+         int waterRGB = water.getRGB();
+         img.setRGB(x, y, waterRGB);
        }
      }
 
@@ -159,7 +159,7 @@ public class RandomImage{
 
      //write image
      try{
-       String fileName = "static/images/block/stone" + String.valueOf(i) + "_block.png";
+       String fileName = "static/images/block/water" + String.valueOf(i) + "_block.png";
        f = new File(fileName);
        ImageIO.write(img, "png", f);
      }catch(IOException e){
@@ -169,14 +169,71 @@ public class RandomImage{
      img = resize(img, 16, 16);
      //write image
      try{
-       String fileName = "static/images/item/stone" + String.valueOf(i) + "_item.png";
+       String fileName = "static/images/item/water" + String.valueOf(i) + "_item.png";
        f = new File(fileName);
        ImageIO.write(img, "png", f);
      }catch(IOException e){
        System.out.println("Error: " + e);
      }
   }
+  /*============================================================================*/
+  /*================================ STONE BLOCK ===============================*/
+  /*============================================================================*/
+     for (int i = 0; i < 10; i++) {
+       //image dimension
+       int width = 8;
+       int height = 8;
 
+       //create buffered image object img
+       BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+       //file object
+
+       File f = null;
+       Color stone;
+
+       //create random image pixel by pixel
+       for(int y = 0; y < height; y++){
+         for(int x = 0; x < width; x++){
+
+           int rand = (int)(Math.random()*6);
+
+           switch(rand) {
+            case 0:
+              stone = new Color(78, 78, 78);
+              break;
+            case 1:
+              stone = new Color(139, 139, 139);
+              break;
+            default:
+              stone = new Color(117, 117, 117);
+           }
+
+           int stoneRGB = stone.getRGB();
+           img.setRGB(x, y, stoneRGB);
+         }
+       }
+
+       img = resize(img, 32, 32);
+
+       //write image
+       try{
+         String fileName = "static/images/block/stone" + String.valueOf(i) + "_block.png";
+         f = new File(fileName);
+         ImageIO.write(img, "png", f);
+       }catch(IOException e){
+         System.out.println("Error: " + e);
+       }
+
+       img = resize(img, 16, 16);
+       //write image
+       try{
+         String fileName = "static/images/item/stone" + String.valueOf(i) + "_item.png";
+         f = new File(fileName);
+         ImageIO.write(img, "png", f);
+       }catch(IOException e){
+         System.out.println("Error: " + e);
+       }
+    }
 
   }//main() ends here
 
