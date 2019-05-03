@@ -159,7 +159,7 @@ function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
         let itemName = blockType + "_item";
         console.log(itemName);
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
-            generateBlock(i,k,100,map,"dirt",collisionMap)
+            generateBlock(i,k,100,map,blockName,collisionMap)
             deleteItemInventory(player, itemName)
         }
         return true;

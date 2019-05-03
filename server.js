@@ -129,9 +129,15 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('rightclick', function (click) {
+
         let player = players[socket.id] || {};
+
         if (player.isDead === false) {
-            mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, "dirt0_block", 128)
+            let holding = player.holding[0]
+            if(holding.type === "block"){
+                mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128)
+            }
+
         }
     });
     socket.on('getimages', function (click) {
