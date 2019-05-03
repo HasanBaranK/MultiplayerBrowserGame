@@ -40,11 +40,13 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
 
         collisionMap[i * gridSize] = {};
         for (let k = 20; k > minHeight; k--) {
+
+
             let block = {};
             collisionMap[i * gridSize ][k * gridSize] = true;
             block["x"] = i * gridSize;
             block["y"] = k * gridSize;
-            block["type"] = "dirt_block";
+            block["type"] = "dirt0_block";
             block["health"] = 100;
             blocks.push(block);
         }
@@ -68,7 +70,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
                     collisionMap[i * gridSize][k * gridSize] = true;
                     block["x"] = i * gridSize;
                     block["y"] = k * gridSize;
-                    block["type"] = "dirt_block";
+                    block["type"] = "dirt0_block";
                     block["health"] = 100;
                     blocks.push(block);
                 }
@@ -85,7 +87,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap) {
                     collisionMap[i * gridSize][k * gridSize] = true;
                     block["x"] = i * gridSize;
                     block["y"] = k * gridSize;
-                    block["type"] = "dirt_block";
+                    block["type"] = "dirt0_block";
                     block["health"] = 100;
                     blocks.push(block);
                 }
@@ -157,7 +159,7 @@ function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
 
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
 
-            generateblock(i,k,100,map,"dirt",collisionMap)
+            generateBlock(i,k,100,map,"dirt",collisionMap)
             deleteItemInventory(player, itemName)
         }
         return true;
@@ -169,11 +171,11 @@ function calculateDistance(x1,y1,x2,y2) {
     return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
 }
 
-function generateblock(x,y,health,map,blockName,collisionMap){
+function generateBlock(x,y,health,map,blockName,collisionMap){
 
     let random = Math.floor(Math.random() * 9)
 
-    blockName = blockName + random;
+    blockName = blockName +""+ random;
     console.log(blockName)
     blockName = blockName + "_block"
     let block = {};

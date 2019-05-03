@@ -31,6 +31,8 @@ let items = [];
 let projectiles = [];
 let map;
 let mapChanged = false;
+let images = {};
+getImages(images)
 let maps = mapFunctions.autoMapGenerator(0, 70, gridSize, collisionMap);
 map = maps.map;
 collisionMap = maps.collisionMap;
@@ -39,7 +41,7 @@ itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0,
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 
-let images = {};
+
 async function getImages(images) {
     await fs.readdir(imageFolder, (err, files) => {
         files.forEach(folder => {
@@ -51,10 +53,8 @@ async function getImages(images) {
     return images
 }
 
-let imagePromise = getImages(images)
 
-Promise.resolve(imagePromise);
-console.log(images)
+
 io.on('connection', function (socket) {
     console.log('Player ' + socket.id + ' has joined the game');
     socket.on('new player', function () {
@@ -138,7 +138,6 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('getimages', function (click) {
-
         io.sockets.emit('images', images);
     });
     socket.on('disconnect', function (some) {

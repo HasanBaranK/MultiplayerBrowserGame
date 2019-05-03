@@ -127,6 +127,7 @@ function whenImagesLoad(){
       inInventory = !inInventory
     }
     if(key.key == 'Escape'){
+
       inInventory = false
     }
     if(!inInventory){
@@ -184,8 +185,8 @@ function whenImagesLoad(){
     socket.on('images', (images) => {
       for (let folder in images){
         for(let name in images[folder]){
-          imageNames.push(folder +"/" + images[folder][name]);
-          console.log('./images/' + folder +"/" + images[folder][name]);
+          imageNames.push('./images/' + folder +"/" + images[folder][name]);
+          console.log(folder +"/" + images[folder][name]);
 
         }
       }
