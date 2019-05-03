@@ -1,4 +1,4 @@
-let imageNames = ['dwarf1','dirt_block','coin_item','inventory','inventoryopen','inventory_UI','dirt_item','healthpotion_item','sword_item']
+let imageNames = []
 let images = {}
 let promises = []
 
@@ -8,7 +8,7 @@ for(let image in imageNames){
     img.onload = function() {
         resolve('resolved')
     }
-    img.src = './images/' + imageNames[image] + '.png' ;
+    img.src =  imageNames[image];
     images[imageNames[image]] = img
   }))
 }
@@ -80,13 +80,14 @@ class UIButton {
 
 let keys = {}
 let players = {}
-var map;
-var items;
+let map;
+let items;
 let health = 100
 let energy = 100
 let currentTransform = {x:0,y:0}
 
 function whenImagesLoad(){
+  console.log(images)
   socket = null
   cvs = document.getElementById('canvas')
   ctx = cvs.getContext('2d')
@@ -142,6 +143,7 @@ function whenImagesLoad(){
   socket = io.connect('http://localhost:5000', {reconnection: false})
   socket.on('connect', () => {
     socket.emit('new player')
+    socket.emit('getimages')
     requestAnimationFrame(game)
     socket.on('state', (playersServer) => {
       for(let player in playersServer){
@@ -178,6 +180,15 @@ function whenImagesLoad(){
     });
     socket.on('items', (items) => {
       this.items = items;
+    });
+    socket.on('images', (images) => {
+      for (let folder in images){
+        for(let name in images[folder]){
+          imageNames.push(folder +"/" + images[folder][name]);
+          console.log('./images/' + folder +"/" + images[folder][name]);
+
+        }
+      }
     });
     socket.on('peoplegothit', (peoplewhogothit) => {
       for(let player in peoplewhogothit){

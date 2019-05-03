@@ -39,7 +39,22 @@ itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0,
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 
+let images = {};
+async function getImages(images) {
+    await fs.readdir(imageFolder, (err, files) => {
+        files.forEach(folder => {
+            fs.readdir(imageFolder + "/" + folder, (err, files) => {
+                images[folder] = files
+            });
+        });
+    });
+    return images
+}
 
+let imagePromise = getImages(images)
+
+Promise.resolve(imagePromise);
+console.log(images)
 io.on('connection', function (socket) {
     console.log('Player ' + socket.id + ' has joined the game');
     socket.on('new player', function () {
@@ -123,17 +138,7 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('getimages', function (click) {
-        let images = {};
-        fs.readdir(imageFolder, (err, files) => {
-            files.forEach(folder => {
-                console.log(folder)
-                fs.readdir(imageFolder +"/" +folder, (err, files) => {
-                    images[folder] = files
-                    console.log(files)
-                });
-            });
-        });
-        console.log(images)
+
         io.sockets.emit('images', images);
     });
     socket.on('disconnect', function (some) {
