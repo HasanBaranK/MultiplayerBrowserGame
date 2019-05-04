@@ -275,3 +275,15 @@ function whichGridIamOn(x, y, gridSize) {
     ctx.fillRect(gridx, gridy, gridSize, gridSize);
     ctx.restore()
 }
+function buildRange(players, gridSize) {
+    ctx.save()
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.beginPath();
+    for(let player in players){
+        player = players[player]
+        ctx.arc(player.state.x+ gridSize, player.state.y+gridSize+gridSize/2, 128,0, 2 * Math.PI);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore()
+}

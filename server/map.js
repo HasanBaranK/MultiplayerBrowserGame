@@ -171,7 +171,7 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
         let gridx = position.x
         let gridy = position.y
 
-        if (calculateDistance(gridx, gridy, player.x, player.y) <= range) {
+        if (calculateDistance(gridx, gridy, player.x+ gridSize, player.y+gridSize+gridSize/2) <= range) {
             console.log(player.x + "," + player.y)
             if (collisionMap[gridx][gridy] !== undefined) {
                 if (collisionMap[gridx][gridy] === true) {
@@ -218,8 +218,8 @@ function addBlock(player, map, collisionMap, gridSize, x, y, blockType, range, f
     let i = position.x
     let k = position.y
 
-
-    if (calculateDistance(i, y, player.x, player.y) <= range) {
+    let playerPosition = myGrid(player.x,player.y,gridSize)
+    if (calculateDistance(i, y, player.x+ gridSize, player.y+gridSize+gridSize/2) <= range) {
         blockType = blockType.split("_")[0];
         let blockName = blockType + "_block";
         let itemName = blockType + "_item";

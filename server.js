@@ -90,7 +90,7 @@ io.on('connection', function (socket) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
             let speed = 5//5
-            let jumpAmount = 4//5
+            let jumpAmount = 3//5
             let jumpSpeed = 5//5
             if (data.a || data.w || data.d || data.s) {
                 if (data.a) {
