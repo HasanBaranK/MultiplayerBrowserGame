@@ -26,7 +26,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
     let hills = []
     let trees = []
     if (amount > 20) {
-        let amountOfHills = Math.floor(Math.random() * Math.floor((size / 20)));
+        let amountOfHills = 0//Math.floor(Math.random() * Math.floor((size / 20)));
         console.log("Amount of Hills: " + amountOfHills)
         for (let i = 0; i < amountOfHills; i++) {
             let hill = {}
@@ -37,14 +37,12 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
             //randomize hills lenght
             hills.push(hill);
         }
-        // let amountOfTrees = Math.floor(Math.random() * Math.floor((size / 20)));
-        // console.log("Amount of Trees: " + amountOfTrees)
-        // for (let i = 0; i < amountOfHills; i++) {
-        //     let start = startX + Math.floor(Math.random() * amount);
-        //     trees.push(start)
-        //     //randomize hills lenght
-        //     hills.push(trees);
-        // }
+        let amountOfTrees = 2//Math.floor(Math.random() * Math.floor((size / 20)));
+        console.log("Amount of Trees: " + amountOfTrees)
+        for (let i = 0; i < amountOfTrees; i++) {
+            let start = startX + Math.floor(Math.random() * amount);
+            trees.push(start)
+        }
     }
 
     for (let i = startX; i < size; i++) {
@@ -106,25 +104,28 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
     }
     //tree generation
 
-    // for (let tree in trees) {
-    //     let x = trees[tree];
-    //     let size = 2 + Math.floor(Math.random() * 3);
-    //
-    //     let height = getHeight(x, collisionMap,gridSize,640)
-    //     console.log(height)
-    //     //console.log(height)
-    //     try {
-    //         let k = height
-    //         for (; k > height - size * gridSize; k -= gridSize) {
-    //             console.log("generated wood")
-    //             generateBlock(x * gridSize, k * gridSize, 100, blocks, "wood", collisionMap, fastMap)
-    //         }
-    //     } catch (e) {
-    //         //map not generated for that part yet
-    //     }
-    //
-    //
-    // }
+    for (let tree in trees) {
+        let x = trees[tree];
+        let size = 2 + Math.floor(Math.random() * 3);
+
+        let height = getHeight(x, collisionMap,gridSize,640)
+        console.log(height)
+        //console.log(height)
+        try {
+            let k = height
+            console.log(height-size *gridSize)
+            console.log(x)
+            for (; k > height - size * gridSize; k -= gridSize) {
+                console.log(k)
+                console.log("generated wood")
+                generateBlock(x*gridSize, k, 100, blocks, "wood", collisionMap, fastMap)
+            }
+        } catch (e) {
+            //map not generated for that part yet
+        }
+
+
+    }
 
     let maps = {
         map: blocks,
@@ -139,8 +140,8 @@ function getHeight(x, collisionMap,gridSize,start) {
     if (collisionMap[x * gridSize] !== undefined) {
         console.log(collisionMap[x * gridSize])
         let searched = Object.keys(collisionMap[x * gridSize]).length;
-
-        let result = start - searched.length * gridSize
+        console.log(searched)
+        let result = start - searched * gridSize
         return result
     }
 }
