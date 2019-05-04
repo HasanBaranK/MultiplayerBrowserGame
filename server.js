@@ -119,11 +119,12 @@ io.on('connection', function (socket) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
 
+            console.log(player.holding)
             let holding = player.holding[0]
             console.log(holding)
             if (holding !== undefined) {
-                console.log("hello I am working")
                 if (holding.type === "melee") {
+                    console.log("hello")
                     let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, holding)
                     if (peopleGotHit.length > 0) {
                         console.log(peopleGotHit)
@@ -146,14 +147,14 @@ io.on('connection', function (socket) {
     socket.on('rightclick', function (click) {
 
         let player = players[socket.id] || {};
-
+        console.log(player)
         if (player.isDead === false) {
             let holding = player.holding[0]
             console.log(holding)
             if (holding !== undefined) {
                 console.log("hello I am working")
                 if (holding.type === "block") {
-                    mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128)
+                    mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128,fastMap)
                 }
             }
 
@@ -166,7 +167,7 @@ io.on('connection', function (socket) {
         players[socket.id] = player
     });
     socket.on('map', function (player) {
-        let partialMap = mapFunctions.sendPartialMap(player.x,player.y,30,10,fastMap,32)
+        let partialMap = mapFunctions.sendPartialMap(player.x,player.y,30,30,fastMap,32)
         io.sockets.emit('map', partialMap);
     });
     socket.on('disconnect', function (some) {
