@@ -98,6 +98,15 @@ function game(){
         ctx.fillText(player, players[player].state.x, players[player].state.y);
       }
     }
+    let item  = players[socket.id].state.holding[0]
+    if(item){
+      ctx.font = "26px serif"
+      ctx.fillText('Holding: ' + item.name, currentTransform.x + 100, currentTransform.y + 100)
+    }
+    else{
+      ctx.font = "26px serif"
+      ctx.fillText('Holding: ' + 'Nothing', currentTransform.x + 100, currentTransform.y + 100)
+    }
     drawMap(map);
     drawItems(items);
     ctx.font = "bold 16px serif"
@@ -120,28 +129,4 @@ function game(){
     console.log(e);
     requestAnimationFrame(game)
   }
-}
-function whichGridIamOn(x, y, gridSize) {
-  console.log(x + "," + y)
-  ctx.save()
-  ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-
-  let gridx = x - (x % gridSize)
-  let gridy = y - (y % gridSize)
-
-  if (gridx < 0) {
-    gridx = gridx - gridSize
-  }
-  if (gridy < 0) {
-    gridy = gridy - gridSize
-  }
-
-  if (x < 0 && (0 - gridSize) < x) {
-    gridx = x - (x % gridSize) - gridSize
-  }
-  if (y < 0 && (0 - gridSize) < y) {
-    gridy = y - (y % gridSize) - gridSize
-  }
-  ctx.fillRect(gridx, gridy, gridSize, gridSize);
-  ctx.restore()
 }
