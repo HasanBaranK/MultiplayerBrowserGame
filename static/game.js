@@ -9,7 +9,6 @@ function drawItems(items){
     ctx.drawImage(images[items[item].name],items[item].x,items[item].y);
   }
 }
-let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 100}
 
 function determineAnimation(player){
   switch (player.state.status) {
@@ -29,6 +28,18 @@ function determineAnimation(player){
 
 function game(){
   try {
+    if(keys['ArrowLeft']){
+      currentCoords.x+=5
+    }
+    if(keys['ArrowRight']){
+      currentCoords.x-=5
+    }
+    if(keys['ArrowDown']){
+      currentCoords.y-=5
+    }
+    if(keys['ArrowUp']){
+      currentCoords.y+=5
+    }
     socket.emit('movement', keys)
     socket.emit('map', players[socket.id].state)
     if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
