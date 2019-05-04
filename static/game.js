@@ -30,6 +30,7 @@ function determineAnimation(player){
 function game(){
   try {
     socket.emit('movement', keys)
+    socket.emit('map', players[socket.id].state)
     if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
       let xDifference = (currentCoords.x - players[socket.id].state.x)
       let yDifference = (currentCoords.y - players[socket.id].state.y)
@@ -89,10 +90,13 @@ function game(){
     drawMap(map);
     drawItems(items);
     ctx.font = "bold 16px serif"
-    ctx.fillText('Health: '+ players[socket.id].state.health, currentTransform.x + 2, currentTransform.y + cvs.height - 20);
-    ctx.fillText('Energy: '+ players[socket.id].state.energy, currentTransform.x + 2, currentTransform.y + cvs.height - 40);
     buttons['inventory'].isClicked()
-    displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 132, currentTransform.y + cvs.height - 260 ,players[socket.id].state.inventory)
+    displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 32, currentTransform.y + cvs.height - 500 ,players[socket.id].state.inventory)
+    displays['healthbarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 40, 100)
+    displays['energybarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 20, 100)
+    displays['healthbar'].draw(ctx, currentTransform.x + 1, currentTransform.y + cvs.height - 40, players[socket.id].state.health)
+    displays['energybar'].draw(ctx, currentTransform.x + 1, currentTransform.y + cvs.height - 20, 100, players[socket.id].state.health)
+
     if(inInventory){
       displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
       buttons['inventoryopen'].draw(ctx,currentTransform.x,currentTransform.y)
@@ -102,6 +106,7 @@ function game(){
     }
     requestAnimationFrame(game)
   } catch (e) {
+    // console.log(e);
     requestAnimationFrame(game)
   }
 }

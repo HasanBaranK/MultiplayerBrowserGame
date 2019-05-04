@@ -80,6 +80,20 @@ class UIButton {
   }
 }
 
+class Bar {
+  constructor(name, x, y,img, width, height){
+    this.name = name
+    this.x = x
+    this.y = y
+    this.img = img
+    this.width = width || img.width
+    this.height = height || img.height
+  }
+  draw(ctx,ctX,ctY,width){
+    ctx.drawImage(this.img, this.x+ctX, this.y+ctY, (width / 100) * this.width, this.height)
+  }
+}
+
 let images = {}
 let promises = []
 function loadImagesThen(folders){
@@ -96,11 +110,15 @@ function loadImagesThen(folders){
     }
   }
   Promise.all(promises).then(() => {
+    console.log('Finished loading images');
     buttons['inventory'] = new UIButton('Inventory', 0, 0, images['inventory'], 32, 32)
     buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen'], 32, 32)
     displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 12,14,29)
-    displays['quickselect'] = new Inventory('Quickselect', images['quickselect_UI'], 100,100,0,0,1,5,32,12,3,17)
-    console.log('Finished loading images');
+    displays['quickselect'] = new Inventory('Quickselect', images['quickselect_UI'], 0,0,0,0,1,9,32,12,3,17)
+    displays['healthbarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
+    displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
+    displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
+    displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     socket.emit('new player')
     window.requestAnimationFrame(game)
   });
@@ -163,15 +181,18 @@ document.body.onload = () => {
     document.onkeydown = (key) => {
       if(key.key == 'i'){
         inInventory = !inInventory
+        return
       }
       if(key.key == 'Escape'){
         inInventory = false
+        return
       }
       if(!inInventory){
         if(key.key == ' ' && !players[socket.id].attacking){
           socket.emit('attack', null)
         }
         keys[key.key] = true
+        return
       }
       let item = key.key-1
       if(!isNaN(item)){
