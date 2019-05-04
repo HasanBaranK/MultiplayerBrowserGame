@@ -100,7 +100,6 @@ function game(){
     }
     drawMap(map);
     drawItems(items);
-    whichGridIamOn(mousePosition.x+currentTransform.x,mousePosition.y + currentTransform.y,32)
     ctx.font = "bold 16px serif"
     buttons['inventory'].isClicked()
     displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 32, currentTransform.y + cvs.height - 500 ,players[socket.id].state.inventory)

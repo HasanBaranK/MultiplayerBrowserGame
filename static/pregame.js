@@ -191,9 +191,10 @@ document.body.onload = () => {
       if(!inInventory){
         if(key.key == ' ' && !players[socket.id].attacking){
           socket.emit('attack', null)
+          keys[key.key] = true
+          return
         }
         keys[key.key] = true
-        return
       }
       let item = key.key-1
       if(!isNaN(item)){
