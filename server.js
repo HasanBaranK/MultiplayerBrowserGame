@@ -89,24 +89,27 @@ io.on('connection', function (socket) {
     socket.on('movement', function (data) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
+            let speed = 5//5
+            let jumpAmount = 4//5
+            let jumpSpeed = 5//5
             if (data.a || data.w || data.d || data.s) {
                 if (data.a) {
-                    collisionFunctions.move("left", player, gridSize, collisionMap)
+                    collisionFunctions.move("left", player, gridSize, collisionMap,speed)
                 }
                 if (data.w) {
                     if (player.onair === false) {
                         player.y -= 4;
                         player.status = 1;
-                        collisionFunctions.jump(player, 50, collisionMap, gridSize);
+                        collisionFunctions.jump(player, 50, collisionMap, gridSize,jumpAmount,jumpSpeed);//5,3
                         player.onair = true;
                     }
 
                 }
                 if (data.d) {
-                    collisionFunctions.move("right", player, gridSize, collisionMap)
+                    collisionFunctions.move("right", player, gridSize, collisionMap,speed)
                 }
                 if (data.s) {
-                    collisionFunctions.move("down", player, gridSize, collisionMap)
+                    collisionFunctions.move("down", player, gridSize, collisionMap,speed)
                 }
             } else {
                 player.status = 0;
@@ -176,10 +179,10 @@ io.on('connection', function (socket) {
 
 
 setInterval(function () {
-    collisionFunctions.gravity(players, gridSize, collisionMap, projectiles);
+    collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,3);
 
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
-    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,64,200,collisionMap,fastMap)
+    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap)
     rightEdge= edges.rightEdge
     leftEdge = edges.leftEdge
     io.sockets.in('players').emit('state', players);

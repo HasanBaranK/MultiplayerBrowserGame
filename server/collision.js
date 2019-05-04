@@ -11,14 +11,14 @@ module.exports={
     move
 }
 
-async function jump(player, amount,collisionMap,gridSize) {
+async function jump(player, amount,collisionMap,gridSize,jumpAmount,speed) {
     for (let i = 0; i < amount ; i++) {
-        player.y -= 3
+        player.y -= jumpAmount
         if(checkCollision(player,player.sizex,player.sizey,gridSize,collisionMap)){
-            player.y += 3
+            player.y += jumpAmount
             break;
         }
-        await sleep(5);
+        await sleep(speed);
     }
     function sleep(ms){
         return new Promise(resolve=>{
@@ -26,27 +26,27 @@ async function jump(player, amount,collisionMap,gridSize) {
         })
     }
 }
-function move(direction,player,gridSize,collisionMap){
+function move(direction,player,gridSize,collisionMap,speed){
     if(direction === "left") {
-        player.x -= 5;
+        player.x -= speed;
         player.status = 2;
         player.facing = "left"
         if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
             player.x += 5;
         }
     }if(direction === "right"){
-        player.x += 5;
+        player.x += speed;
         player.status = 4;
         player.facing = "right"
         if (checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
-            player.x -= 5;
+            player.x -= speed;
 
         }
     }if(direction === "down"){
-        player.y += 5;
+        player.y += speed;
         player.status = 3;
         if (checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
-            player.y -= 5;
+            player.y -= speed;
         }
     }
 }
@@ -322,15 +322,15 @@ function checkPlayerCloseToItems(players,items,gridSize,collisionMap) {
     }
 }
 
-function gravity(players,gridSize,collisionMap,projectiles) {
+function gravity(players,gridSize,collisionMap,projectiles,playerGravity) {
     for (let player in players) {
 
         let currentPlayer = players[player];
-        currentPlayer.y += 3;
+        currentPlayer.y += playerGravity;
         currentPlayer.onair = true;
         if (checkCollision(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, gridSize,collisionMap)) {
             //console.log(collisionMap);
-            currentPlayer.y -= 3;
+            currentPlayer.y -= playerGravity;
             currentPlayer.onair = false;
             // console.log("In land");
         }

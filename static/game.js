@@ -1,6 +1,11 @@
 function drawMap(map) {
   for(let block in map){
-    ctx.drawImage(images[map[block].type],map[block].x,map[block].y);
+    try {
+      ctx.drawImage(images[map[block].type], map[block].x, map[block].y);
+    }catch (e) {
+      console.log(e)
+      console.log(map[block])
+    }
   }
 }
 
