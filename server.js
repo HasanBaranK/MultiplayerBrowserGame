@@ -83,7 +83,7 @@ io.on('connection', function (socket) {
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 50, 50, 0, 0, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
-        players[socket.id].holding.push(players[socket.id].inventory[0]);
+        [socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
     });
     socket.on('movement', function (data) {
@@ -185,4 +185,3 @@ setInterval(function () {
     io.sockets.in('players').emit('state', players);
     io.sockets.in('players').emit('items', items);
 }, 1000 / 60);
-

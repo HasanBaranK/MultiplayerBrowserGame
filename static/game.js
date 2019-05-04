@@ -100,6 +100,8 @@ function game(){
       }
     }
     let item  = players[socket.id].state.holding[0]
+    drawMap(map);
+    drawItems(items);
     if(item){
       ctx.font = "26px serif"
       ctx.fillStyle = 'white'
@@ -110,9 +112,9 @@ function game(){
       ctx.fillStyle = 'white'
       ctx.fillText('Holding: ' + 'Nothing', currentTransform.x + 100, currentTransform.y + 100)
     }
-    drawMap(map);
-    drawItems(items);
+
     ctx.font = "bold 16px serif"
+    
     buttons['inventory'].isClicked()
     displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 32, currentTransform.y + cvs.height - 500 ,players[socket.id].state.inventory)
     displays['healthbarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 40, 100)

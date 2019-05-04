@@ -9,11 +9,12 @@ let players = {}
 let map;
 let items;
 let currentTransform = {x:0,y:0}
+let itemHoldingIndex = 0
 
 cvs = document.getElementById('canvas')
 ctx = cvs.getContext('2d')
-cvs.width  = 1280;
-cvs.height = 700;
+cvs.width  = 1340;
+cvs.height = 740;
 cvs.style.border = 'solid black 1px'
 let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 100}
 
@@ -52,6 +53,48 @@ class Inventory{
       ctx.fillStyle = 'white'
       ctx.fillText(inventory[item].amount, xOfItem + this.textOffsetX, yOfItem + this.textOffsetY)
       ctx.restore()
+    }
+  }
+  check(){
+
+  }
+}
+
+class QuickSelect{
+  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset,textOffsetX,textOffsetY){
+    this.name = name
+    this.img = img
+    this.x = x
+    this.y = y
+    this.xOffset = xOffset
+    this.yOffset = yOffset
+    this.columnCount = columnCount
+    this.rowCount = rowCount
+    this.gridSize = gridSize
+    this.currentRow = 0
+    this.actualSizeOffset = actualSizeOffset
+    this.textOffsetX = textOffsetX
+    this.textOffsetY = textOffsetY
+  }
+  draw(ctx,ctX,ctY,inventory){
+    ctx.drawImage(this.img,this.x+ctX, this.y+ctY)
+    for(this.currentRow = 0; this.currentRow < 9; this.currentRow++){
+      let itemCurrent = inventory[this.currentRow]
+      let xOfItem = (this.x+ctX)+((this.currentRow%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + (this.actualSizeOffset/2)
+      let yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
+      if(itemCurrent){
+        ctx.drawImage(images[inventory[this.currentRow].name],xOfItem,yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
+        ctx.save()
+        ctx.font = '16px '
+        ctx.fillStyle = 'white'
+        ctx.fillText(inventory[this.currentRow].amount, xOfItem + this.textOffsetX, yOfItem + this.textOffsetY)
+        ctx.restore()
+      }
+      if(this.currentRow == itemHoldingIndex){
+        ctx.fillStyle = 'rgba(250,0,0,0.2)'
+        ctx.fillRect(xOfItem - 5, yOfItem - 5, this.gridSize, this.gridSize)
+        ctx.restore()
+      }
     }
   }
 }
@@ -116,7 +159,7 @@ function loadImagesThen(folders){
     buttons['inventory'] = new UIButton('Inventory', 0, 0, images['inventory'], 32, 32)
     buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen'], 32, 32)
     displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 12,14,29)
-    displays['quickselect'] = new Inventory('Quickselect', images['quickselect_UI'], 0,0,0,0,1,9,32,12,3,17)
+    displays['quickselect'] = new QuickSelect('Quickselect', images['quickselect_UI'], 0,0,0,0,1,9,32,12,2,17)
     displays['healthbarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
@@ -204,6 +247,7 @@ document.body.onload = () => {
       }
       let item = key.key-1
       if(!isNaN(item)){
+        itemHoldingIndex = item
         players[socket.id].state.holding = [players[socket.id].state.inventory[item]]
         socket.emit('holding', players[socket.id].state)
         console.log('sent');
@@ -233,6 +277,24 @@ document.body.onload = () => {
     cvs.addEventListener('mousemove', function(event) {
      mousePosition.x = event.offsetX || event.layerX;
      mousePosition.y = event.offsetY || event.layerY;
+    });
+
+    cvs.addEventListener('wheel', function(event) {
+      if(event.deltaY > 0){
+        itemHoldingIndex++
+        if(itemHoldingIndex > 8){
+          itemHoldingIndex = 0
+        }
+      }
+      else{
+        itemHoldingIndex--
+        if(itemHoldingIndex < 0){
+          itemHoldingIndex = 8
+        }
+      }
+      players[socket.id].state.holding = [players[socket.id].state.inventory[itemHoldingIndex]]
+      socket.emit('holding', players[socket.id].state)
+      console.log('sent');
     });
 
     socket.emit('getimages')
