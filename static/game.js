@@ -118,7 +118,7 @@ function game(){
     }
     requestAnimationFrame(game)
   } catch (e) {
-    // console.log(e);
+    console.log(e);
     requestAnimationFrame(game)
   }
 }
