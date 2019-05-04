@@ -190,8 +190,13 @@ document.body.onload = () => {
       }
       if(!inInventory){
         if(key.key == ' ' && !players[socket.id].attacking){
-          socket.emit('attack', null)
-          keys[key.key] = true
+          let holding = players[socket.id].state.holding[0]
+          if(holding){
+            if(holding.type == 'melee'){
+              socket.emit('attack', null)
+              keys[key.key] = true
+            }
+          }
           return
         }
         keys[key.key] = true
