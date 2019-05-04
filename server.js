@@ -22,24 +22,30 @@ let mapFunctions = require("./server/map");
 let collisionFunctions = require("./server/collision");
 let attackFunctions = require("./server/Player/attack");
 let itemFunctions = require("./server/Player/items");
+let inventoryFunctions = require("./server/Player/inventory");
 
 const imageFolder = './static/images';
 
 var players = {};
 var collisionMap = {};
+var fastMap = {};
 let items = [];
 let projectiles = [];
 let map;
 let mapChanged = false;
 let images = {};
 images = getImages(images)
-let maps = mapFunctions.autoMapGenerator(0, 70, gridSize, collisionMap);
+let maps = mapFunctions.autoMapGenerator(0, 70, gridSize, collisionMap,fastMap);
 map = maps.map;
 collisionMap = maps.collisionMap;
+fastMap = maps.fastMap;
 itemFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+console.log("start")
+console.log(mapFunctions.sendPartialMap(320,287,320,320,fastMap,32))
+console.log("start")
 
 function getImages(images) {
     fs.readdir(imageFolder, (err, files) => {
@@ -72,15 +78,15 @@ io.on('connection', function (socket) {
         };
         io.sockets.emit('map', map);
         io.sockets.emit('mapCollision', collisionMap);
+        let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 50, 50, 0, 0, items, 1)
+        inventoryFunctions.addItemInventory(players[socket.id], sword, items)
     });
     socket.on('movement', function (data) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
             if (data.a || data.w || data.d || data.s) {
                 if (data.a) {
-
                     collisionFunctions.move("left", player, gridSize, collisionMap)
-
                 }
                 if (data.w) {
                     if (player.onair === false) {
@@ -111,14 +117,22 @@ io.on('connection', function (socket) {
     socket.on('stopattack', function (evt) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
-            console.log("Socket id:" + socket.id)
-            let sword = itemFunctions.generateItem(player.x, player.y, "sword_item", "melee", 50, 50, 0, 0, items, 1)
-            let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, sword)
-            if (peopleGotHit.length > 0) {
-                console.log(peopleGotHit)
-                io.sockets.emit('peoplegothit', peopleGotHit);
+
+            let holding = player.holding[0]
+            console.log(holding)
+            if (holding !== undefined) {
+                console.log("hello I am working")
+                if (holding.type === "melee") {
+                    let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, holding)
+                    if (peopleGotHit.length > 0) {
+                        console.log(peopleGotHit)
+                        io.sockets.emit('peoplegothit', peopleGotHit);
+                    }
+                    player.attacking = false
+                }
             }
-            player.attacking = false
+
+
         }
     });
     socket.on('leftclick', function (click) {
@@ -135,7 +149,7 @@ io.on('connection', function (socket) {
         if (player.isDead === false) {
             let holding = player.holding[0]
             console.log(holding)
-            if(holding !== undefined) {
+            if (holding !== undefined) {
                 console.log("hello I am working")
                 if (holding.type === "block") {
                     mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128)
@@ -161,6 +175,7 @@ io.on('connection', function (socket) {
 setInterval(function () {
     collisionFunctions.gravity(players, gridSize, collisionMap, projectiles);
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
+
     io.sockets.emit('state', players);
     io.sockets.emit('items', items);
     if (mapChanged) {
