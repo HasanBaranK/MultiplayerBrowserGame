@@ -52,6 +52,7 @@ function game(){
       currentCoords.y = players[socket.id].state.y
     }
     ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
+    ctx.drawImage(images['8-bit-background-1'], currentTransform.x, currentTransform.y - 500, cvs.width + 300, cvs.height + 500)
     for(let player in players){
       if(players[player].state.isDead){
         players[player].drawFinal(ctx, 'dieR')
@@ -101,10 +102,12 @@ function game(){
     let item  = players[socket.id].state.holding[0]
     if(item){
       ctx.font = "26px serif"
+      ctx.fillStyle = 'white'
       ctx.fillText('Holding: ' + item.name, currentTransform.x + 100, currentTransform.y + 100)
     }
     else{
       ctx.font = "26px serif"
+      ctx.fillStyle = 'white'
       ctx.fillText('Holding: ' + 'Nothing', currentTransform.x + 100, currentTransform.y + 100)
     }
     drawMap(map);

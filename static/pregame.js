@@ -111,6 +111,7 @@ function loadImagesThen(folders){
     }
   }
   Promise.all(promises).then(() => {
+    console.log(images['8-bit-background-1']);
     console.log('Finished loading images');
     buttons['inventory'] = new UIButton('Inventory', 0, 0, images['inventory'], 32, 32)
     buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen'], 32, 32)
