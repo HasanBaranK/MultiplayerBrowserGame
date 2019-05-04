@@ -152,7 +152,7 @@ function deleteBlock(gridx,gridy,block,map,collisionMap,fastMap) {
     fastMap[gridx][gridy] = undefined;
 }
 
-function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
+function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range,fastMap) {
 
     let position = myGrid(x,y,gridSize)
 
@@ -165,7 +165,7 @@ function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
         let blockName = blockType + "_block";
         let itemName = blockType + "_item";
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
-            generateBlock(i,k,100,map,blockType,collisionMap)
+            generateBlock(i,k,100,map,blockType,collisionMap,fastMap)
             deleteItemInventory(player, itemName)
         }
         return true;
@@ -191,6 +191,9 @@ function generateBlock(x,y,health,map,blockName,collisionMap,fastMap){
     block["type"] = blockName;
     block["health"] = 100;
     map.push(block);
+    if(fastMap[x] == undefined){
+        fastMap[x] = {}
+    }
     fastMap[x][y] = block;
 
 }
