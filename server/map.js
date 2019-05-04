@@ -102,7 +102,7 @@ function autoMapGenerator(startX, amount, gridSize,collisionMap,fastMap) {
     return maps;
 }
 
-function mineBlock(player,x,y,gridSize,collisionMap,map,items,range) {
+function mineBlock(player,x,y,gridSize,collisionMap,map,items,range,fastMap) {
 
     try {
         let position = myGrid(x,y,gridSize)
@@ -123,8 +123,7 @@ function mineBlock(player,x,y,gridSize,collisionMap,map,items,range) {
                             blockType = blockType.substr(0,blockType.length-1)
                             let itemName = blockType + "0_item";
                             console.log(itemName)
-                            map.splice(block, 1);
-                            collisionMap[gridx][gridy] = false;
+                            deleteBlock(gridx,gridy,block,map,collisionMap,fastMap)
                             generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
                             console.log("deleting: " + gridx + "," + gridy)
                             console.log("destroyed");
@@ -146,6 +145,11 @@ function mineBlock(player,x,y,gridSize,collisionMap,map,items,range) {
         console.log("error")
         return false;
     }
+}
+function deleteBlock(gridx,gridy,block,map,collisionMap,fastMap) {
+    map.splice(block, 1);
+    collisionMap[gridx][gridy] = false;
+    fastMap[gridx][gridy] = undefined;
 }
 
 function addBlock(player,map,collisionMap,gridSize,x,y,blockType,range) {
@@ -221,31 +225,23 @@ function sendPartialMap(x,y,halfsizex,halfsizey,map,gridSize) {
 
     //console.log(map)
 
-    let startx = position.x - halfsizex
-    let endx = position.x + halfsizex
+    let startx = position.x - (halfsizex* gridSize)
+    let endx = position.x + (halfsizex* gridSize)
 
-    let starty = position.y - halfsizey
-    let endy = position.y + halfsizey
+    let starty = position.y - (halfsizey * gridSize)
+    let endy = position.y + (halfsizey* gridSize)
 
-    console.log(map)
-    console.log(position)
+    for (let i = startx;i< endx;){
 
-    for (;startx < endx;startx += gridSize){
-
-        console.log(startx)
-        if(map[startx] !== undefined) {
-            console.log(map[startx])
-            for (; starty < endy; starty += gridSize) {
-
-                if (map[startx][starty] !== undefined) {
-                    console.log(map[startx][starty])
-                    partialMap.push(map[startx][starty])
+        if(map[i] !== undefined) {
+            for (let k = starty; k < endy;) {
+                if(map[i][k] !== undefined){
+                    partialMap.push(map[i][k])
                 }
+                k = k + gridSize
             }
         }
+        i = i + gridSize
     }
-    console.log(partialMap)
-
     return partialMap
-
 }

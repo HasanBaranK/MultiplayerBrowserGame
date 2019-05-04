@@ -44,7 +44,7 @@ itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0,
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 console.log("start")
-console.log(mapFunctions.sendPartialMap(320,287,320,320,fastMap,32))
+console.log()
 console.log("start")
 
 function getImages(images) {
@@ -80,6 +80,7 @@ io.on('connection', function (socket) {
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 50, 50, 0, 0, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
+        socket.join('players');
     });
     socket.on('movement', function (data) {
         let player = players[socket.id] || {};
@@ -139,7 +140,7 @@ io.on('connection', function (socket) {
 
         let player = players[socket.id] || {};
         if (player.isDead === false) {
-            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128)
+            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128,fastMap)
         }
     });
     socket.on('rightclick', function (click) {
@@ -164,7 +165,10 @@ io.on('connection', function (socket) {
     socket.on('holding', function (player) {
         players[socket.id] = player
     });
-
+    socket.on('map', function (player) {
+        let partialMap = mapFunctions.sendPartialMap(player.x,player.y,30,10,fastMap,32)
+        io.sockets.emit('map', partialMap);
+    });
     socket.on('disconnect', function (some) {
         console.log('Player ' + socket.id + ' has disconnected.');
         players[socket.id] = 0
@@ -175,11 +179,6 @@ io.on('connection', function (socket) {
 setInterval(function () {
     collisionFunctions.gravity(players, gridSize, collisionMap, projectiles);
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
-
-    io.sockets.emit('state', players);
-    io.sockets.emit('items', items);
-    if (mapChanged) {
-        io.sockets.emit('map', map);
-        mapChanged = false
-    }
+    io.sockets.in('players').emit('state', players);
+    io.sockets.in('players').emit('items', items);
 }, 1000 / 60);
