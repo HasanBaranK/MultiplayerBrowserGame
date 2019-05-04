@@ -35,7 +35,12 @@ let map;
 let mapChanged = false;
 let images = {};
 images = getImages(images)
-let maps = mapFunctions.autoMapGenerator(0, 70, gridSize, collisionMap,fastMap);
+
+let leftEdge = 0;
+let rightEdge = 70;
+
+
+let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
 map = maps.map;
 collisionMap = maps.collisionMap;
 fastMap = maps.fastMap;
@@ -43,9 +48,7 @@ itemFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0, 0, 0,
 itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
-console.log("start")
-console.log()
-console.log("start")
+
 
 function getImages(images) {
     fs.readdir(imageFolder, (err, files) => {
@@ -80,7 +83,7 @@ io.on('connection', function (socket) {
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 50, 50, 0, 0, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
-        players[socket.id].holding = [players[socket.id].inventory[0]]
+        [socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
     });
     socket.on('movement', function (data) {
@@ -119,16 +122,11 @@ io.on('connection', function (socket) {
     socket.on('stopattack', function (evt) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
-
-            console.log(player.holding)
             let holding = player.holding[0]
-            console.log(holding)
-            if (holding !== undefined) {
+            if (holding !== undefined && holding !== null) {
                 if (holding.type === "melee") {
-                    console.log("hello")
                     let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, holding)
                     if (peopleGotHit.length > 0) {
-                        console.log(peopleGotHit)
                         io.sockets.emit('peoplegothit', peopleGotHit);
                     }
                     player.attacking = false
@@ -142,20 +140,19 @@ io.on('connection', function (socket) {
 
         let player = players[socket.id] || {};
         if (player.isDead === false) {
-            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128,fastMap)
+            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap)
         }
     });
     socket.on('rightclick', function (click) {
 
         let player = players[socket.id] || {};
-        console.log(player)
         if (player.isDead === false) {
             let holding = player.holding[0]
-            console.log(holding)
             if (holding !== undefined) {
-                console.log("hello I am working")
-                if (holding.type === "block") {
-                    mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128,fastMap)
+                if (holding !== null) {
+                    if (holding.type === "block") {
+                        mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
+                    }
                 }
             }
 
@@ -168,8 +165,8 @@ io.on('connection', function (socket) {
         players[socket.id] = player
     });
     socket.on('map', function (player) {
-        let partialMap = mapFunctions.sendPartialMap(player.x,player.y,30,30,fastMap,32)
-        io.sockets.emit('map', partialMap);
+        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 30, fastMap, 32)
+        socket.emit('map', partialMap);
     });
     socket.on('disconnect', function (some) {
         console.log('Player ' + socket.id + ' has disconnected.');
@@ -180,7 +177,11 @@ io.on('connection', function (socket) {
 
 setInterval(function () {
     collisionFunctions.gravity(players, gridSize, collisionMap, projectiles);
+
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
+    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,64,200,collisionMap,fastMap)
+    rightEdge= edges.rightEdge
+    leftEdge = edges.leftEdge
     io.sockets.in('players').emit('state', players);
     io.sockets.in('players').emit('items', items);
 }, 1000 / 60);
