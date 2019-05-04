@@ -15,6 +15,7 @@ ctx = cvs.getContext('2d')
 cvs.width  = 1280;
 cvs.height = 700;
 cvs.style.border = 'solid black 1px'
+let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 100}
 
 $('body').on('contextmenu', '#canvas', function (e) {
   return false;
