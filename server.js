@@ -23,6 +23,8 @@ let collisionFunctions = require("./server/collision");
 let attackFunctions = require("./server/Player/attack");
 let itemFunctions = require("./server/Player/items");
 let inventoryFunctions = require("./server/Player/inventory");
+let timeFunctions = require("./server/time.js");
+let messageFunctions = require("./server/message.js");
 
 const imageFolder = './static/images';
 
@@ -32,6 +34,8 @@ var fastMap = {};
 let items = [];
 let projectiles = [];
 let map;
+let gameTime = 0;
+let day = 0;
 let mapChanged = false;
 let images = {};
 images = getImages(images)
@@ -145,6 +149,7 @@ io.on('connection', function (socket) {
         if (player.isDead === false) {
             mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap)
         }
+        console.log(getGameTime(gameTime))
     });
     socket.on('rightclick', function (click) {
 
@@ -163,6 +168,13 @@ io.on('connection', function (socket) {
     });
     socket.on('getimages', function (click) {
         socket.emit('images', images);
+    });
+    socket.on('gameTime', function (click) {
+        socket.emit('images', timeFunctions.getGameTime(gameTime));
+    });
+    socket.on('generalMessage', function (message) {
+        message.sender = socket.id
+        io.sockets.in('players').emit('generalMessage', message);
     });
     socket.on('holding', function (player) {
         players[socket.id] = player
@@ -187,4 +199,8 @@ setInterval(function () {
     leftEdge = edges.leftEdge
     io.sockets.in('players').emit('state', players);
     io.sockets.in('players').emit('items', items);
+    gameTime = timeFunctions.updateGameTime(gameTime,1)
 }, 1000 / 60);
+
+
+

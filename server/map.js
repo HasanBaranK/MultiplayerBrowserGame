@@ -61,9 +61,11 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
         generateBlock(i * gridSize, k * gridSize, 100, blocks, "stone", collisionMap, fastMap)
         k--;
 
-        for (; k > minHeight; k--) {
+        for (; k > minHeight+1; k--) {
             generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt", collisionMap, fastMap)
         }
+        generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt10", collisionMap, fastMap)
+
     }
 
     //hill generation
@@ -80,7 +82,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
         for (let i = start; i < middle; i++) {
             let noise = Math.floor(Math.random() * 3)
             try {
-                let k = minHeight
+                let k = minHeight +1
                 for (; k > lastY + 1; k--) {
                     generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt", collisionMap, fastMap)
                 }
@@ -95,7 +97,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
         for (let i = middle; i < end; i++) {
             let noise = Math.floor(Math.random() * 3)
             try {
-                let k = minHeight
+                let k = minHeight +1
                 for (; k > lastY + 2; k--) {
                     generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt", collisionMap, fastMap)
                 }
@@ -244,11 +246,13 @@ function generateBlock(x, y, health, map, blockName, collisionMap, fastMap,playe
     if(playerAdded === true){
         collisionMap[x][y] = true;
     }
-
-    blockName = blockName.replace("0", "");
-    blockName = blockName + "" + random;
-    blockName = blockName + "_block"
-
+    if(blockName === "dirt10"){
+        blockName = blockName + "_block"
+    }else {
+        blockName = blockName.replace("0", "");
+        blockName = blockName + "" + random;
+        blockName = blockName + "_block"
+    }
     let block = {};
 
 
