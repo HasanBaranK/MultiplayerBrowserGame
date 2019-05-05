@@ -10,13 +10,14 @@ let map;
 let items;
 let currentTransform = {x:0,y:0}
 let itemHoldingIndex = 0
+let background = null
 
 cvs = document.getElementById('canvas')
 ctx = cvs.getContext('2d')
-cvs.width  = 1340;
-cvs.height = 740;
+cvs.width  = 32*42;
+cvs.height = 32*22;
 cvs.style.border = 'solid black 1px'
-let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 100}
+let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 64}
 
 $('body').on('contextmenu', '#canvas', function (e) {
   return false;
@@ -110,6 +111,7 @@ class UIButton {
   }
   isHovered(){
     if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
+      ctx.fillRect(currentTransform.x, currentTransform.y, 100, 100)
       return true
     }
   }
@@ -154,7 +156,6 @@ function loadImagesThen(folders){
     }
   }
   Promise.all(promises).then(() => {
-    console.log(images['8-bit-background-1']);
     console.log('Finished loading images');
     buttons['inventory'] = new UIButton('Inventory', 0, 0, images['inventory'], 32, 32)
     buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen'], 32, 32)
@@ -164,6 +165,7 @@ function loadImagesThen(folders){
     displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
+    background = new Animation(images['background'], 0, 103, 0, 1200, 675, cvs.width, cvs.height, 500)
     socket.emit('new player')
     window.requestAnimationFrame(game)
   });
@@ -268,6 +270,7 @@ document.body.onload = () => {
           socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
         }
       }
+      buttons['inventory'].isClicked()
     });
 
     cvs.addEventListener('mouseup', function(event) {

@@ -57,7 +57,8 @@ function game(){
       currentCoords.y = players[socket.id].state.y
     }
     ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
-    ctx.drawImage(images['8-bit-background-1'], currentTransform.x, currentTransform.y - 500, cvs.width + 300, cvs.height + 500)
+    background.draw(ctx, currentTransform.x, currentTransform.y)
+    // ctx.drawImage(images['8-bit-background-1'], currentTransform.x, currentTransform.y - 500, cvs.width + 300, cvs.height + 500)
     for(let player in players){
       if(players[player].state.isDead){
         players[player].drawFinal(ctx, 'dieR')
@@ -119,14 +120,13 @@ function game(){
     }
 
     ctx.font = "bold 16px serif"
-    
-    buttons['inventory'].isClicked()
+
     displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 32, currentTransform.y + cvs.height - 500 ,players[socket.id].state.inventory)
     displays['healthbarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 40, 100)
     displays['energybarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 20, 100)
     displays['healthbar'].draw(ctx, currentTransform.x + 1, currentTransform.y + cvs.height - 40, players[socket.id].state.health)
     displays['energybar'].draw(ctx, currentTransform.x + 1, currentTransform.y + cvs.height - 20, 100, players[socket.id].state.health)
-
+    buttons['inventoryopen'].isHovered()
     if(inInventory){
       displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
       buttons['inventoryopen'].draw(ctx,currentTransform.x,currentTransform.y)
