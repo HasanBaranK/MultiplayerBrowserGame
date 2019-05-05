@@ -173,8 +173,8 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
 
         if (calculateDistance(gridx, gridy, player.x+ gridSize, player.y+gridSize+gridSize/2) <= range) {
             console.log(player.x + "," + player.y)
-            if (collisionMap[gridx][gridy] !== undefined) {
-                if (collisionMap[gridx][gridy] === true) {
+            if (fastMap[gridx][gridy] !== undefined) {
+
                     console.log("found")
 
                     let block = fastMap[gridx][gridy];
@@ -187,12 +187,6 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
                         generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
                         return true
                     }
-
-
-                } else {
-                    console.log("already false")
-                    return false
-                }
             } else {
                 console.log("undefined")
                 return false
@@ -207,7 +201,9 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
 
 function deleteBlock(gridx, gridy, block, map, collisionMap, fastMap) {
     map.splice(map.indexOf(block), 1);
-    collisionMap[gridx][gridy] = false;
+    if(collisionMap[gridx][gridy] !== undefined ) {
+        collisionMap[gridx][gridy] = false;
+    }
     fastMap[gridx][gridy] = undefined;
 }
 
@@ -218,14 +214,14 @@ function addBlock(player, map, collisionMap, gridSize, x, y, blockType, range, f
     let i = position.x
     let k = position.y
 
-    let playerPosition = myGrid(player.x,player.y,gridSize)
+    //let playerPosition = myGrid(player.x,player.y,gridSize)
     if (calculateDistance(i, y, player.x+ gridSize, player.y+gridSize+gridSize/2) <= range) {
         blockType = blockType.split("_")[0];
         let blockName = blockType + "_block";
         let itemName = blockType + "_item";
         blockType = blockType.substr(0,blockType.length-1)
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
-            generateBlock(i, k, 100, map, blockType, collisionMap, fastMap)
+            generateBlock(i, k, 100, map, blockType, collisionMap, fastMap,true)
             deleteItemInventory(player, itemName)
         }
         return true;
@@ -237,10 +233,16 @@ function calculateDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
 }
 
-function generateBlock(x, y, health, map, blockName, collisionMap, fastMap) {
+function generateBlock(x, y, health, map, blockName, collisionMap, fastMap,playerAdded) {
     let random = Math.floor(Math.random() * 9)
+
     if (blockName === "wood" || blockName === "leaves") {
         random = 0
+    }else {
+        collisionMap[x][y] = true;
+    }
+    if(playerAdded === true){
+        collisionMap[x][y] = true;
     }
 
     blockName = blockName.replace("0", "");
@@ -248,7 +250,7 @@ function generateBlock(x, y, health, map, blockName, collisionMap, fastMap) {
     blockName = blockName + "_block"
 
     let block = {};
-    collisionMap[x][y] = true;
+
 
     block["x"] = x;
     block["y"] = y;

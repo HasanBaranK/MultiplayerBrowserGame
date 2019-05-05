@@ -168,7 +168,7 @@ io.on('connection', function (socket) {
         players[socket.id] = player
     });
     socket.on('map', function (player) {
-        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 30, fastMap, 32)
+        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
         socket.emit('map', partialMap);
     });
     socket.on('disconnect', function (some) {
