@@ -166,7 +166,7 @@ function getHeight(x, collisionMap,gridSize,start) {
         return result
     }
 }
-function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fastMap) {
+function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fastMap,damage) {
 
     try {
         let position = myGrid(x, y, gridSize)
@@ -182,12 +182,25 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
                     let block = fastMap[gridx][gridy];
                     if (block !== undefined && block !== null) {
                         let blockType = block.type
-                        blockType = blockType.split("_")[0];
-                        blockType = blockType.substr(0, blockType.length - 1)
-                        let itemName = blockType + "0_item";
-                        deleteBlock(gridx, gridy, block, map, collisionMap, fastMap)
-                        generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
-                        return true
+
+                        block.health = block.health - damage
+                        if(block.health <= 0) {
+                            blockType = blockType.split("_")[0];
+                            blockType = blockType.substr(0, blockType.length - 1)
+                            let itemName = blockType + "0_item";
+                            if(blockType === "dirt1"){
+                                itemName = "dirt0_item"
+                            }
+
+
+                            deleteBlock(gridx, gridy, block, map, collisionMap, fastMap)
+                            generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
+                            return true
+                        }else {
+                            fastMap[gridx][gridy] = block;
+                            map[map.indexOf(block)] = block
+
+                        }
                     }
             } else {
                 console.log("undefined")
