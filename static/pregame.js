@@ -8,6 +8,7 @@ let keys = {}
 let players = {}
 let map;
 let items;
+let projectiles;
 let currentTransform = {x:0,y:0}
 let itemHoldingIndex = 0
 let background = null
@@ -213,6 +214,10 @@ document.body.onload = () => {
 
     socket.on('items', (itemsServer) => {
       items = itemsServer
+    });
+
+    socket.on('projectiles', (projectilesServer) => {
+      projectiles = projectilesServer
     });
 
     socket.on('peoplegothit', (peoplewhogothit) => {
