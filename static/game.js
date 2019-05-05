@@ -20,7 +20,11 @@ function drawItems(items){
     ctx.drawImage(images[items[item].name],items[item].x,items[item].y);
   }
 }
-
+function drawProjectiles(projectiles){
+  for(let projectile in projectiles){
+    ctx.drawImage(images[projectiles[projectile].name],projectiles[projectile].x,projectiles[projectile].y);
+  }
+}
 function determineAnimation(player){
   switch (player.state.status) {
     case 0: if(player.facing == 'right'){player.draw(ctx, 'idleR')}else{player.draw(ctx, 'idleL')}
@@ -120,6 +124,7 @@ function game(){
     let item  = players[socket.id].state.holding[0]
     drawMap(map);
     drawItems(items);
+    drawProjectiles(projectiles)
     if(item){
       ctx.font = "26px serif"
       ctx.fillStyle = 'white'

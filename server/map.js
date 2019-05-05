@@ -16,7 +16,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
     //Rules
     //world has max 2000 depth mountains and and min 500 depth flat land
     //blocks should be connected and should not defy the laws of gravity(no fling blocks)
-    //no extreme changes (a tower of 2000 in an instant should not be possible)
+    //no extreme changes (a tower of 2000 in an instant should notdw be possible)
     let minHeight = 10;
     let blocks = [];
     let size = startX + amount;
@@ -26,18 +26,20 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
     let hills = []
     let trees = []
     if (amount > 20) {
-        let amountOfHills = Math.floor(Math.random() * Math.floor((size / 15))) + 1;
+        let amountOfHills = Math.floor(Math.random() * Math.floor((amount / 15))) + 1;
         console.log("Amount of Hills: " + amountOfHills)
         for (let i = 0; i < amountOfHills; i++) {
             let hill = {}
-            let start = startX + Math.floor(Math.random() * amount);
-            let end = start + Math.floor(Math.random() * (amount - start));
+            let widthOfHill = Math.floor(Math.random() * amount);
+            let start = startX + widthOfHill
+            let end = start + Math.floor(Math.random() * (amount - widthOfHill));
             hill["start"] = start
             hill["end"] = end
+            console.log(start *32 +" ," + end*32)
             //randomize hills lenght
             hills.push(hill);
         }
-        let amountOfTrees = Math.floor(Math.random() * Math.floor((size / 10))) + 1;
+        let amountOfTrees = Math.floor(Math.random() * Math.floor((amount / 10))) + 1;
         let density = 10
         console.log("Amount of Trees: " + amountOfTrees)
         let lastTree = startX +5
@@ -183,6 +185,12 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
                     if (block !== undefined && block !== null) {
                         let blockType = block.type
 
+                        if(block.type.includes("stone")){
+                            damage = Math.ceil(damage/3);
+                        }
+                        if(damage <= 0){
+                        damage++;
+                        }
                         block.health = block.health - damage
                         if(block.health <= 0) {
                             blockType = blockType.split("_")[0];
@@ -215,7 +223,7 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
 }
 
 function deleteBlock(gridx, gridy, block, map, collisionMap, fastMap) {
-    map.splice(map.indexOf(block), 1);
+    //map.splice(map.indexOf(block), 1);
     if(collisionMap[gridx][gridy] !== undefined ) {
         collisionMap[gridx][gridy] = false;
     }
@@ -235,6 +243,7 @@ function addBlock(player, map, collisionMap, gridSize, x, y, blockType, range, f
         let blockName = blockType + "_block";
         let itemName = blockType + "_item";
         blockType = blockType.substr(0,blockType.length-1)
+
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
             generateBlock(i, k, 100, map, blockType, collisionMap, fastMap,true)
             deleteItemInventory(player, itemName)
@@ -268,11 +277,12 @@ function generateBlock(x, y, health, map, blockName, collisionMap, fastMap,playe
     }
     let block = {};
 
+    health = 100;
 
     block["x"] = x;
     block["y"] = y;
     block["type"] = blockName;
-    block["health"] = 100;
+    block["health"] = health;
     map.push(block);
     if (fastMap[x] === undefined) {
         fastMap[x] = {}

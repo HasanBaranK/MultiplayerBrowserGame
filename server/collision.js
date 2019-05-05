@@ -335,17 +335,6 @@ function gravity(players,gridSize,collisionMap,projectiles,playerGravity) {
             // console.log("In land");
         }
     }
-    for (let projectile in projectiles){
-        let projectile = projectiles[projectile];
-        projectile.y +=3
-        if (checkCollision(projectile, projectile.sizex, projectile.sizey, gridSize,collisionMap)) {
-            //console.log(collisionMap);
-            projectile.y -= 3;
-            projectile.onair = false;
-            // console.log("In land");
-        }
-
-    }
 
 }
 

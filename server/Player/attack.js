@@ -1,9 +1,13 @@
+const {checkCollision} = require("../collision");
+const {generateItem} = require("./items");
 module.exports = {
     lowerHealth,
     killPlayer,
     heal,
     meleeAttack,
     checkPlayerInRange,
+    calculateProjectiles,
+    generateProjectile
 }
 
 
@@ -66,43 +70,91 @@ function checkPlayerInRange(x, y, player, range, facing, attackingSizey) {
     return false
 }
 
-function generateProjectile(projectiles, name, speed, startx, starty, finishX, finishY, direction) {
-
+function generateProjectile(projectiles, name, speed, startx, starty, range, finishX, finishY, direction, damage, power) {
+    let xLength = Math.abs(finishX - startx)
+    let yLength = Math.abs(finishY - starty)
+    let total = xLength + yLength;
+    let xPercentage = Math.floor(xLength * 100 / total)
+    let yPercentage = Math.floor(yLength * 100 / total)
     let projectile = {
         name: name,
         speed: speed,
         direction: direction,
-        startx: startx,
-        starty: starty,
-        finishX: finishX,
-        finishY: finishY
+        range: range,
+        x: startx,
+        y: starty,
+        xPercentage: xPercentage,
+        yPercentage: yPercentage,
+        power: power,
+        damage: damage
     }
     projectiles.push(projectile)
 
 }
 
-async function rangedAttack(player, projectile, players) {
+async function calculateProjectiles(projectiles, players, items, gridSize, collisionMap) {
+    let sleepTime = 10;
+    for (let projectile in projectiles) {
 
-    for (let i = 0; i < amount; i++) {
-        calculateDistance()
-
-        projectile.y -= 3
-        if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
-            player.y += 3
-            break;
+        projectile = projectiles[projectile]
+        for (let player in players) {
+            player = players[player]
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+                lowerHealth(player, projectile.damage);
+            }
         }
-        await sleep(5);
-    }
+        if(projectile.power >= 0) {
+            if (projectile.direction == "right") {
 
-    function sleep(ms) {
-        return new Promise(resolve => {
-            setTimeout(resolve, ms)
-        })
+                projectile.y -= projectile.power * (projectile.yPercentage / 10)
+                projectile.x += projectile.power * (projectile.xPercentage / 10)
+
+                projectile.power = projectile.power - 1;
+
+                if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+                    deleteProjectile(projectiles, projectile)
+                    generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+                    break;
+                }
+            } else {
+                projectile.y -= projectile.power * (projectile.yPercentage / 10)
+                projectile.x -= projectile.power * (projectile.xPercentage / 10)
+                if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+                    deleteProjectile(projectiles, projectile)
+                    generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+                    break;
+                }
+            }
+        }
+        for (let player in players) {
+            player = players[player]
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+                lowerHealth(player, projectile.damage);
+            }
+            projectile.y += 3
+            if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
+                deleteProjectile(projectiles, projectile)
+                generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+                break;
+            }
+        }
+
+
     }
 
 
 }
 
+function sleep(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms)
+    })
+}
+
 function calculateDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+}
+
+function deleteProjectile(projectiles, projectile) {
+    projectiles[projectile] == undefined
 }
