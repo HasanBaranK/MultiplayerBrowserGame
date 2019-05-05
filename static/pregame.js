@@ -1,4 +1,5 @@
 let socket, cvs, ctx, leftMousePressed, rightMousePressed = undefined
+let delayMouseClickEmit = new Date().getTime()
 let mousePosition = {}
 let buttons = []
 let displays = {}

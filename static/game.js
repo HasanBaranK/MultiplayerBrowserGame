@@ -43,11 +43,14 @@ function determineAnimation(player){
 
 function game(){
   try {
-    if(leftMousePressed){
+    let t = new Date().getTime()
+    if(leftMousePressed && t > delayMouseClickEmit){
       socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      delayMouseClickEmit = t + 500
     }
-    else if(rightMousePressed){
+    else if(rightMousePressed && t > delayMouseClickEmit){
       socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      delayMouseClickEmit = t + 500
     }
     if(keys['ArrowLeft']){
       currentCoords.x+=5
