@@ -2,6 +2,13 @@ function drawMap(map) {
   for(let block in map){
     try {
       ctx.drawImage(images[map[block].type], map[block].x, map[block].y);
+      if(map[block].health < 100){
+        ctx.save()
+        ctx.fillStyle = "red";
+        ctx.globalAlpha = (1 - map[block].health/100) * (0.4)
+        ctx.fillRect(map[block].x, map[block].y, 32, 32)
+        ctx.restore()
+      }
     }catch (e) {
       console.log(map[block])
     }
