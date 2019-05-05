@@ -24,7 +24,6 @@ let attackFunctions = require("./server/Player/attack");
 let itemFunctions = require("./server/Player/items");
 let inventoryFunctions = require("./server/Player/inventory");
 let timeFunctions = require("./server/time.js");
-let messageFunctions = require("./server/message.js");
 
 const imageFolder = './static/images';
 
