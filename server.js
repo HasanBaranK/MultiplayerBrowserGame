@@ -148,7 +148,6 @@ io.on('connection', function (socket) {
         if (player.isDead === false) {
             mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap)
         }
-        console.log(getGameTime(gameTime))
     });
     socket.on('rightclick', function (click) {
 
