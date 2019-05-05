@@ -3,7 +3,6 @@ function drawMap(map) {
     try {
       ctx.drawImage(images[map[block].type], map[block].x, map[block].y);
     }catch (e) {
-      console.log(e)
       console.log(map[block])
     }
   }
@@ -33,6 +32,12 @@ function determineAnimation(player){
 
 function game(){
   try {
+    if(leftMousePressed){
+      socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+    }
+    else if(rightMousePressed){
+      socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+    }
     if(keys['ArrowLeft']){
       currentCoords.x+=5
     }

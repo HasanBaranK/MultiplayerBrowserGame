@@ -1,4 +1,4 @@
-let socket, cvs, ctx, mousePressed = undefined
+let socket, cvs, ctx, leftMousePressed, rightMousePressed = undefined
 let mousePosition = {}
 let buttons = []
 let displays = {}
@@ -261,20 +261,26 @@ document.body.onload = () => {
     }
 
     cvs.addEventListener('mousedown', function(evt) {
-      mousePressed = true;
       if(!inInventory){
         if(evt.button == 0){
-          socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+          leftMousePressed = true
         }
         else{
-          socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+          rightMousePressed = true
         }
       }
       buttons['inventory'].isClicked()
     });
 
-    cvs.addEventListener('mouseup', function(event) {
-      mousePressed = false;
+    cvs.addEventListener('mouseup', function(evt) {
+      if(!inInventory){
+        if(evt.button == 0){
+          leftMousePressed = false
+        }
+        else{
+          rightMousePressed = false
+        }
+      }
     });
 
     cvs.addEventListener('mousemove', function(event) {

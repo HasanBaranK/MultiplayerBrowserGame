@@ -103,7 +103,6 @@ class AnimationsFiles {
       this.currentFrame = 1
     }
     let img = images['bg1 (' + this.currentFrame + ')']
-    console.log(this.currentFrame);
     ctx.drawImage(img, ctX, ctY, this.cWidth, this.cHeight)
 
     let t = new Date().getTime()
