@@ -57,7 +57,7 @@ function game(){
       currentCoords.y = players[socket.id].state.y
     }
     ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
-    background.draw(ctx, currentTransform.x, currentTransform.y)
+    background.draw(ctx, currentTransform.x, currentTransform.y, images)
     // ctx.drawImage(images['8-bit-background-1'], currentTransform.x, currentTransform.y - 500, cvs.width + 300, cvs.height + 500)
     for(let player in players){
       if(players[player].state.isDead){

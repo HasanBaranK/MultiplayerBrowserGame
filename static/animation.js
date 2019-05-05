@@ -87,3 +87,29 @@ class AnimationFinal {
     }
   }
 }
+
+class AnimationsFiles {
+  constructor(numberOfFrames, speed, cWidth, cHeight){
+    this.numberOfFrames = numberOfFrames
+    this.speed = speed
+    this.currentFrame = 1
+    this.cWidth = cWidth
+    this.cHeight = cHeight
+
+    this.animTime = new Date().getTime()
+  }
+  draw(ctx, ctX , ctY, images){
+    if(this.currentFrame > this.numberOfFrames){
+      this.currentFrame = 1
+    }
+    let img = images['bg1 (' + this.currentFrame + ')']
+    console.log(this.currentFrame);
+    ctx.drawImage(img, ctX, ctY, this.cWidth, this.cHeight)
+
+    let t = new Date().getTime()
+    if(t > this.animTime){
+      this.currentFrame++
+      this.animTime = t + this.speed
+    }
+  }
+}

@@ -165,7 +165,7 @@ function loadImagesThen(folders){
     displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
-    background = new Animation(images['background'], 0, 103, 0, 1200, 675, cvs.width, cvs.height, 500)
+    background = new AnimationsFiles(104, 500, cvs.width, cvs.height)
     socket.emit('new player')
     window.requestAnimationFrame(game)
   });
