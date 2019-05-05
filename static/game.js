@@ -146,6 +146,7 @@ function game(){
     else{
       buttons['inventory'].draw(ctx,currentTransform.x,currentTransform.y)
     }
+    chatInput.draw(ctx, currentTransform.x, currentTransform.y)
     requestAnimationFrame(game)
   } catch (e) {
     console.log(e);

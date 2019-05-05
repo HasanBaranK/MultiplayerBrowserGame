@@ -3,6 +3,8 @@ let mousePosition = {}
 let buttons = []
 let displays = {}
 let inInventory = false
+let nameBuffer = 'Enter Message Here'
+let inChat = false
 
 let keys = {}
 let players = {}
@@ -11,6 +13,7 @@ let items;
 let currentTransform = {x:0,y:0}
 let itemHoldingIndex = 0
 let background = null
+let chatInput = null
 
 cvs = document.getElementById('canvas')
 ctx = cvs.getContext('2d')
@@ -18,6 +21,7 @@ cvs.width  = 32*42;
 cvs.height = 32*22;
 cvs.style.border = 'solid black 1px'
 let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 64}
+
 
 $('body').on('contextmenu', '#canvas', function (e) {
   return false;
@@ -116,7 +120,7 @@ class UIButton {
     }
   }
   isClicked(){
-    if(this.isHovered() && mousePressed){
+    if(this.isHovered() && leftMousePressed){
       inInventory = !inInventory
     }
     return true
@@ -137,6 +141,42 @@ class Bar {
   }
   draw(ctx,ctX,ctY,width){
     ctx.drawImage(this.img, this.x+ctX, this.y+ctY, (width / 100) * this.width, this.height)
+  }
+}
+
+class ChatInput {
+  constructor(x, y, width, height){
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+  }
+  draw(ctx, ctX, ctY){
+    ctx.save()
+    ctx.fillStyle = 'white'
+    ctx.fillRect(ctX + this.x, ctY + this.y, this.width, this.height)
+    ctx.strokeStyle = 'black'
+    ctx.rect(ctX + this.x -1, ctY + this.y - 1, this.width + 1, this.height + 1)
+    ctx.stroke()
+    ctx.fillStyle = 'black'
+    ctx.font = "18px serif"
+    ctx.fillText(nameBuffer, ctX + this.x + 2, ctY + this.y + 15)
+    ctx.restore()
+  }
+  isHovered(){
+    if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
+      ctx.fillRect(currentTransform.x, currentTransform.y, 500, 500)
+      document.body.style.cursor = 'text';
+      return true
+    }
+    return false
+  }
+  isClicked(){
+    if(this.isHovered() && leftMousePressed){
+      inChat = true
+      return true
+    }
+    return false
   }
 }
 
@@ -166,6 +206,7 @@ function loadImagesThen(folders){
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     background = new AnimationsFiles(104, 500, cvs.width, cvs.height)
+    chatInput = new ChatInput(cvs.width - 253, cvs.height - 28, 250, 24)
     socket.emit('new player')
     window.requestAnimationFrame(game)
   });
@@ -226,33 +267,52 @@ document.body.onload = () => {
     });
 
     document.onkeydown = (key) => {
-      if(key.key == 'i'){
-        inInventory = !inInventory
-        return
+      if(inChat){
+        var keycode = parseInt(key.which);
+        if (keycode == 46 || keycode == 8) {
+          event.preventDefault();
+          nameBuffer = nameBuffer.slice(0,nameBuffer.length-1);
+        }
       }
-      if(key.key == 'Escape'){
-        inInventory = false
-        return
-      }
-      if(!inInventory){
-        if(key.key == ' ' && !players[socket.id].attacking){
-          let holding = players[socket.id].state.holding[0]
-          if(holding){
-            if(holding.type == 'melee'){
-              socket.emit('attack', null)
-              keys[key.key] = true
-            }
-          }
+      else{
+        if(key.key == 'i'){
+          inInventory = !inInventory
           return
         }
-        keys[key.key] = true
+        if(key.key == 'Escape'){
+          inInventory = false
+          return
+        }
+        if(!inInventory){
+          if(key.key == ' ' && !players[socket.id].attacking){
+            let holding = players[socket.id].state.holding[0]
+            if(holding){
+              if(holding.type == 'melee'){
+                socket.emit('attack', null)
+                keys[key.key] = true
+              }
+            }
+            return
+          }
+          keys[key.key] = true
+        }
+        let item = key.key-1
+        if(!isNaN(item)){
+          itemHoldingIndex = item
+          players[socket.id].state.holding = [players[socket.id].state.inventory[item]]
+          socket.emit('holding', players[socket.id].state)
+          console.log('sent');
+        }
       }
-      let item = key.key-1
-      if(!isNaN(item)){
-        itemHoldingIndex = item
-        players[socket.id].state.holding = [players[socket.id].state.inventory[item]]
-        socket.emit('holding', players[socket.id].state)
-        console.log('sent');
+    }
+
+    document.onkeypress = (key) => {
+      if(inChat){
+        var keycode = parseInt(key.which);
+        if (nameBuffer.length < 50)
+        {
+          nameBuffer += String.fromCharCode(keycode);
+        }
       }
     }
 
@@ -264,12 +324,15 @@ document.body.onload = () => {
       if(!inInventory){
         if(evt.button == 0){
           leftMousePressed = true
+          buttons['inventory'].isClicked()
+          if(!chatInput.isClicked()){
+            inChat = false
+          }
         }
         else{
           rightMousePressed = true
         }
       }
-      buttons['inventory'].isClicked()
     });
 
     cvs.addEventListener('mouseup', function(evt) {
@@ -286,6 +349,12 @@ document.body.onload = () => {
     cvs.addEventListener('mousemove', function(event) {
      mousePosition.x = event.offsetX || event.layerX;
      mousePosition.y = event.offsetY || event.layerY;
+     try {
+       if(!chatInput.isHovered()){
+         document.body.style.cursor = 'auto';
+       }
+     } catch (e) {
+     }
     });
 
     cvs.addEventListener('wheel', function(event) {

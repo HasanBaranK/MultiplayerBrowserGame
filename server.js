@@ -153,7 +153,7 @@ io.on('connection', function (socket) {
 
         let player = players[socket.id] || {};
         if (player.isDead === false) {
-            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap,1)
+            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap,2)
         }
     });
     socket.on('rightclick', function (click) {
@@ -206,6 +206,3 @@ setInterval(function () {
     io.sockets.in('players').emit('items', items);
     gameTime = timeFunctions.updateGameTime(gameTime,1)
 }, 1000 / 60);
-
-
-
