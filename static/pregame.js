@@ -121,6 +121,8 @@ class UIButton {
   isClicked(){
     if(this.isHovered() && leftMousePressed){
       inInventory = !inInventory
+      leftMousePressed = false
+      rightMousePressed = false
     }
     return true
   }
@@ -150,8 +152,9 @@ class ChatInput {
     this.width = width
     this.height = height
   }
-  draw(ctx, ctX, ctY){
+  draw(ctx, ctX, ctY, opacity){
     ctx.save()
+    ctx.globalAlpha = opacity
     ctx.fillStyle = 'white'
     ctx.fillRect(ctX + this.x, ctY + this.y, this.width, this.height)
     ctx.strokeStyle = this.borderColor
@@ -177,6 +180,8 @@ class ChatInput {
         nameBuffer = ''
       }
       this.borderColor = 'red'
+      leftMousePressed = false
+      rightMousePressed = false
       return true
     }
     this.borderColor = 'black'
