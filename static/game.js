@@ -14,6 +14,7 @@ function drawMap(map) {
     }
   }
 }
+let xCloud = -cvs.width
 
 function drawItems(items){
   for(let item in items){
@@ -80,7 +81,13 @@ function game(){
       currentCoords.y = players[socket.id].state.y
     }
     ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
-    background.draw(ctx, currentTransform.x, currentTransform.y, images)
+    ctx.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
+    ctx.drawImage(images['cloud01'], currentTransform.x + xCloud , currentTransform.y - 200, cvs.width, cvs.height)
+    xCloud+=1
+    if(xCloud > cvs.width){
+      xCloud = -cvs.width
+    }
+    //background.draw(ctx, currentTransform.x, currentTransform.y, images)
     // ctx.drawImage(images['8-bit-background-1'], currentTransform.x, currentTransform.y - 500, cvs.width + 300, cvs.height + 500)
     for(let player in players){
       if(players[player].state.isDead){
