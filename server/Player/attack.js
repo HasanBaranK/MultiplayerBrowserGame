@@ -102,7 +102,11 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
     projectile = projectiles[projectile]
     let startPower = projectile.power
 
+    let xamountTraveled = 0;
+    let yamountTraveled = 0;
+
     while (projectile.power >= 0) {
+
         for (let player in players) {
             player = players[player]
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
@@ -111,8 +115,10 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
         }
         if (projectile.direction == "right") {
 
-            projectile.y -= speed * (projectile.power * (projectile.yPercentage))
-            projectile.x += speed * (projectile.power * (projectile.xPercentage))
+            yamountTraveled = speed * (projectile.power * (projectile.yPercentage))
+            xamountTraveled = speed * (projectile.power * (projectile.xPercentage))
+            projectile.y -= yamountTraveled
+            projectile.x += xamountTraveled
 
             projectile.power = projectile.power - 1;
 
@@ -122,8 +128,12 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
                 break;
             }
         } else {
-            projectile.y -=speed * projectile.power * (projectile.yPercentage / 10)
-            projectile.x -=speed * projectile.power * (projectile.xPercentage / 10)
+
+            yamountTraveled = speed * projectile.power * (projectile.yPercentage / 10)
+            xamountTraveled = speed * projectile.power * (projectile.xPercentage / 10)
+
+            projectile.y -=yamountTraveled
+            projectile.x -=xamountTraveled
 
             projectile.power = projectile.power - 1;
             if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
@@ -146,13 +156,17 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
             generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
             break;
         }
+
+        projectile.angle = getAngleRad(xamountTraveled,yamountTraveled+gravityAmount)
+        console.log(projectile.angle)
         await sleep(sleepTime)
-        //getAngleDeg()
+
     }
 
     for (;startPower > projectile.power ;projectile.power++) {
 
-        projectile.x -=speed * projectile.power * (projectile.xPercentage / 10)
+        xamountTraveled = speed * projectile.power * (projectile.xPercentage / 10)
+        projectile.x -=xamountTraveled
 
         if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
             deleteProjectile(projectiles, indexProjectile)
@@ -172,7 +186,8 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
                 lowerHealth(player, projectile.damage);
             }
         }
-        console.log("works")
+        projectile.angle = getAngleRad(xamountTraveled,gravityAmount)
+        console.log(projectile.angle)
         await sleep(sleepTime)
     }
     //gravity
@@ -190,6 +205,7 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
                 return
             }
         }
+        projectile.angle = getAngleRad(0,gravityAmount)
         await sleep(sleepTime)
     }
 
@@ -201,9 +217,8 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
 
 }
 
-function getAngleRad(ax,ay,bx,by) {
-    var angleRad = Math.atan((ay-by)/(ax-bx));
-
+function getAngleRad(xamount,yamount) {
+    var angleRad = Math.atan((yamount)/(xamount));
     return(angleRad);
 }
 function projectileGravity(projectiles, players, gridSize, collisionMap, items,gravityAmount) {
