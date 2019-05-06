@@ -5,6 +5,7 @@ let buttons = []
 let displays = {}
 let inInventory = false
 let nameBuffer = 'Enter your message'
+let messageHistory = []
 let inChat = false
 
 let keys = {}
@@ -16,6 +17,7 @@ let currentTransform = {x:0,y:0}
 let itemHoldingIndex = 0
 let background = null
 let chatInput = null
+let chatBox = null
 
 cvs = document.getElementById('canvas')
 ctx = cvs.getContext('2d')
@@ -114,12 +116,11 @@ class UIButton {
   }
   isHovered(){
     if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
-      ctx.fillRect(currentTransform.x, currentTransform.y, 100, 100)
       return true
     }
   }
   isClicked(){
-    if(this.isHovered() && leftMousePressed){
+    if(this.isHovered()){
       inInventory = !inInventory
       leftMousePressed = false
       rightMousePressed = false
@@ -146,18 +147,18 @@ class Bar {
 }
 
 class ChatInput {
-  constructor(x, y, width, height, borderColor){
+  constructor(x, y, width, height){
     this.x = x
     this.y = y
     this.width = width
     this.height = height
   }
-  draw(ctx, ctX, ctY, opacity){
+  draw(ctx, ctX, ctY, opacity, borderColor){
     ctx.save()
     ctx.globalAlpha = opacity
     ctx.fillStyle = 'white'
     ctx.fillRect(ctX + this.x, ctY + this.y, this.width, this.height)
-    ctx.strokeStyle = this.borderColor
+    ctx.strokeStyle = borderColor
     ctx.rect(ctX + this.x -1, ctY + this.y - 1, this.width + 1, this.height + 1)
     ctx.stroke()
     ctx.fillStyle = 'black'
@@ -167,25 +168,52 @@ class ChatInput {
   }
   isHovered(){
     if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
-      ctx.fillRect(currentTransform.x, currentTransform.y, 500, 500)
       document.body.style.cursor = 'text';
       return true
     }
     return false
   }
   isClicked(){
-    if(this.isHovered() && leftMousePressed){
+    if(this.isHovered()){
       inChat = true
       if(nameBuffer == 'Enter your message'){
         nameBuffer = ''
       }
-      this.borderColor = 'red'
       leftMousePressed = false
       rightMousePressed = false
       return true
     }
     this.borderColor = 'black'
     return false
+  }
+}
+
+class ChatBox{
+
+  constructor(x, y, width, height){
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+  }
+
+  draw(ctx, ctX, ctY){
+    ctx.save()
+    ctx.fillStyle = 'white'
+    ctx.fillRect(ctX + this.x, ctY + this.y, this.width, this.height)
+    ctx.fillStyle = 'black'
+    let offSet = 15
+    let messageSender = 'you'
+    for(let message in messageHistory){
+      if(messageHistory[message].sender != socket.id){
+        ctx.fillText(messageHistory[message].sender + ': ' + messageHistory[message].message, this.x + ctX, this.y + ctY + offSet)
+      }
+      else{
+        ctx.fillText(messageSender + ': ' + messageHistory[message].message, this.x + ctX, this.y + ctY + offSet)
+      }
+      offSet+= 15
+    }
+    ctx.restore()
   }
 }
 
@@ -216,6 +244,8 @@ function loadImagesThen(folders){
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     background = new AnimationsFiles(104, 500, cvs.width, cvs.height)
     chatInput = new ChatInput(cvs.width - 253, cvs.height - 28, 250, 24, 'black')
+    chatBox = new ChatBox(chatInput.x, chatInput.y - 140, chatInput.width, chatInput.height + 100)
+
     socket.emit('new player')
     window.requestAnimationFrame(game)
   });
@@ -279,6 +309,10 @@ document.body.onload = () => {
       loadImagesThen(folders)
     });
 
+    socket.on('generalmessage', (message) => {
+      messageHistory.push(message)
+    })
+
     document.onkeydown = (key) => {
       if(inChat){
         var keycode = parseInt(key.which);
@@ -289,6 +323,9 @@ document.body.onload = () => {
         if(key.key == 'Enter' && nameBuffer.trim() != ''){
           socket.emit('generalmessage', {message:nameBuffer})
           nameBuffer = ''
+        }
+        if(key.key == 'Escape'){
+          inChat = false
         }
       }
       else{
@@ -348,6 +385,14 @@ document.body.onload = () => {
         }
         else{
           rightMousePressed = true
+        }
+      }
+      else{
+        if(evt.button == 0){
+          buttons['inventory'].isClicked()
+          if(!chatInput.isClicked()){
+            inChat = false
+          }
         }
       }
     });
