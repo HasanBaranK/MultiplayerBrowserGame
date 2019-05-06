@@ -154,11 +154,12 @@ io.on('connection', function (socket) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
             let damage =  1;
-            if(players[socket.id].holding[0] !== undefined){
+            if(players[socket.id].holding[0] !== undefined && players[socket.id].holding[0] !== null){
                 damage = players[socket.id].holding[0].damage /10;
             }
             mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap,damage)
-            attackFunctions.generateProjectile(projectiles,"arrow0_item",10,player.x,player.y,10,click.x,click.y,"right",0,10)
+            let projectile = attackFunctions.generateProjectile(projectiles,"arrow0_item",10,player.x,player.y,10,click.x,click.y,"right",0,40)
+            attackFunctions.calculateProjectile(projectiles,projectile,players,items,gridSize,collisionMap)
         }
 
     });
@@ -180,12 +181,13 @@ io.on('connection', function (socket) {
     socket.on('getimages', function (click) {
         socket.emit('images', images);
     });
-    socket.on('gameTime', function (click) {
+    socket.on('gametime', function (click) {
         socket.emit('images', timeFunctions.getGameTime(gameTime));
     });
-    socket.on('generalMessage', function (message) {
+    socket.on('generalmessage', function (message) {
         message.sender = socket.id
-        io.sockets.in('players').emit('generalMessage', message);
+        console.log(message)
+        io.sockets.in('players').emit('generalmessage', message);
     });
     socket.on('holding', function (player) {
         players[socket.id] = player
@@ -203,7 +205,7 @@ io.on('connection', function (socket) {
 
 setInterval(function () {
     collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,3);
-    attackFunctions.calculateProjectiles(projectiles,players,items,gridSize,collisionMap)
+    attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items)
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
     let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap)
     rightEdge= edges.rightEdge

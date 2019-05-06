@@ -43,11 +43,14 @@ function determineAnimation(player){
 
 function game(){
   try {
-    if(leftMousePressed){
+    let t = new Date().getTime()
+    if(leftMousePressed && t > delayMouseClickEmit){
       socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      delayMouseClickEmit = t + 500
     }
-    else if(rightMousePressed){
+    else if(rightMousePressed && t > delayMouseClickEmit){
       socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      delayMouseClickEmit = t + 500
     }
     if(keys['ArrowLeft']){
       currentCoords.x+=5
@@ -151,7 +154,13 @@ function game(){
     else{
       buttons['inventory'].draw(ctx,currentTransform.x,currentTransform.y)
     }
-    chatInput.draw(ctx, currentTransform.x, currentTransform.y)
+    if(inChat){
+      chatInput.draw(ctx, currentTransform.x, currentTransform.y, 1.0)
+    }
+    else{
+      chatInput.draw(ctx, currentTransform.x, currentTransform.y, 0.2)
+    }
+
     requestAnimationFrame(game)
   } catch (e) {
     console.log(e);

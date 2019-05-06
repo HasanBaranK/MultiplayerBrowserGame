@@ -1,9 +1,10 @@
 let socket, cvs, ctx, leftMousePressed, rightMousePressed = undefined
+let delayMouseClickEmit = new Date().getTime()
 let mousePosition = {}
 let buttons = []
 let displays = {}
 let inInventory = false
-let nameBuffer = 'Enter Message Here'
+let nameBuffer = 'Enter your message'
 let inChat = false
 
 let keys = {}
@@ -60,9 +61,6 @@ class Inventory{
       ctx.fillText(inventory[item].amount, xOfItem + this.textOffsetX, yOfItem + this.textOffsetY)
       ctx.restore()
     }
-  }
-  check(){
-
   }
 }
 
@@ -123,6 +121,8 @@ class UIButton {
   isClicked(){
     if(this.isHovered() && leftMousePressed){
       inInventory = !inInventory
+      leftMousePressed = false
+      rightMousePressed = false
     }
     return true
   }
@@ -146,17 +146,18 @@ class Bar {
 }
 
 class ChatInput {
-  constructor(x, y, width, height){
+  constructor(x, y, width, height, borderColor){
     this.x = x
     this.y = y
     this.width = width
     this.height = height
   }
-  draw(ctx, ctX, ctY){
+  draw(ctx, ctX, ctY, opacity){
     ctx.save()
+    ctx.globalAlpha = opacity
     ctx.fillStyle = 'white'
     ctx.fillRect(ctX + this.x, ctY + this.y, this.width, this.height)
-    ctx.strokeStyle = 'black'
+    ctx.strokeStyle = this.borderColor
     ctx.rect(ctX + this.x -1, ctY + this.y - 1, this.width + 1, this.height + 1)
     ctx.stroke()
     ctx.fillStyle = 'black'
@@ -175,8 +176,15 @@ class ChatInput {
   isClicked(){
     if(this.isHovered() && leftMousePressed){
       inChat = true
+      if(nameBuffer == 'Enter your message'){
+        nameBuffer = ''
+      }
+      this.borderColor = 'red'
+      leftMousePressed = false
+      rightMousePressed = false
       return true
     }
+    this.borderColor = 'black'
     return false
   }
 }
@@ -207,7 +215,7 @@ function loadImagesThen(folders){
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     background = new AnimationsFiles(104, 500, cvs.width, cvs.height)
-    chatInput = new ChatInput(cvs.width - 253, cvs.height - 28, 250, 24)
+    chatInput = new ChatInput(cvs.width - 253, cvs.height - 28, 250, 24, 'black')
     socket.emit('new player')
     window.requestAnimationFrame(game)
   });
@@ -277,6 +285,10 @@ document.body.onload = () => {
         if (keycode == 46 || keycode == 8) {
           event.preventDefault();
           nameBuffer = nameBuffer.slice(0,nameBuffer.length-1);
+        }
+        if(key.key == 'Enter' && nameBuffer.trim() != ''){
+          socket.emit('generalmessage', {message:nameBuffer})
+          nameBuffer = ''
         }
       }
       else{
