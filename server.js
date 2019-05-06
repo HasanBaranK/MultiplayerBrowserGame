@@ -91,7 +91,7 @@ io.on('connection', function (socket) {
         };
         io.sockets.emit('map', map);
         io.sockets.emit('mapCollision', collisionMap);
-        let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 50, 50, 0, 0, items, 1)
+        let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 50, 0, 0, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
@@ -100,7 +100,7 @@ io.on('connection', function (socket) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
             let speed = 5//5
-            let jumpAmount = 5//5
+            let jumpAmount = 4//5
             let jumpSpeed = 5//5
             if (data.a || data.w || data.d || data.s) {
                 if (data.a) {
@@ -153,13 +153,15 @@ io.on('connection', function (socket) {
 
         let player = players[socket.id] || {};
         if (player.isDead === false) {
-            let damage =  1;
+            let damage =  10;
             if(players[socket.id].holding[0] !== undefined && players[socket.id].holding[0] !== null){
-                damage = players[socket.id].holding[0].damage /10;
+                damage = players[socket.id].holding[0].damage;
             }
             mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap,damage)
-            let projectile = attackFunctions.generateProjectile(projectiles,"arrow0_item",10,player.x,player.y,10,click.x,click.y,"right",0,40)
-            attackFunctions.calculateProjectile(projectiles,projectile,players,items,gridSize,collisionMap)
+            if(mapChanged == false) {
+                let projectile = attackFunctions.generateProjectile(projectiles, "arrow0_item", 10, player.x + 32, player.y, 32, click.x, click.y, "right", 10, 40)
+                attackFunctions.calculateProjectile(projectiles, projectile, players, items, gridSize, collisionMap)
+            }
         }
 
     });
@@ -204,8 +206,8 @@ io.on('connection', function (socket) {
 
 
 setInterval(function () {
-    collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,3);
-    //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,3)
+    collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,5);
+    attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
     let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap)
     rightEdge= edges.rightEdge

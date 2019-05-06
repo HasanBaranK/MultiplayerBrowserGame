@@ -153,7 +153,7 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
         projectile.y += gravityAmount
         if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
             deleteProjectile(projectiles, indexProjectile)
-            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 20, 0, 1, items, 1, false)
             break;
         }
 
@@ -165,8 +165,13 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
 
     for (;startPower > projectile.power ;projectile.power++) {
 
-        xamountTraveled = speed * projectile.power * (projectile.xPercentage / 10)
-        projectile.x -=xamountTraveled
+        if (projectile.direction == "right") {
+            xamountTraveled = speed * projectile.power * (projectile.xPercentage / 10)
+            projectile.x += xamountTraveled
+        }{
+            xamountTraveled = speed * projectile.power * (projectile.xPercentage / 10)
+            projectile.x -= xamountTraveled
+        }
 
         if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
             deleteProjectile(projectiles, indexProjectile)
@@ -206,6 +211,7 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
             }
         }
         projectile.angle = getAngleRad(0,gravityAmount)
+        console.log(projectile.angle)
         await sleep(sleepTime)
     }
 

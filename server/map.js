@@ -26,7 +26,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
     let hills = []
     let trees = []
     if (amount > 20) {
-        let amountOfHills = 0//Math.floor(Math.random() * Math.floor((amount / 15))) + 1;
+        let amountOfHills = Math.floor(Math.random() * Math.floor((amount / 15))) + 1;
         console.log("Amount of Hills: " + amountOfHills)
         for (let i = 0; i < amountOfHills; i++) {
             let hill = {}
@@ -199,8 +199,6 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
                             if(blockType === "dirt1"){
                                 itemName = "dirt0_item"
                             }
-
-
                             deleteBlock(gridx, gridy, block, map, collisionMap, fastMap)
                             generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
                             return true
@@ -209,6 +207,7 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
                             map[map.indexOf(block)] = block
 
                         }
+                        return true
                     }
             } else {
                 console.log("undefined")
