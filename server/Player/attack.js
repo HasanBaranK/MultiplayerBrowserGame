@@ -6,8 +6,9 @@ module.exports = {
     heal,
     meleeAttack,
     checkPlayerInRange,
-    calculateProjectiles,
-    generateProjectile
+    calculateProjectile,
+    generateProjectile,
+    projectileGravity
 }
 
 
@@ -89,72 +90,81 @@ function generateProjectile(projectiles, name, speed, startx, starty, range, fin
         damage: damage
     }
     projectiles.push(projectile)
+    return projectiles.indexOf(projectile)
+}
+
+async function calculateProjectile(projectiles,projectile, players, items, gridSize, collisionMap) {
+    let sleepTime = 10;
+    let speed = 0.01
+
+    let indexProjectile = projectile
+    projectile = projectiles[projectile]
+
+    while (projectile.power >= 0) {
+        if (projectile.direction == "right") {
+
+            projectile.y -= speed * (projectile.power * (projectile.yPercentage))
+            projectile.x += speed * (projectile.power * (projectile.xPercentage))
+
+            projectile.power = projectile.power - 1;
+
+            if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+                deleteProjectile(projectiles, indexProjectile)
+                generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+                break;
+            }
+        } else {
+            projectile.y -=speed * projectile.power * (projectile.yPercentage / 10)
+            projectile.x -=speed * projectile.power * (projectile.xPercentage / 10)
+
+            projectile.power = projectile.power - 1;
+            if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+                deleteProjectile(projectiles, indexProjectile)
+                generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+                break;
+            }
+        }
+        for (let player in players) {
+            player = players[player]
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+                lowerHealth(player, projectile.damage);
+            }
+        }
+        console.log("sleep")
+        await sleep(sleepTime)
+        console.log("sleeped")
+    }
+    function sleep(ms){
+        return new Promise(resolve=>{
+            setTimeout(resolve,ms)
+        })
+    }
 
 }
 
-async function calculateProjectiles(projectiles, players, items, gridSize, collisionMap) {
-    let sleepTime = 10;
+function projectileGravity(projectiles, players, gridSize, collisionMap, items) {
     for (let projectile in projectiles) {
-
+        let indexProjectile = projectile
         projectile = projectiles[projectile]
         for (let player in players) {
             player = players[player]
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
                 lowerHealth(player, projectile.damage);
             }
-        }
-        if(projectile.power >= 0) {
-            if (projectile.direction == "right") {
-
-                projectile.y -= projectile.power * (projectile.yPercentage / 10)
-                projectile.x += projectile.power * (projectile.xPercentage / 10)
-
-                projectile.power = projectile.power - 1;
-
-                if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
-                    deleteProjectile(projectiles, projectile)
-                    generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
-                    break;
-                }
-            } else {
-                projectile.y -= projectile.power * (projectile.yPercentage / 10)
-                projectile.x -= projectile.power * (projectile.xPercentage / 10)
-                if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
-                    deleteProjectile(projectiles, projectile)
-                    generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
-                    break;
-                }
-            }
-        }
-        for (let player in players) {
-            player = players[player]
-            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
-                lowerHealth(player, projectile.damage);
-            }
             projectile.y += 3
-            if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
-                deleteProjectile(projectiles, projectile)
+            if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+                deleteProjectile(projectiles, indexProjectile)
                 generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
                 break;
             }
         }
-
-
     }
-
-
-}
-
-function sleep(ms) {
-    return new Promise(resolve => {
-        setTimeout(resolve, ms)
-    })
 }
 
 function calculateDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
 }
 
-function deleteProjectile(projectiles, projectile) {
-    projectiles[projectile] == undefined
+function deleteProjectile(projectiles, indexProjectile) {
+    projectiles.splice(indexProjectile, 1)
 }
