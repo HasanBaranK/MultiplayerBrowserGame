@@ -95,13 +95,20 @@ function generateProjectile(projectiles, name, speed, startx, starty, range, fin
 }
 
 async function calculateProjectile(projectiles,projectile, players, items, gridSize, collisionMap) {
-    let sleepTime = 10;
+    let sleepTime = 5;
     let speed = 0.01
-
+    let gravityAmount = 5
     let indexProjectile = projectile
     projectile = projectiles[projectile]
     let startPower = projectile.power
+
     while (projectile.power >= 0) {
+        for (let player in players) {
+            player = players[player]
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+                lowerHealth(player, projectile.damage);
+            }
+        }
         if (projectile.direction == "right") {
 
             projectile.y -= speed * (projectile.power * (projectile.yPercentage))
@@ -125,28 +132,63 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
                 break;
             }
         }
+
         for (let player in players) {
             player = players[player]
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
                 lowerHealth(player, projectile.damage);
             }
+        }
+
+        projectile.y += gravityAmount
+        if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+            deleteProjectile(projectiles, indexProjectile)
+            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+            break;
         }
         await sleep(sleepTime)
-        getAngleDeg()
+        //getAngleDeg()
     }
+
     for (;startPower > projectile.power ;projectile.power++) {
 
-        projectile.y += speed * (projectile.power * (projectile.yPercentage))
-        for (let player in players) {
-            player = players[player]
-            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
-                lowerHealth(player, projectile.damage);
-            }
-        }
+        projectile.x -=speed * projectile.power * (projectile.xPercentage / 10)
+
         if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
             deleteProjectile(projectiles, indexProjectile)
             generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
             return
+        }
+
+        projectile.y += gravityAmount
+        if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+            deleteProjectile(projectiles, indexProjectile)
+            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+            break;
+        }
+        for (let player in players) {
+            player = players[player]
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+                lowerHealth(player, projectile.damage);
+            }
+        }
+        console.log("works")
+        await sleep(sleepTime)
+    }
+    //gravity
+    while (true){
+        projectile.y += gravityAmount
+        if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+            deleteProjectile(projectiles, indexProjectile)
+            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+            break;
+        }
+        for (let player in players) {
+            player = players[player]
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+                lowerHealth(player, projectile.damage);
+                return
+            }
         }
         await sleep(sleepTime)
     }
@@ -159,11 +201,10 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
 
 }
 
-function getAngleDeg(ax,ay,bx,by) {
+function getAngleRad(ax,ay,bx,by) {
     var angleRad = Math.atan((ay-by)/(ax-bx));
-    var angleDeg = angleRad * 180 / Math.PI;
 
-    return(angleDeg);
+    return(angleRad);
 }
 function projectileGravity(projectiles, players, gridSize, collisionMap, items,gravityAmount) {
     for (let projectile in projectiles) {
