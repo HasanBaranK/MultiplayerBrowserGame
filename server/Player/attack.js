@@ -95,8 +95,8 @@ function generateProjectile(projectiles, name, speed, startx, starty, range, fin
 }
 
 async function calculateProjectile(projectiles,projectile, players, items, gridSize, collisionMap) {
-    let sleepTime = 5;
-    let speed = 0.01
+    let sleepTime = 10;
+    let speed = 0.002
     let gravityAmount = 5
     let indexProjectile = projectile
     projectile = projectiles[projectile]

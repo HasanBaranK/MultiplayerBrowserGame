@@ -159,7 +159,7 @@ io.on('connection', function (socket) {
             }
             mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap,damage)
             if(mapChanged == false) {
-                let projectile = attackFunctions.generateProjectile(projectiles, "arrow0_item", 10, player.x + 32, player.y, 32, click.x, click.y, "right", 10, 40)
+                let projectile = attackFunctions.generateProjectile(projectiles, "arrow0_item", 10, player.x + 32, player.y, 25, click.x, click.y, "right", 10, 100)
                 attackFunctions.calculateProjectile(projectiles, projectile, players, items, gridSize, collisionMap)
             }
         }
