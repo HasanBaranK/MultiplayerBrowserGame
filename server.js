@@ -76,7 +76,7 @@ io.on('connection', function (socket) {
     socket.on('new player', function () {
         players[socket.id] = {
             x: 320,
-            y: 200,
+            y: 287,
             status: 0,
             health: 100,
             energy: 100,
@@ -205,7 +205,7 @@ io.on('connection', function (socket) {
 
 setInterval(function () {
     collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,3);
-    attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items)
+    attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,3)
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
     let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap)
     rightEdge= edges.rightEdge

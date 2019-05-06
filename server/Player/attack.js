@@ -87,7 +87,8 @@ function generateProjectile(projectiles, name, speed, startx, starty, range, fin
         xPercentage: xPercentage,
         yPercentage: yPercentage,
         power: power,
-        damage: damage
+        damage: damage,
+        angle: 0
     }
     projectiles.push(projectile)
     return projectiles.indexOf(projectile)
@@ -99,7 +100,7 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
 
     let indexProjectile = projectile
     projectile = projectiles[projectile]
-
+    let startPower = projectile.power
     while (projectile.power >= 0) {
         if (projectile.direction == "right") {
 
@@ -130,10 +131,26 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
                 lowerHealth(player, projectile.damage);
             }
         }
-        console.log("sleep")
         await sleep(sleepTime)
-        console.log("sleeped")
+        getAngleDeg()
     }
+    for (;startPower > projectile.power ;projectile.power++) {
+
+        projectile.y += speed * (projectile.power * (projectile.yPercentage))
+        for (let player in players) {
+            player = players[player]
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+                lowerHealth(player, projectile.damage);
+            }
+        }
+        if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+            deleteProjectile(projectiles, indexProjectile)
+            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
+            return
+        }
+        await sleep(sleepTime)
+    }
+
     function sleep(ms){
         return new Promise(resolve=>{
             setTimeout(resolve,ms)
@@ -142,7 +159,13 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
 
 }
 
-function projectileGravity(projectiles, players, gridSize, collisionMap, items) {
+function getAngleDeg(ax,ay,bx,by) {
+    var angleRad = Math.atan((ay-by)/(ax-bx));
+    var angleDeg = angleRad * 180 / Math.PI;
+
+    return(angleDeg);
+}
+function projectileGravity(projectiles, players, gridSize, collisionMap, items,gravityAmount) {
     for (let projectile in projectiles) {
         let indexProjectile = projectile
         projectile = projectiles[projectile]
@@ -151,7 +174,7 @@ function projectileGravity(projectiles, players, gridSize, collisionMap, items) 
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
                 lowerHealth(player, projectile.damage);
             }
-            projectile.y += 3
+            projectile.y += gravityAmount
             if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
                 deleteProjectile(projectiles, indexProjectile)
                 generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
