@@ -22,7 +22,11 @@ function drawItems(items){
 }
 function drawProjectiles(projectiles){
   for(let projectile in projectiles){
-    ctx.drawImage(images[projectiles[projectile].name],projectiles[projectile].x,projectiles[projectile].y);
+    ctx.save()
+    ctx.translate(projectiles[projectile].x, projectiles[projectile].y)
+    ctx.rotate(45*Math.PI/180)
+    ctx.drawImage(images[projectiles[projectile].name],-8,-8);
+    ctx.restore()
   }
 }
 function determineAnimation(player){
