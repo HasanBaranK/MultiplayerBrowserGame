@@ -285,14 +285,17 @@ document.body.onload = () => {
             delete players[player]
           }
         }
+        socket.emit('state',);
     });
 
     socket.on('map', (mapServer) => {
       map = mapServer
+      socket.emit('map',)
     });
 
     socket.on('items', (itemsServer) => {
       items = itemsServer
+      socket.emit('items',)
     });
 
     socket.on('projectiles', (projectilesServer) => {
