@@ -1,11 +1,11 @@
 let socket, cvs, cvsBackground,ctxBackground, ctx, leftMousePressed, rightMousePressed = undefined
-let delayMouseClickEmit = new Date().getTime()
 let mousePosition = {}
 let buttons = []
 let displays = {}
 let inInventory = false
 let meter = new FPSMeter();
 let perf = window.performance
+let delayMouseClickEmit = perf.now()
 
 
 
@@ -19,15 +19,15 @@ let itemHoldingIndex = 0
 let itemKeyThing = 0
 
 cvs = document.getElementById('canvas')
-cvsBackground = document.getElementById('background')
-ctxBackground = cvsBackground.getContext('2d')
+// cvsBackground = document.getElementById('background')
+// ctxBackground = cvsBackground.getContext('2d')
+// cvsBackground.height = 32*22
+// cvsBackground.width = 32*42
+// cvsBackground.style['z-index'] = 0
 ctx = cvs.getContext('2d')
 cvs.width  = 32*42;
-cvsBackground.width = 32*42
 cvs.height = 32*22;
-cvsBackground.height = 32*22
 cvs.style['z-index'] = 1
-cvsBackground.style['z-index'] = 0
 cvs.style.border = 'solid black 1px'
 let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 64}
 
@@ -178,7 +178,8 @@ function loadImagesThen(folders){
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     socket.emit('new player')
-    ctxBackground.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
+    socket.emit('map',)
+    //ctxBackground.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
     window.requestAnimationFrame(game)
   });
 }

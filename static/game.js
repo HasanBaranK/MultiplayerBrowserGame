@@ -14,8 +14,6 @@ function drawMap(map) {
     }
   }
 }
-let xCloud = -cvs.width
-
 function drawItems(items){
   for(let item in items){
     ctx.drawImage(images[items[item].name],items[item].x,items[item].y);
@@ -26,7 +24,6 @@ function drawProjectiles(projectiles){
     ctx.save()
     ctx.translate(projectiles[projectile].x, projectiles[projectile].y)
     ctx.rotate(projectiles[projectile].angle)
-      console.log(projectiles[projectile].angle * Math.PI * 180)
     ctx.drawImage(images[projectiles[projectile].name],-8,-8);
     ctx.restore()
   }
@@ -52,14 +49,14 @@ let timeDelayOfMouse = 0
 function game(){
   try {
     meter.tickStart();
-    let timeDelayOfMouse = perf.now()
+    timeDelayOfMouse = perf.now()
     if(leftMousePressed && timeDelayOfMouse > delayMouseClickEmit){
       socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
       delayMouseClickEmit = timeDelayOfMouse + 500
     }
-    else if(rightMousePressed && t > delayMouseClickEmit){
+    else if(rightMousePressed && timeDelayOfMouse > delayMouseClickEmit){
       socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
-      delayMouseClickEmit = t + 500
+      delayMouseClickEmit = timeDelayOfMouse + 500
     }
     if(keys['ArrowLeft']){
       currentCoords.x+=5
