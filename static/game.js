@@ -25,7 +25,8 @@ function drawProjectiles(projectiles){
   for(let projectile in projectiles){
     ctx.save()
     ctx.translate(projectiles[projectile].x, projectiles[projectile].y)
-    ctx.rotate(45*Math.PI/180)
+    ctx.rotate(projectiles[projectile].angle)
+      console.log(projectiles[projectile].angle * Math.PI * 180)
     ctx.drawImage(images[projectiles[projectile].name],-8,-8);
     ctx.restore()
   }
@@ -70,7 +71,7 @@ function game(){
       currentCoords.y+=5
     }
     socket.emit('movement', keys)
-    socket.emit('map', players[socket.id].state)
+    // socket.emit('map', players[socket.id].state)
     if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
       let xDifference = (currentCoords.x - players[socket.id].state.x)
       let yDifference = (currentCoords.y - players[socket.id].state.y)
@@ -82,11 +83,11 @@ function game(){
     }
     ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
     ctx.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
-    ctx.drawImage(images['cloud01'], currentTransform.x + xCloud , currentTransform.y - 200, cvs.width, cvs.height)
-    xCloud+=1
-    if(xCloud > cvs.width){
-      xCloud = -cvs.width
-    }
+    // ctx.drawImage(images['cloud01'], currentTransform.x + xCloud , currentTransform.y - 200, cvs.width, cvs.height)
+    // xCloud+=1
+    // if(xCloud > cvs.width){
+    //   xCloud = -cvs.width
+    // }
     //background.draw(ctx, currentTransform.x, currentTransform.y, images)
     // ctx.drawImage(images['8-bit-background-1'], currentTransform.x, currentTransform.y - 500, cvs.width + 300, cvs.height + 500)
     for(let player in players){

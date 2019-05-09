@@ -89,7 +89,11 @@ io.on('connection', function (socket) {
             equipped: [],
             holding: []
         };
-        io.sockets.emit('map', map);
+        let player = players[socket.id]
+        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
+        io.sockets.emit('map', partialMap);
+        io.sockets.emit('items', items);
+        io.sockets.emit('state', players);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 50, 0, 0, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
@@ -158,15 +162,24 @@ io.on('connection', function (socket) {
                 damage = players[socket.id].holding[0].damage;
             }
             mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap,damage)
-            if(mapChanged == false) {
-                if(click.x > player.x) {
-                    let projectile = attackFunctions.generateProjectile(projectiles, "arrow0_item", 10, player.x + 32, player.y, 25, click.x, click.y, "right", 10, 100)
-                    attackFunctions.calculateProjectile(projectiles, projectile, players, items, gridSize, collisionMap)
-                }else{
-                    let projectile = attackFunctions.generateProjectile(projectiles, "arrow0_item", 10, player.x + 32, player.y, 25, click.x, click.y, "left", 10, 100)
-                    attackFunctions.calculateProjectile(projectiles, projectile, players, items, gridSize, collisionMap)
-                }
-            }
+            // if(mapChanged == false) {
+            //     let xdirection;
+            //     let ydirection;
+            //     if(click.x > player.x) {
+            //         xdirection = "right"
+            //
+            //     }else{
+            //         xdirection = "left"
+            //     }
+            //     if(click.y > player.y){
+            //         ydirection = "up"
+            //     }else{
+            //         ydirection = "down"
+            //     }
+            //     let projectile = attackFunctions.generateProjectile(projectiles, "arrow0_item", 10, player.x, player.y -32, 25, click.x, click.y, xdirection,ydirection, 10, 100)
+            //     attackFunctions.calculateProjectile(projectiles, projectile, players, items, gridSize, collisionMap)
+            //
+            // }
         }
 
     });
@@ -199,7 +212,8 @@ io.on('connection', function (socket) {
     socket.on('holding', function (player) {
         players[socket.id] = player
     });
-    socket.on('map', function (player) {
+    socket.on('map', function () {
+        let player = players[socket.id]
         let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
         socket.emit('map', partialMap);
     });
@@ -207,20 +221,26 @@ io.on('connection', function (socket) {
         console.log('Player ' + socket.id + ' has disconnected.');
         players[socket.id] = 0
     });
+    socket.on('items', function (some) {
+        socket.emit('items', items);
+    });
+    socket.on('state', function (some) {
+        socket.emit("state",players)
+    });
 });
 
 
 setInterval(function () {
     collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,5);
-    attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
+    //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
     let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap)
     rightEdge= edges.rightEdge
     leftEdge = edges.leftEdge
-    io.sockets.in('players').emit('state', players);
-    io.sockets.in('players').emit('items', items);
-    io.sockets.in('players').emit('projectiles',projectiles);
-    gameTime = timeFunctions.updateGameTime(gameTime,1)
+    //io.sockets.in('players').emit('state', players);
+    //io.sockets.in('players').emit('items', items);
+    //io.sockets.in('players').emit('projectiles',projectiles);
+    //gameTime = timeFunctions.updateGameTime(gameTime,1)
 }, 1000 / 60);
 
 
