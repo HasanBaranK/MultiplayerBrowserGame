@@ -111,16 +111,4 @@ class AnimationsFiles {
       this.animTime = t + this.speed
     }
   }
-  decreaseFrame(){
-    this.currentFrame--
-    if(this.currentFrame == 0){
-      this.currentFrame = this.numberOfFrames
-    }
-  }
-  increaseFrame(){
-    this.currentFrame++
-    if(this.currentFrame == this.numberOfFrames){
-      this.currentFrame = 0
-    }
-  }
 }

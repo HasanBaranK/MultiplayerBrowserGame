@@ -4,9 +4,7 @@ let mousePosition = {}
 let buttons = []
 let displays = {}
 let inInventory = false
-let nameBuffer = 'Enter your message'
-let messageHistory = []
-let inChat = false
+
 
 let keys = {}
 let players = {}
@@ -16,8 +14,6 @@ let projectiles;
 let currentTransform = {x:0,y:0}
 let itemHoldingIndex = 0
 let background = null
-let chatInput = null
-let chatBox = null
 
 cvs = document.getElementById('canvas')
 ctx = cvs.getContext('2d')
@@ -146,77 +142,6 @@ class Bar {
   }
 }
 
-class ChatInput {
-  constructor(x, y, width, height){
-    this.x = x
-    this.y = y
-    this.width = width
-    this.height = height
-  }
-  draw(ctx, ctX, ctY, opacity, borderColor){
-    ctx.save()
-    ctx.globalAlpha = opacity
-    ctx.fillStyle = 'white'
-    ctx.fillRect(ctX + this.x, ctY + this.y, this.width, this.height)
-    ctx.strokeStyle = borderColor
-    ctx.rect(ctX + this.x -1, ctY + this.y - 1, this.width + 1, this.height + 1)
-    ctx.stroke()
-    ctx.fillStyle = 'black'
-    ctx.font = "18px serif"
-    ctx.fillText(nameBuffer, ctX + this.x + 2, ctY + this.y + 15)
-    ctx.restore()
-  }
-  isHovered(){
-    if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
-      document.body.style.cursor = 'text';
-      return true
-    }
-    return false
-  }
-  isClicked(){
-    if(this.isHovered()){
-      inChat = true
-      if(nameBuffer == 'Enter your message'){
-        nameBuffer = ''
-      }
-      leftMousePressed = false
-      rightMousePressed = false
-      return true
-    }
-    this.borderColor = 'black'
-    return false
-  }
-}
-
-class ChatBox{
-
-  constructor(x, y, width, height){
-    this.x = x
-    this.y = y
-    this.width = width
-    this.height = height
-  }
-
-  draw(ctx, ctX, ctY){
-    ctx.save()
-    ctx.fillStyle = 'white'
-    ctx.fillRect(ctX + this.x, ctY + this.y, this.width, this.height)
-    ctx.fillStyle = 'black'
-    let offSet = 15
-    let messageSender = 'you'
-    for(let message in messageHistory){
-      if(messageHistory[message].sender != socket.id){
-        ctx.fillText(messageHistory[message].sender + ': ' + messageHistory[message].message, this.x + ctX, this.y + ctY + offSet)
-      }
-      else{
-        ctx.fillText(messageSender + ': ' + messageHistory[message].message, this.x + ctX, this.y + ctY + offSet)
-      }
-      offSet+= 15
-    }
-    ctx.restore()
-  }
-}
-
 let images = {}
 let promises = []
 function loadImagesThen(folders){
@@ -243,9 +168,6 @@ function loadImagesThen(folders){
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     background = new AnimationsFiles(104, 500, cvs.width, cvs.height)
-    chatInput = new ChatInput(cvs.width - 253, cvs.height - 28, 250, 24, 'black')
-    chatBox = new ChatBox(chatInput.x, chatInput.y - 140, chatInput.width, chatInput.height + 100)
-
     socket.emit('new player')
     window.requestAnimationFrame(game)
   });
@@ -314,21 +236,6 @@ document.body.onload = () => {
     })
 
     document.onkeydown = (key) => {
-      if(inChat){
-        var keycode = parseInt(key.which);
-        if (keycode == 46 || keycode == 8) {
-          event.preventDefault();
-          nameBuffer = nameBuffer.slice(0,nameBuffer.length-1);
-        }
-        if(key.key == 'Enter' && nameBuffer.trim() != ''){
-          socket.emit('generalmessage', {message:nameBuffer})
-          nameBuffer = ''
-        }
-        if(key.key == 'Escape'){
-          inChat = false
-        }
-      }
-      else{
         if(key.key == 'i'){
           inInventory = !inInventory
           return
@@ -355,19 +262,7 @@ document.body.onload = () => {
           itemHoldingIndex = item
           players[socket.id].state.holding = [players[socket.id].state.inventory[item]]
           socket.emit('holding', players[socket.id].state)
-          console.log('sent');
         }
-      }
-    }
-
-    document.onkeypress = (key) => {
-      if(inChat){
-        var keycode = parseInt(key.which);
-        if (nameBuffer.length < 50)
-        {
-          nameBuffer += String.fromCharCode(keycode);
-        }
-      }
     }
 
     document.onkeyup = (key) => {
@@ -379,9 +274,7 @@ document.body.onload = () => {
         if(evt.button == 0){
           leftMousePressed = true
           buttons['inventory'].isClicked()
-          if(!chatInput.isClicked()){
-            inChat = false
-          }
+
         }
         else{
           rightMousePressed = true
@@ -390,9 +283,6 @@ document.body.onload = () => {
       else{
         if(evt.button == 0){
           buttons['inventory'].isClicked()
-          if(!chatInput.isClicked()){
-            inChat = false
-          }
         }
       }
     });
@@ -411,12 +301,6 @@ document.body.onload = () => {
     cvs.addEventListener('mousemove', function(event) {
      mousePosition.x = event.offsetX || event.layerX;
      mousePosition.y = event.offsetY || event.layerY;
-     try {
-       if(!chatInput.isHovered()){
-         document.body.style.cursor = 'auto';
-       }
-     } catch (e) {
-     }
     });
 
     cvs.addEventListener('wheel', function(event) {
