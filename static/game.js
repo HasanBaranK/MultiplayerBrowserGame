@@ -46,13 +46,16 @@ function determineAnimation(player){
     default:
   }
 }
-
+let xDifference = 0
+let yDifference = 0
+let timeDelayOfMouse = 0
 function game(){
   try {
-    let t = new Date().getTime()
-    if(leftMousePressed && t > delayMouseClickEmit){
+    meter.tickStart();
+    let timeDelayOfMouse = perf.now()
+    if(leftMousePressed && timeDelayOfMouse > delayMouseClickEmit){
       socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
-      delayMouseClickEmit = t + 500
+      delayMouseClickEmit = timeDelayOfMouse + 500
     }
     else if(rightMousePressed && t > delayMouseClickEmit){
       socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
@@ -71,10 +74,9 @@ function game(){
       currentCoords.y+=5
     }
     socket.emit('movement', keys)
-    // socket.emit('map', players[socket.id].state)
     if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
-      let xDifference = (currentCoords.x - players[socket.id].state.x)
-      let yDifference = (currentCoords.y - players[socket.id].state.y)
+      xDifference = (currentCoords.x - players[socket.id].state.x)
+      yDifference = (currentCoords.y - players[socket.id].state.y)
       currentTransform.x -= xDifference
       currentTransform.y -= yDifference
       ctx.translate(xDifference, yDifference)
@@ -82,14 +84,6 @@ function game(){
       currentCoords.y = players[socket.id].state.y
     }
     ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
-    ctx.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
-    // ctx.drawImage(images['cloud01'], currentTransform.x + xCloud , currentTransform.y - 200, cvs.width, cvs.height)
-    // xCloud+=1
-    // if(xCloud > cvs.width){
-    //   xCloud = -cvs.width
-    // }
-    //background.draw(ctx, currentTransform.x, currentTransform.y, images)
-    // ctx.drawImage(images['8-bit-background-1'], currentTransform.x, currentTransform.y - 500, cvs.width + 300, cvs.height + 500)
     for(let player in players){
       if(players[player].state.isDead){
         players[player].drawFinal(ctx, 'dieR')
@@ -131,27 +125,10 @@ function game(){
           determineAnimation(players[player])
         }
       }
-      ctx.font = "10px serif"
-      if(player != socket.id){
-        ctx.fillText(player, players[player].state.x, players[player].state.y);
-      }
     }
-    let item  = players[socket.id].state.holding[0]
     drawMap(map);
     drawItems(items);
     drawProjectiles(projectiles)
-    if(item){
-      ctx.font = "26px serif"
-      ctx.fillStyle = 'white'
-      ctx.fillText('Holding: ' + item.name, currentTransform.x + 100, currentTransform.y + 100)
-    }
-    else{
-      ctx.font = "26px serif"
-      ctx.fillStyle = 'white'
-      ctx.fillText('Holding: ' + 'Nothing', currentTransform.x + 100, currentTransform.y + 100)
-    }
-
-    ctx.font = "bold 16px serif"
 
     displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 32, currentTransform.y + cvs.height - 500 ,players[socket.id].state.inventory)
     displays['healthbarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 40, 100)
@@ -166,10 +143,11 @@ function game(){
     else{
       buttons['inventory'].draw(ctx,currentTransform.x,currentTransform.y)
     }
-
+    meter.tick()
     requestAnimationFrame(game)
   } catch (e) {
     console.log(e);
+    meter.tick()
     requestAnimationFrame(game)
   }
 }

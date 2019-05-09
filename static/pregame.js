@@ -1,9 +1,12 @@
-let socket, cvs, ctx, leftMousePressed, rightMousePressed = undefined
+let socket, cvs, cvsBackground,ctxBackground, ctx, leftMousePressed, rightMousePressed = undefined
 let delayMouseClickEmit = new Date().getTime()
 let mousePosition = {}
 let buttons = []
 let displays = {}
 let inInventory = false
+let meter = new FPSMeter();
+let perf = window.performance
+
 
 
 let keys = {}
@@ -13,12 +16,18 @@ let items;
 let projectiles;
 let currentTransform = {x:0,y:0}
 let itemHoldingIndex = 0
-let background = null
+let itemKeyThing = 0
 
 cvs = document.getElementById('canvas')
+cvsBackground = document.getElementById('background')
+ctxBackground = cvsBackground.getContext('2d')
 ctx = cvs.getContext('2d')
 cvs.width  = 32*42;
+cvsBackground.width = 32*42
 cvs.height = 32*22;
+cvsBackground.height = 32*22
+cvs.style['z-index'] = 1
+cvsBackground.style['z-index'] = 0
 cvs.style.border = 'solid black 1px'
 let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 64}
 
@@ -42,6 +51,8 @@ class Inventory{
     this.actualSizeOffset = actualSizeOffset
     this.textOffsetX = textOffsetX
     this.textOffsetY = textOffsetY
+    this.xOfItem = 0
+    this.yOfItem = 0
   }
   draw(ctx,ctX,ctY,inventory){
     this.currentRow = 0
@@ -50,14 +61,12 @@ class Inventory{
       if(item % this.columnCount == 0 && item != 0){
         this.currentRow++
       }
-      let xOfItem = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + this.actualSizeOffset/2
-      let yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
-      ctx.drawImage(images[inventory[item].name],xOfItem,yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
-      ctx.save()
+      this.xOfItem = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + this.actualSizeOffset/2
+      this.yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
+      ctx.drawImage(images[inventory[item].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
       ctx.font = '16px bold'
       ctx.fillStyle = 'white'
       ctx.fillText(inventory[item].amount, xOfItem + this.textOffsetX, yOfItem + this.textOffsetY)
-      ctx.restore()
     }
   }
 }
@@ -77,25 +86,25 @@ class QuickSelect{
     this.actualSizeOffset = actualSizeOffset
     this.textOffsetX = textOffsetX
     this.textOffsetY = textOffsetY
+    this.itemCurrent = 0
+    this.xOfItem = 0
+    this.yOfItem = 0
   }
   draw(ctx,ctX,ctY,inventory){
     ctx.drawImage(this.img,this.x+ctX, this.y+ctY)
     for(this.currentRow = 0; this.currentRow < 9; this.currentRow++){
-      let itemCurrent = inventory[this.currentRow]
-      let xOfItem = (this.x+ctX)+((this.currentRow%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + (this.actualSizeOffset/2)
-      let yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
-      if(itemCurrent){
-        ctx.drawImage(images[inventory[this.currentRow].name],xOfItem,yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
-        ctx.save()
+      this.itemCurrent = inventory[this.currentRow]
+      this.xOfItem = (this.x+ctX)+((this.currentRow%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + (this.actualSizeOffset/2)
+      this.yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
+      if(this.itemCurrent){
+        ctx.drawImage(images[inventory[this.currentRow].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
         ctx.font = '16px '
         ctx.fillStyle = 'white'
-        ctx.fillText(inventory[this.currentRow].amount, xOfItem + this.textOffsetX, yOfItem + this.textOffsetY)
-        ctx.restore()
+        ctx.fillText(inventory[this.currentRow].amount, this.xOfItem + this.textOffsetX, this.yOfItem + this.textOffsetY)
       }
       if(this.currentRow == itemHoldingIndex){
         ctx.fillStyle = 'rgba(250,0,0,0.2)'
-        ctx.fillRect(xOfItem - 5, yOfItem - 5, this.gridSize, this.gridSize)
-        ctx.restore()
+        ctx.fillRect(this.xOfItem - 5, this.yOfItem - 5, this.gridSize, this.gridSize)
       }
     }
   }
@@ -144,11 +153,12 @@ class Bar {
 
 let images = {}
 let promises = []
+let img = null
 function loadImagesThen(folders){
   for(let folder in folders){
     for(let image in folders[folder]){
       promises.push(new Promise((resolve, reject) => {
-        let img = new Image();
+        img = new Image();
         img.onload = function() {
           resolve('resolved')
         }
@@ -167,8 +177,8 @@ function loadImagesThen(folders){
     displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
-    background = new AnimationsFiles(104, 500, cvs.width, cvs.height)
     socket.emit('new player')
+    ctxBackground.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
     window.requestAnimationFrame(game)
   });
 }
@@ -260,10 +270,10 @@ document.body.onload = () => {
           }
           keys[key.key] = true
         }
-        let item = key.key-1
-        if(!isNaN(item)){
-          itemHoldingIndex = item
-          players[socket.id].state.holding = [players[socket.id].state.inventory[item]]
+         itemKeyThing = key.key-1
+        if(!isNaN(itemKeyThing)){
+          itemHoldingIndex = itemKeyThing
+          players[socket.id].state.holding = [players[socket.id].state.inventory[itemKeyThing]]
           socket.emit('holding', players[socket.id].state)
         }
     }

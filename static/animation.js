@@ -11,7 +11,8 @@ class Animation {
     this.speed = speed
 
     this.currentColumn = this.startColumn
-    this.animTime = new Date().getTime()
+    this.animTime = perf.now()
+    this.currentTime = perf.now()
   }
   draw(ctx, x, y){
     if(this.currentColumn > this.endColumn){
@@ -19,10 +20,10 @@ class Animation {
     }
     ctx.drawImage(this.img, this.currentColumn * this.width, this.row * this.height,
                   this.width, this.height, x, y, this.cWidth, this.cHeight)
-    let t = new Date().getTime()
-    if(t > this.animTime){
+    this.currentTime = perf.now()
+    if(this.currentTime > this.animTime){
       this.currentColumn++
-      this.animTime = t + this.speed
+      this.animTime = this.currentTime + this.speed
     }
   }
   reset(){
@@ -43,7 +44,8 @@ class AnimationOnce {
     this.speed = speed
 
     this.currentColumn = this.startColumn
-    this.animTime = new Date().getTime()
+    this.animTime = perf.now()
+    this.currentTime = perf.now()
     this.ended = false
   }
   draw(ctx, x, y){
@@ -53,10 +55,10 @@ class AnimationOnce {
     }
     ctx.drawImage(this.img, this.currentColumn * this.width, this.row * this.height,
                   this.width, this.height, x, y, this.cWidth, this.cHeight)
-    let t = new Date().getTime()
-    if(t > this.animTime){
+    this.currentTime = perf.now()
+    if(this.currentTime > this.animTime){
       this.currentColumn++
-      this.animTime = t + this.speed
+      this.animTime = this.currentTime + this.speed
     }
   }
 }
@@ -74,16 +76,17 @@ class AnimationFinal {
     this.speed = speed
 
     this.currentColumn = this.startColumn
-    this.animTime = new Date().getTime()
+    this.animTime = perf.now()
+    this.currentTime = perf.now()
     this.ended = false
   }
   draw(ctx, x, y){
     ctx.drawImage(this.img, this.currentColumn * this.width, this.row * this.height,
                   this.width, this.height, x, y, this.cWidth, this.cHeight)
-    let t = new Date().getTime()
-    if(t > this.animTime && this.currentColumn < this.endColumn){
+    this.currentTime = perf.now()
+    if(this.currentTime > this.animTime && this.currentColumn < this.endColumn){
       this.currentColumn++
-      this.animTime = t + this.speed
+      this.animTime = this.currentTime + this.speed
     }
   }
 }
@@ -96,7 +99,8 @@ class AnimationsFiles {
     this.cWidth = cWidth
     this.cHeight = cHeight
 
-    this.animTime = new Date().getTime()
+    this.animTime = perf.now()
+    this.currentTime = perf.now()
   }
   draw(ctx, ctX , ctY, images){
     if(this.currentFrame > this.numberOfFrames){
@@ -105,10 +109,10 @@ class AnimationsFiles {
     let img = images['bg1 (' + this.currentFrame + ')']
     ctx.drawImage(img, ctX, ctY, this.cWidth, this.cHeight)
 
-    let t = new Date().getTime()
-    if(t > this.animTime){
+    this.currentTime = perf.now()
+    if(this.currentTime > this.animTime){
       this.currentFrame++
-      this.animTime = t + this.speed
+      this.animTime = this.currentTime + this.speed
     }
   }
 }
