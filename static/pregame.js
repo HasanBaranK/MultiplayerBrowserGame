@@ -66,7 +66,7 @@ class Inventory{
       ctx.drawImage(images[inventory[item].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
       ctx.font = '16px bold'
       ctx.fillStyle = 'white'
-      ctx.fillText(inventory[item].amount, xOfItem + this.textOffsetX, yOfItem + this.textOffsetY)
+      ctx.fillText(inventory[item].amount, this.xOfItem + this.textOffsetX, this.yOfItem + this.textOffsetY)
     }
   }
 }
