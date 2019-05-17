@@ -18,6 +18,12 @@ function MobAI(mob,collisionMap) {
             move("right", mob, 32, collisionMap, 5)
         }
 
+    }else {
+        if(player.x > mob.x){
+            move("right", mob, 32, collisionMap, 5)
+        }else {
+            move("left", mob, 32, collisionMap, 5)
+        }
     }
 }
 
