@@ -28,6 +28,7 @@ function generateMobs(startX,amount,mobs,collisionMap,gridSize) {
         mobs.push(mob)
     }
 
+    return mobs;
 
 }
 
