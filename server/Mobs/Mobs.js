@@ -1,3 +1,9 @@
+
+module.exports = {
+    generateMobs,
+    generateMob
+}
+
 function idleMob() {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
@@ -6,7 +12,7 @@ function idleMob() {
 
 }
 
-function generateMobs(startX,mobs,collisionMap,gridSize) {
+function generateMobs(startX,amount,mobs,collisionMap,gridSize) {
     let amountOfMobs = Math.floor(Math.random() * Math.floor((amount / 10))) + 1;
     let density = 10
     console.log("Amount of Trees: " + amountOfMobs)

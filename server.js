@@ -31,6 +31,7 @@ let attackFunctions = require("./server/Player/attack");
 let itemFunctions = require("./server/Player/items");
 let inventoryFunctions = require("./server/Player/inventory");
 let timeFunctions = require("./server/time.js");
+let mobsFunctions = require("./server/Mobs/Mobs");
 
 const imageFolder = './static/images';
 
@@ -40,7 +41,7 @@ var fastMap = {};
 let items = [];
 let projectiles = [];
 let map;
-let mobs;
+let mobs = [];
 let gameTime = 0;
 let day = 0;
 let mapChanged = false;
@@ -52,7 +53,7 @@ let rightEdge = 70;
 
 
 let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
-mobs = generateMobs(startX,mobs,collisionMap,gridSize);
+mobs = mobsFunctions.generateMobs(leftEdge,rightEdge-leftEdge,mobs,collisionMap,gridSize);
 map = maps.map;
 collisionMap = maps.collisionMap;
 fastMap = maps.fastMap;
