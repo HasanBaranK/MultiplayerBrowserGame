@@ -136,7 +136,7 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
         }
         for (let player in players) {
             player = players[player]
-            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
                 lowerHealth(player, projectile.damage);
             }
         }
@@ -163,13 +163,14 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
         }
         for (let player in players) {
             player = players[player]
-            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
                 lowerHealth(player, projectile.damage);
             }
         }
         projectile.angle = getAngleRad(xamountTraveled,gravityAmount)
         await sleep(sleepTime)
     }
+
 
     function sleep(ms){
         return new Promise(resolve=>{
@@ -187,18 +188,20 @@ function projectileGravity(projectiles, players, gridSize, collisionMap, items,g
     for (let projectile in projectiles) {
         let indexProjectile = projectile
         projectile = projectiles[projectile]
+
+        projectile.y += gravityAmount
         for (let player in players) {
             player = players[player]
-            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x, player.y)) {
+            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
                 lowerHealth(player, projectile.damage);
             }
-            projectile.y += gravityAmount
-            if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
-                deleteProjectile(projectiles, indexProjectile)
-                generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 32, 0, 1, items, 1, false)
-                break;
-            }
         }
+        if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+            deleteProjectile(projectiles, indexProjectile)
+            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 64, 0, 1, items, 1, false)
+            break;
+        }
+
     }
 }
 

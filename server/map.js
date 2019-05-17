@@ -12,7 +12,7 @@ module.exports = {
 }
 
 
-function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
+function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) {
     //Rules
     //world has max 2000 depth mountains and and min 500 depth flat land
     //blocks should be connected and should not defy the laws of gravity(no fling blocks)
@@ -52,6 +52,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
             lastTree = start + 5
             trees.push(start)
         }
+
     }
 
     for (let i = startX; i < size; i++) {
@@ -151,7 +152,6 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
 
 
     }
-
     let maps = {
         map: blocks,
         collisionMap: collisionMap,
@@ -342,13 +342,14 @@ function sendPartialMap(x, y, halfsizex, halfsizey, map, gridSize) {
     return partialMap
 }
 
-function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap) {
+function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap,mobs) {
     for (let player in players) {
         if (players[player].x + proximity >= rightEdge * 32) {
-            console.log(rightEdge)
+            //console.log(rightEdge)
             autoMapGenerator(rightEdge, amount, 32, collisionMap, fastMap)
+            mobs = generateMobs(rightEdge *32,mobs,collisionMap,32);
             rightEdge = rightEdge + (amount - 1)
-            console.log(rightEdge)
+            //console.log(rightEdge)
         }
         if (players[player].x - proximity <= leftEdge * 32) {
             // autoMapGenerator(leftEdge-amount,amount,32,collisionMap,fastMap)
@@ -358,7 +359,8 @@ function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, coll
 
     let edges = {
         leftEdge: leftEdge,
-        rightEdge: rightEdge
+        rightEdge: rightEdge,
+        mobs: mobs
     }
 
     return edges
