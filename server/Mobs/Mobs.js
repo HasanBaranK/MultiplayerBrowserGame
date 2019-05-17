@@ -1,15 +1,24 @@
-
+const {move} = require("./../collision");
 module.exports = {
     generateMobs,
     generateMob
 }
 
-function idleMob() {
+function MobAI(mob,collisionMap) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
     //if he is close enogh then attack not then follow him
 
+    let player = getClosestPlayer(players,range);
+    if(player == null) {
+        let number = Math.floor(Math.random());
+        if(number == 0){
+            move("left", mob, 32, collisionMap, 5)
+        }else{
+            move("right", mob, 32, collisionMap, 5)
+        }
 
+    }
 }
 
 function generateMobs(startX,amount,mobs,collisionMap,gridSize) {
@@ -24,16 +33,17 @@ function generateMobs(startX,amount,mobs,collisionMap,gridSize) {
             break
         }
         lastMob = start + 5
-        let mob = generateMob(start,collisionMap,gridSize);
-        mobs.push(mob)
+        mobs = generateMob(start,collisionMap,gridSize,mobs);
+        console.log(mobs)
     }
 
     return mobs;
 
 }
 
-function generateMob(start,collisionMap,gridSize) {
-    let mob = {
+function generateMob(start,collisionMap,gridSize,mobs) {
+    let id = Math.floor(Math.random() * 100000000);
+    mobs["asd"+id + "asd"]= {
         name: "Skeleton",
         x: start,
         y: getHeight(start,collisionMap,gridSize,640),
@@ -49,7 +59,7 @@ function generateMob(start,collisionMap,gridSize) {
         equipped: [],
         holding: []
     };
-    return mob
+    return mobs
 }
 function getHeight(x, collisionMap,gridSize,start) {
     if (collisionMap[x * gridSize] !== undefined) {

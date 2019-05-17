@@ -41,7 +41,7 @@ var fastMap = {};
 let items = [];
 let projectiles = [];
 let map;
-let mobs = [];
+let mobs = {};
 let gameTime = 0;
 let day = 0;
 let mapChanged = false;
@@ -92,6 +92,7 @@ io.on('connection', function (socket) {
             equipped: [],
             holding: []
         };
+        console.log(players)
         let player = players[socket.id]
         let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
         io.sockets.emit('map', partialMap);
