@@ -348,7 +348,7 @@ function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, coll
         if (players[player].x + proximity >= rightEdge * 32) {
             //console.log(rightEdge)
             autoMapGenerator(rightEdge, amount, 32, collisionMap, fastMap)
-            mobs = generateMobs(rightEdge *32,amount,mobs,collisionMap,32);
+            mobs = generateMobs(rightEdge,amount,mobs,collisionMap,32);
             rightEdge = rightEdge + (amount - 1)
             //console.log(rightEdge)
         }

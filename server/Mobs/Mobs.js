@@ -51,7 +51,7 @@ function generateMob(start,collisionMap,gridSize,mobs) {
     let id = Math.floor(Math.random() * 100000000);
     mobs["asd"+id + "asd"]= {
         name: "Skeleton",
-        x: start,
+        x: start *32,
         y: getHeight(start,collisionMap,gridSize,640),
         status: 0,
         health: 100,
