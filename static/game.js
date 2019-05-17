@@ -1,13 +1,18 @@
 function drawMap(map) {
   for(let block in map){
     try {
-      ctx.drawImage(images[map[block].type], map[block].x, map[block].y);
+      ctx.drawImage(images[map[block].type], map[block].x, map[block].y)
+      if(map[block].health <= 25){
+        ctx.drawImage(images['crack03_block'], map[block].x, map[block].y)
+        continue
+      }
+      if(map[block].health <= 50){
+        ctx.drawImage(images['crack02_block'], map[block].x, map[block].y)
+        continue
+      }
       if(map[block].health < 100){
-        ctx.save()
-        ctx.fillStyle = "red";
-        ctx.globalAlpha = (1 - map[block].health/100) * (0.4)
-        ctx.fillRect(map[block].x, map[block].y, 32, 32)
-        ctx.restore()
+        ctx.drawImage(images['crack01_block'], map[block].x, map[block].y)
+        continue
       }
     }catch (e) {
       console.log(map[block])
@@ -45,17 +50,19 @@ function determineAnimation(player){
 }
 let xDifference = 0
 let yDifference = 0
+let xComm = 0
+let yComm = 0
 let timeDelayOfMouse = 0
 function game(){
   try {
     meter.tickStart();
     timeDelayOfMouse = perf.now()
     if(leftMousePressed && timeDelayOfMouse > delayMouseClickEmit){
-      socket.emit('leftclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      socket.emit('leftclick', {x:mousePosition.x+camera.x, y:mousePosition.y+camera.y})
       delayMouseClickEmit = timeDelayOfMouse + 500
     }
     else if(rightMousePressed && timeDelayOfMouse > delayMouseClickEmit){
-      socket.emit('rightclick', {x:mousePosition.x+currentTransform.x, y:mousePosition.y+currentTransform.y})
+      socket.emit('rightclick', {x:mousePosition.x+camera.x, y:mousePosition.y+camera.y})
       delayMouseClickEmit = timeDelayOfMouse + 500
     }
     if(keys['ArrowLeft']){
@@ -71,16 +78,48 @@ function game(){
       currentCoords.y+=5
     }
     socket.emit('movement', keys)
-    if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
-      xDifference = (currentCoords.x - players[socket.id].state.x)
-      yDifference = (currentCoords.y - players[socket.id].state.y)
-      currentTransform.x -= xDifference
-      currentTransform.y -= yDifference
-      ctx.translate(xDifference, yDifference)
-      currentCoords.x = players[socket.id].state.x
-      currentCoords.y = players[socket.id].state.y
+    // if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
+    //   xDifference = (currentCoords.x - players[socket.id].state.x)
+    //   yDifference = (currentCoords.y - players[socket.id].state.y)
+    //   xComm += xDifference
+    //   yComm += yDifference
+    //   console.log(xComm);
+    //   //camera.move(xDifference, yDifference)
+    //   currentCoords.x = players[socket.id].state.x
+    //   currentCoords.y = players[socket.id].state.y
+    // }
+    xDifference = (currentCoords.x - players[socket.id].state.x)
+    yDifference = (currentCoords.y - players[socket.id].state.y)
+    currentCoords.x = players[socket.id].state.x
+    currentCoords.y = players[socket.id].state.y
+    xComm += xDifference
+    yComm += yDifference
+    if(xComm <= -camera.speed){
+      xComm += camera.speed
+      camera.move(camera.speed, 0)
     }
-    ctx.clearRect(currentTransform.x, currentTransform.y, cvs.width, cvs.height);
+    else if(xComm >= camera.speed){
+      xComm -= camera.speed
+      camera.move(-camera.speed, 0)
+    }
+    else{
+      camera.move(xComm, 0)
+      xComm = 0
+    }
+
+    if(yComm <= -camera.speed){
+      yComm += camera.speed
+      camera.move(0, camera.speed)
+    }
+    else if(yComm >= camera.speed){
+      yComm -= camera.speed
+      camera.move(0, -camera.speed)
+    }
+    else{
+      camera.move(yComm, 0)
+      yComm = 0
+    }
+    ctx.clearRect(camera.x, camera.y, cvs.width, cvs.height);
     for(let player in players){
       if(players[player].state.isDead){
         players[player].drawFinal(ctx, 'dieR')
@@ -127,18 +166,18 @@ function game(){
     drawItems(items);
     drawProjectiles(projectiles)
 
-    displays['quickselect'].draw(ctx,currentTransform.x + cvs.width - 32, currentTransform.y + cvs.height - 500 ,players[socket.id].state.inventory)
-    displays['healthbarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 40, 100)
-    displays['energybarframe'].draw(ctx, currentTransform.x, currentTransform.y + cvs.height - 20, 100)
-    displays['healthbar'].draw(ctx, currentTransform.x + 1, currentTransform.y + cvs.height - 40, players[socket.id].state.health)
-    displays['energybar'].draw(ctx, currentTransform.x + 1, currentTransform.y + cvs.height - 20, 100, players[socket.id].state.health)
+    displays['quickselect'].draw(ctx,camera.x + cvs.width - 32, camera.y + cvs.height - 500 ,players[socket.id].state.inventory)
+    displays['healthbarframe'].draw(ctx, camera.x, camera.y + cvs.height - 40, 100)
+    displays['energybarframe'].draw(ctx, camera.x, camera.y + cvs.height - 20, 100)
+    displays['healthbar'].draw(ctx, camera.x + 1, camera.y + cvs.height - 40, players[socket.id].state.health)
+    displays['energybar'].draw(ctx, camera.x + 1, camera.y + cvs.height - 20, 100, players[socket.id].state.health)
     buttons['inventoryopen'].isHovered()
     if(inInventory){
-      displays['inventory'].draw(ctx,currentTransform.x,currentTransform.y,players[socket.id].state.inventory)
-      buttons['inventoryopen'].draw(ctx,currentTransform.x,currentTransform.y)
+      displays['inventory'].draw(ctx,camera.x,camera.y,players[socket.id].state.inventory)
+      buttons['inventoryopen'].draw(ctx,camera.x,camera.y)
     }
     else{
-      buttons['inventory'].draw(ctx,currentTransform.x,currentTransform.y)
+      buttons['inventory'].draw(ctx,camera.x,camera.y)
     }
     meter.tick()
     requestAnimationFrame(game)

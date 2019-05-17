@@ -14,7 +14,6 @@ let players = {}
 let map;
 let items;
 let projectiles;
-let currentTransform = {x:0,y:0}
 let itemHoldingIndex = 0
 let itemKeyThing = 0
 
@@ -151,6 +150,28 @@ class Bar {
   }
 }
 
+class Camera {
+  constructor(x, y, ppX, ppY, speed){
+    this.x = x;
+    this.y = y;
+    this.ppX = ppX;
+    this.ppY = ppY;
+    this.speed = speed;
+  }
+
+  move(x,y){
+    camera.x+=x
+    camera.y+=y
+    ctx.translate(-x, -y)
+  }
+
+  set(x,y){
+    this.x = x
+    this.y = y
+  }
+}
+
+let camera = new Camera(0, 0, 0, 0, 5);
 let images = {}
 let promises = []
 let img = null
