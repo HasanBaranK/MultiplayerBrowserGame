@@ -11,6 +11,7 @@ let delayMouseClickEmit = perf.now()
 
 let keys = {}
 let players = {}
+let mobs = {}
 let map;
 let items;
 let projectiles;
@@ -254,6 +255,11 @@ document.body.onload = () => {
 
     socket.on('projectiles', (projectilesServer) => {
       projectiles = projectilesServer
+    });
+
+    socket.on('mobs', (mobsServer) => {
+      mobs = mobsServer
+      socket.emit('mobs',)
     });
 
     socket.on('peoplegothit', (peoplewhogothit) => {
