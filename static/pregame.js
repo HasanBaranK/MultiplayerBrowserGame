@@ -1,4 +1,4 @@
-let socket, cvs, cvsBackground,ctxBackground, ctx, leftMousePressed, rightMousePressed = undefined
+let socket, cvs, cvsBackground,ctxBackground,ctxChat,cvsChat, ctx, leftMousePressed, rightMousePressed = undefined
 let mousePosition = {}
 let buttons = []
 let displays = {}
@@ -6,6 +6,7 @@ let inInventory = false
 let meter = new FPSMeter();
 let perf = window.performance
 let delayMouseClickEmit = perf.now()
+let inChat = false
 
 
 
@@ -24,6 +25,11 @@ cvs = document.getElementById('canvas')
 // cvsBackground.height = 32*22
 // cvsBackground.width = 32*42
 // cvsBackground.style['z-index'] = 0
+cvsChat = document.getElementById('chat')
+ctxChat = cvsChat.getContext('2d')
+cvsChat.height = 32*22
+cvsChat.width = 32*42
+cvsChat.style['z-index'] = 2
 ctx = cvs.getContext('2d')
 cvs.width  = 32*42;
 cvs.height = 32*22;
@@ -31,8 +37,26 @@ cvs.style['z-index'] = 1
 cvs.style.border = 'solid black 1px'
 let currentCoords = {x:cvs.width / 2,y:cvs.height/2 + 64}
 
+var input = new CanvasInput({
+  canvas: cvsChat,
+  fontSize: 18,
+  fontFamily: 'Arial',
+  fontColor: '#212121',
+  fontWeight: 'bold',
+  width: 300,
+  padding: 4,
+  borderWidth: 1,
+  borderColor: '#000',
+  borderRadius: 5,
+  boxShadow: '1px 1px 0px #fff',
+  innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
+  placeHolder: 'Enter message here...',
+  x:cvs.width - 311,
+  y:cvs.height - 29
+});
 
-$('body').on('contextmenu', '#canvas', function (e) {
+
+$('body').on('contextmenu', '#chat', function (e) {
   return false;
 });
 
@@ -258,7 +282,24 @@ document.body.onload = () => {
     });
 
     socket.on('mobs', (mobsServer) => {
-      mobs = mobsServer
+      for(let mob in mobsServer){
+        if(mobsServer[mob] != 0){
+          if (!mobs[mob]){
+            console.log('New Mob Generated');
+            mobs[mob] = new Mob(mobsServer[mob])
+            mobs[mob].addAnimation('idle',images['Skeleton_Idle'],0,10,0,24,32,24,32,100)
+          }
+          else{
+            if(mobs[mob].state.status != mobsServer[mob].status){
+              mobs[mob].resetAnimations()
+            }
+            mobs[mob].state = mobsServer[mob]
+          }
+        }
+        else if(mobs[mob]){
+          delete mobs[mob]
+        }
+      }
       socket.emit('mobs',)
     });
 
@@ -310,7 +351,13 @@ document.body.onload = () => {
       keys[key.key] = false
     }
 
-    cvs.addEventListener('mousedown', function(evt) {
+    cvsChat.addEventListener('mousedown', function(evt) {
+      if(input._wasOver){
+        inChat = true
+      }
+      else{
+        inChat = false
+      }
       if(!inInventory){
         if(evt.button == 0){
           leftMousePressed = true
@@ -328,7 +375,7 @@ document.body.onload = () => {
       }
     });
 
-    cvs.addEventListener('mouseup', function(evt) {
+    cvsChat.addEventListener('mouseup', function(evt) {
       if(!inInventory){
         if(evt.button == 0){
           leftMousePressed = false
@@ -339,12 +386,12 @@ document.body.onload = () => {
       }
     });
 
-    cvs.addEventListener('mousemove', function(event) {
+    cvsChat.addEventListener('mousemove', function(event) {
      mousePosition.x = event.offsetX || event.layerX;
      mousePosition.y = event.offsetY || event.layerY;
     });
 
-    cvs.addEventListener('wheel', function(event) {
+    cvsChat.addEventListener('wheel', function(event) {
       if(event.deltaY > 0){
         itemHoldingIndex++
         if(itemHoldingIndex > 8){

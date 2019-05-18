@@ -78,48 +78,46 @@ function game(){
       currentCoords.y+=5
     }
     socket.emit('movement', keys)
-    // if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
-    //   xDifference = (currentCoords.x - players[socket.id].state.x)
-    //   yDifference = (currentCoords.y - players[socket.id].state.y)
-    //   xComm += xDifference
-    //   yComm += yDifference
-    //   console.log(xComm);
-    //   //camera.move(xDifference, yDifference)
-    //   currentCoords.x = players[socket.id].state.x
-    //   currentCoords.y = players[socket.id].state.y
+    if(players[socket.id].state.x != currentCoords.x || players[socket.id].state.y != currentCoords.y){
+      xDifference = (currentCoords.x - players[socket.id].state.x)
+      yDifference = (currentCoords.y - players[socket.id].state.y)
+      camera.move(-xDifference, -yDifference)
+      currentCoords.x = players[socket.id].state.x
+      currentCoords.y = players[socket.id].state.y
+    }
+    // xDifference = (currentCoords.x - players[socket.id].state.x)
+    // yDifference = (currentCoords.y - players[socket.id].state.y)
+    // currentCoords.x = players[socket.id].state.x
+    // currentCoords.y = players[socket.id].state.y
+    // xComm += xDifference
+    // yComm += yDifference
+    // if(xComm <= -camera.speed){
+    //   xComm += camera.speed
+    //   camera.move(camera.speed, 0)
     // }
-    xDifference = (currentCoords.x - players[socket.id].state.x)
-    yDifference = (currentCoords.y - players[socket.id].state.y)
-    currentCoords.x = players[socket.id].state.x
-    currentCoords.y = players[socket.id].state.y
-    xComm += xDifference
-    yComm += yDifference
-    if(xComm <= -camera.speed){
-      xComm += camera.speed
-      camera.move(camera.speed, 0)
-    }
-    else if(xComm >= camera.speed){
-      xComm -= camera.speed
-      camera.move(-camera.speed, 0)
-    }
-    else{
-      camera.move(xComm, 0)
-      xComm = 0
-    }
-
-    if(yComm <= -camera.speed){
-      yComm += camera.speed
-      camera.move(0, camera.speed)
-    }
-    else if(yComm >= camera.speed){
-      yComm -= camera.speed
-      camera.move(0, -camera.speed)
-    }
-    else{
-      camera.move(yComm, 0)
-      yComm = 0
-    }
+    // else if(xComm >= camera.speed){
+    //   xComm -= camera.speed
+    //   camera.move(-camera.speed, 0)
+    // }
+    // else{
+    //   camera.move(-xComm, 0)
+    //   xComm = 0
+    // }
+    //
+    // if(yComm <= -camera.speed){
+    //   yComm += camera.speed
+    //   camera.move(0, camera.speed)
+    // }
+    // else if(yComm >= camera.speed){
+    //   yComm -= camera.speed
+    //   camera.move(0, -camera.speed)
+    // }
+    // else{
+    //   camera.move(0, -yComm)
+    //   yComm = 0
+    // }
     ctx.clearRect(camera.x, camera.y, cvs.width, cvs.height);
+    ctxChat.clearRect(0, 0, cvs.width, cvs.height);
     for(let player in players){
       if(players[player].state.isDead){
         players[player].drawFinal(ctx, 'dieR')
@@ -162,22 +160,30 @@ function game(){
         }
       }
     }
+    for(let mob in mobs){
+      switch (mobs[mob].state.status) {
+        case 0: mobs[mob].draw(ctx, 'idle');
+          break;
+        default:
+      }
+    }
     drawMap(map);
     drawItems(items);
     drawProjectiles(projectiles)
 
-    displays['quickselect'].draw(ctx,camera.x + cvs.width - 32, camera.y + cvs.height - 500 ,players[socket.id].state.inventory)
-    displays['healthbarframe'].draw(ctx, camera.x, camera.y + cvs.height - 40, 100)
-    displays['energybarframe'].draw(ctx, camera.x, camera.y + cvs.height - 20, 100)
-    displays['healthbar'].draw(ctx, camera.x + 1, camera.y + cvs.height - 40, players[socket.id].state.health)
-    displays['energybar'].draw(ctx, camera.x + 1, camera.y + cvs.height - 20, 100, players[socket.id].state.health)
+    input.render()
+    displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
+    displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100)
+    displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100)
+    displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health)
+    displays['energybar'].draw(ctxChat, 1,cvs.height - 20, 100, players[socket.id].state.health)
     buttons['inventoryopen'].isHovered()
     if(inInventory){
-      displays['inventory'].draw(ctx,camera.x,camera.y,players[socket.id].state.inventory)
-      buttons['inventoryopen'].draw(ctx,camera.x,camera.y)
+      displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)
+      buttons['inventoryopen'].draw(ctxChat,0,0)
     }
     else{
-      buttons['inventory'].draw(ctx,camera.x,camera.y)
+      buttons['inventory'].draw(ctxChat,0,0)
     }
     meter.tick()
     requestAnimationFrame(game)
