@@ -4,7 +4,8 @@ const {addItemInventory} = require("./../Player/inventory");
 const {generateItem} = require("./../Player/items");
 module.exports = {
     generateMobs,
-    generateMob
+    generateMob,
+    playerCloseToMob
 }
 
 function MobAI(players,player,mob, collisionMap,attackRange) {
@@ -29,6 +30,7 @@ function MobAI(players,player,mob, collisionMap,attackRange) {
         let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mob.x + mob.sizex, mob.y + mob.sizey)
         if(distance < attackRange){
             meleeAttack(players,null,mob.inventory[0])
+            console.log("attacked")
         }
     }
 }

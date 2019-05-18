@@ -315,14 +315,14 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
 
 }
 
-function checkPlayerCloseToItems(players,items,gridSize,collisionMap) {
+function checkPlayerCloseToItems(players,mobs,items,gridSize,collisionMap) {
     for (let player in players) {
         let currentPlayer = players[player];
         checkPlayerPerimeter(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, 150,items,gridSize,collisionMap);
     }
 }
 
-function gravity(players,gridSize,collisionMap,projectiles,playerGravity) {
+function gravity(players,mobs,gridSize,collisionMap,projectiles,playerGravity) {
     for (let player in players) {
 
         let currentPlayer = players[player];
@@ -335,6 +335,17 @@ function gravity(players,gridSize,collisionMap,projectiles,playerGravity) {
             // console.log("In land");
         }
     }
+    for (let mob in mobs) {
 
+        let currentPlayer = mobs[mob];
+        currentPlayer.y += playerGravity;
+        currentPlayer.onair = true;
+        if (checkCollision(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, gridSize,collisionMap)) {
+            //console.log(collisionMap);
+            currentPlayer.y -= playerGravity;
+            currentPlayer.onair = false;
+            // console.log("In land");
+        }
+    }
 }
 

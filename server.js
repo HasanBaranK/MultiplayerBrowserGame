@@ -244,7 +244,7 @@ io.on('connection', function (socket) {
 
 
 setInterval(function () {
-    collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,5);
+
     //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
     let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap,mobs,items)
@@ -252,6 +252,8 @@ setInterval(function () {
     rightEdge= edges.rightEdge
     leftEdge = edges.leftEdge
     mobs = edges.mobs
+    mobsFunctions.playerCloseToMob(players,mobs,100,collisionMap)
+    collisionFunctions.gravity(players,mobs, gridSize, collisionMap, projectiles,5);
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
