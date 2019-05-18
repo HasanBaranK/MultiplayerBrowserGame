@@ -57,7 +57,7 @@ let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisio
 map = maps.map;
 collisionMap = maps.collisionMap;
 fastMap = maps.fastMap;
-mobs = mobsFunctions.generateMobs(leftEdge,rightEdge-leftEdge,mobs,collisionMap,gridSize);
+mobs = mobsFunctions.generateMobs(leftEdge,rightEdge-leftEdge,mobs,collisionMap,gridSize,items);
 itemFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
@@ -247,7 +247,7 @@ setInterval(function () {
     collisionFunctions.gravity(players, gridSize, collisionMap, projectiles,5);
     //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
-    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap,mobs)
+    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap,mobs,items)
 
     rightEdge= edges.rightEdge
     leftEdge = edges.leftEdge

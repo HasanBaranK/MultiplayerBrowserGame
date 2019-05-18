@@ -343,12 +343,12 @@ function sendPartialMap(x, y, halfsizex, halfsizey, map, gridSize) {
     return partialMap
 }
 
-function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap,mobs) {
+function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap,mobs,items) {
     for (let player in players) {
         if (players[player].x + proximity >= rightEdge * 32) {
             //console.log(rightEdge)
             autoMapGenerator(rightEdge, amount, 32, collisionMap, fastMap)
-            mobs = generateMobs(rightEdge,amount,mobs,collisionMap,32);
+            mobs = generateMobs(rightEdge,amount,mobs,collisionMap,32,items);
             rightEdge = rightEdge + (amount - 1)
             //console.log(rightEdge)
         }
