@@ -268,7 +268,7 @@ function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
 // }
 function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize,collisionMap) {
 
-
+    //console.log(items);
     let arrayLength = items.length;
     if(arrayLength > 0) {
         let xcoordinate = player.x + sizex;
@@ -304,6 +304,7 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
                 } else {
                     //gravity for the item
                     item.y += 3;
+                    //console.log(item)
                     if (checkCollision(item, 16,16, gridSize,collisionMap)) {
                         item.y -= 3;
                     }
@@ -315,7 +316,7 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
 
 }
 
-function checkPlayerCloseToItems(players,mobs,items,gridSize,collisionMap) {
+function checkPlayerCloseToItems(players,items,gridSize,collisionMap) {
     for (let player in players) {
         let currentPlayer = players[player];
         checkPlayerPerimeter(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, 150,items,gridSize,collisionMap);
