@@ -53,6 +53,8 @@ let yDifference = 0
 let xComm = 0
 let yComm = 0
 let timeDelayOfMouse = 0
+let uiDelay = 0
+let currentuiTime = 0
 function game(){
   try {
     meter.tickStart();
@@ -170,7 +172,8 @@ function game(){
     drawItems(items);
     drawProjectiles(projectiles)
 
-    if(shouldUpdateUI){
+    currentuiTime = perf.now()
+    if(shouldUpdateUI || currentuiTime > uiDelay){
       ctxChat.clearRect(0, 0, cvs.width, cvs.height);
       input.render()
       displays['messagebox'].draw(ctxChat, inChat)
@@ -188,6 +191,7 @@ function game(){
         buttons['inventory'].draw(ctxChat,0,0)
       }
       shouldUpdateUI = false
+      uiDelay = currentuiTime + 1000
     }
     meter.tick()
     requestAnimationFrame(game)

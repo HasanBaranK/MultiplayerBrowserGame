@@ -10,6 +10,8 @@ let inChat = false
 let sizeOfChar = 64
 let messageHistory = []
 let shouldUpdateUI = true
+let showThisManyMessages = 9
+let scrollChat = 0
 
 
 
@@ -218,16 +220,29 @@ class MessageBox {
       ctx.fillRect(this.x, this.y, this.width, this.height)
       ctx.fillStyle = 'rgba(0,0,0,0.2)'
     }
-
-    for(let message in messageHistory){
-      if(messageHistory[message].sender == socket.id){
-        ctx.fillText('you:' + messageHistory[message].message, this.x + 2, this.y + this.offset)
+    if(messageHistory.length <= showThisManyMessages){
+      for(let message in messageHistory){
+        if(messageHistory[message].sender == socket.id){
+          ctx.fillText('you:' + messageHistory[message].message, this.x + 2, this.y + this.offset)
+        }
+        else{
+          ctx.fillText(messageHistory[message].sender + ':' + messageHistory[message].message, this.x + 2, this.y + this.offset)
+        }
+        this.offset+=16
       }
-      else{
-        ctx.fillText(messageHistory[message].sender + ':' + messageHistory[message].message, this.x + 2, this.y + this.offset)
-      }
-      this.offset+=16
     }
+    else{
+      for(let message = messageHistory.length - showThisManyMessages - scrollChat;message < messageHistory.length - scrollChat;message++){
+        if(messageHistory[message].sender == socket.id){
+          ctx.fillText('you:' + messageHistory[message].message, this.x + 2, this.y + this.offset)
+        }
+        else{
+          ctx.fillText(messageHistory[message].sender + ':' + messageHistory[message].message, this.x + 2, this.y + this.offset)
+        }
+        this.offset+=16
+      }
+    }
+
     this.offset = 16
   }
 }
@@ -448,21 +463,36 @@ document.body.onload = () => {
     });
 
     cvsChat.addEventListener('wheel', function(event) {
-      if(event.deltaY > 0){
-        itemHoldingIndex++
-        if(itemHoldingIndex > 8){
-          itemHoldingIndex = 0
+      if(!inChat){
+        if(event.deltaY > 0){
+          itemHoldingIndex++
+          if(itemHoldingIndex > 8){
+            itemHoldingIndex = 0
+          }
         }
+        else{
+          itemHoldingIndex--
+          if(itemHoldingIndex < 0){
+            itemHoldingIndex = 8
+          }
+        }
+        players[socket.id].state.holding = [players[socket.id].state.inventory[itemHoldingIndex]]
+        socket.emit('holding', players[socket.id].state)
+        console.log('sent');
       }
       else{
-        itemHoldingIndex--
-        if(itemHoldingIndex < 0){
-          itemHoldingIndex = 8
+        if(event.deltaY > 0){
+          if(scrollChat > 0){
+            scrollChat--
+          }
+        }
+        else{
+          if(messageHistory.length - showThisManyMessages - scrollChat > 0){
+            scrollChat++
+          }
         }
       }
-      players[socket.id].state.holding = [players[socket.id].state.inventory[itemHoldingIndex]]
-      socket.emit('holding', players[socket.id].state)
-      console.log('sent');
+      shouldUpdateUI= true
     });
 
     socket.emit('getimages')
