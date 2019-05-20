@@ -102,6 +102,7 @@ io.on('connection', function (socket) {
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 250, 50, 0, 0, items, 1)
+        let worktable = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "table0_item", "block", 0, 0, 0, 100, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
@@ -195,6 +196,13 @@ io.on('connection', function (socket) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {
             let holding = player.holding[0]
+            let blockGrid = mapFunctions.myGrid(click.x, click.y, 32)
+            let blockAtClick = fastMap[blockGrid.x][blockGrid.y]
+            if(blockAtClick){
+              if(blockAtClick.type.includes("table")){
+                socket.emit('crafting', "hello")
+              }
+            }
             if (holding !== undefined) {
                 if (holding !== null) {
                     if (holding.type === "block") {
@@ -202,7 +210,6 @@ io.on('connection', function (socket) {
                     }
                 }
             }
-
         }
     });
     socket.on('getimages', function (click) {
@@ -259,6 +266,3 @@ setInterval(function () {
     //io.sockets.in('players').emit('projectiles',projectiles);
     //gameTime = timeFunctions.updateGameTime(gameTime,1)
 }, 1000 / 60);
-
-
-

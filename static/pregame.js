@@ -7,6 +7,8 @@ let meter = new FPSMeter();
 let perf = window.performance
 let delayMouseClickEmit = perf.now()
 let inChat = false
+let sizeOfChar = 64
+let messageHistory = []
 
 
 
@@ -54,7 +56,6 @@ var input = new CanvasInput({
   x:cvs.width - 311,
   y:cvs.height - 29
 });
-
 
 $('body').on('contextmenu', '#chat', function (e) {
   return false;
@@ -196,6 +197,40 @@ class Camera {
   }
 }
 
+class MessageBox {
+  constructor(x, y, width, height){
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+    this.offset = 16
+  }
+
+  draw(ctx, truness){
+    if(truness){
+      ctx.fillStyle = 'rgba(255,255,255,1)'
+      ctx.fillRect(this.x, this.y, this.width, this.height)
+      ctx.fillStyle = 'rgba(0,0,0,1)'
+    }
+    else{
+      ctx.fillStyle = 'rgba(255,255,255,0.2)'
+      ctx.fillRect(this.x, this.y, this.width, this.height)
+      ctx.fillStyle = 'rgba(0,0,0,0.2)'
+    }
+
+    for(let message in messageHistory){
+      if(messageHistory[message].sender == socket.id){
+        ctx.fillText('you:' + messageHistory[message].message, this.x + 2, this.y + this.offset)
+      }
+      else{
+        ctx.fillText(messageHistory[message].sender + ':' + messageHistory[message].message, this.x + 2, this.y + this.offset)
+      }
+      this.offset+=16
+    }
+    this.offset = 16
+  }
+}
+
 let camera = new Camera(0, 0, 0, 0, 5);
 let images = {}
 let promises = []
@@ -223,6 +258,7 @@ function loadImagesThen(folders){
     displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
+    displays['messagebox'] = new MessageBox(cvs.width - 311, cvs.height - 29 - 150 - 10, 308, 150)
     socket.emit('new player')
     socket.emit('map',)
     //ctxBackground.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
@@ -241,17 +277,17 @@ document.body.onload = () => {
             if (!players[player]){
               console.log('New Player joined');
               players[player] = new Player(playersServer[player])
-              players[player].addAnimation('idleR',images['dwarf1'],0,4,0,32,32,64,64,100)
-              players[player].addAnimation('idleL',images['dwarf1'],0,4,5,32,32,64,64,100)
-              players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,64,64,100)
-              players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,64,64,100)
-              players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,64,64,100)
-              players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,64,64,100)
-              players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,64,64,50)
-              players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,64,64,50)
-              players[player].addAnimationOnce('gothitR',images['dwarf1'],0,3,3,32,32,64,64,100)
-              players[player].addAnimationOnce('gothitL',images['dwarf1'],0,3,8,32,32,64,64,100)
-              players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,64,64,50)
+              players[player].addAnimation('idleR',images['dwarf1'],0,4,0,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimation('idleL',images['dwarf1'],0,4,5,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,sizeOfChar,sizeOfChar,50)
+              players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,sizeOfChar,sizeOfChar,50)
+              players[player].addAnimationOnce('gothitR',images['dwarf1'],0,3,3,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimationOnce('gothitL',images['dwarf1'],0,3,8,32,32,sizeOfChar,sizeOfChar,100)
+              players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,sizeOfChar,sizeOfChar,50)
             }
             else{
               if(players[player].state.status != playersServer[player].status){
@@ -275,6 +311,10 @@ document.body.onload = () => {
     socket.on('items', (itemsServer) => {
       items = itemsServer
       socket.emit('items',)
+    });
+
+    socket.on('generalmessage', (message) => {
+      messageHistory.push(message)
     });
 
     socket.on('projectiles', (projectilesServer) => {
@@ -313,37 +353,48 @@ document.body.onload = () => {
       loadImagesThen(folders)
     });
 
-    socket.on('generalmessage', (message) => {
-      messageHistory.push(message)
-    })
+    socket.on('crafting', (message) => {
+      console.log('crafting is not yet implemented!')
+    });
 
     document.onkeydown = (key) => {
-        if(key.key == 'i'){
-          inInventory = !inInventory
-          return
-        }
+
         if(key.key == 'Escape'){
           inInventory = false
+          inChat = false
+          input.blur()
           return
         }
-        if(!inInventory){
-          if(key.key == ' ' && !players[socket.id].attacking){
-            let holding = players[socket.id].state.holding[0]
-            if(holding){
-              if(holding.type == 'melee'){
-                socket.emit('attack', null)
-                keys[key.key] = true
-              }
-            }
+        if(key.key == 'Enter'){
+          if(input.value().trim() != ''){
+            socket.emit('generalmessage', {message:input.value()})
+            input.value("")
+          }
+        }
+        if(!inChat){
+          if(key.key == 'i'){
+            inInventory = !inInventory
             return
           }
-          keys[key.key] = true
-        }
-         itemKeyThing = key.key-1
-        if(!isNaN(itemKeyThing)){
-          itemHoldingIndex = itemKeyThing
-          players[socket.id].state.holding = [players[socket.id].state.inventory[itemKeyThing]]
-          socket.emit('holding', players[socket.id].state)
+          if(!inInventory){
+            if(key.key == ' ' && !players[socket.id].attacking){
+              let holding = players[socket.id].state.holding[0]
+              if(holding){
+                if(holding.type == 'melee'){
+                  socket.emit('attack', null)
+                  keys[key.key] = true
+                }
+              }
+              return
+            }
+            keys[key.key] = true
+          }
+           itemKeyThing = key.key-1
+          if(!isNaN(itemKeyThing)){
+            itemHoldingIndex = itemKeyThing
+            players[socket.id].state.holding = [players[socket.id].state.inventory[itemKeyThing]]
+            socket.emit('holding', players[socket.id].state)
+          }
         }
     }
 

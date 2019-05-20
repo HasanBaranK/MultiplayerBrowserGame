@@ -2,15 +2,15 @@ function drawMap(map) {
   for(let block in map){
     try {
       ctx.drawImage(images[map[block].type], map[block].x, map[block].y)
-      if(map[block].health <= 25){
-        ctx.drawImage(images['crack03_block'], map[block].x, map[block].y)
-        continue
-      }
-      if(map[block].health <= 50){
-        ctx.drawImage(images['crack02_block'], map[block].x, map[block].y)
-        continue
-      }
       if(map[block].health < 100){
+        if(map[block].health <= 50){
+          if(map[block].health <= 25){
+            ctx.drawImage(images['crack03_block'], map[block].x, map[block].y)
+            continue
+          }
+          ctx.drawImage(images['crack02_block'], map[block].x, map[block].y)
+          continue
+        }
         ctx.drawImage(images['crack01_block'], map[block].x, map[block].y)
         continue
       }
@@ -172,6 +172,7 @@ function game(){
     drawProjectiles(projectiles)
 
     input.render()
+    displays['messagebox'].draw(ctxChat, inChat)
     displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
     displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100)
     displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100)
