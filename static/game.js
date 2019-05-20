@@ -57,13 +57,16 @@ let uiDelay = 0
 let currentuiTime = 0
 function game(){
   try {
+    if(socket.disconnected){
+      return
+    }
     meter.tickStart();
     timeDelayOfMouse = perf.now()
-    if(leftMousePressed && timeDelayOfMouse > delayMouseClickEmit){
+    if(!inInventory && leftMousePressed && timeDelayOfMouse > delayMouseClickEmit){
       socket.emit('leftclick', {x:mousePosition.x+camera.x, y:mousePosition.y+camera.y})
       delayMouseClickEmit = timeDelayOfMouse + 500
     }
-    else if(rightMousePressed && timeDelayOfMouse > delayMouseClickEmit){
+    else if(!inInventory && rightMousePressed && timeDelayOfMouse > delayMouseClickEmit){
       socket.emit('rightclick', {x:mousePosition.x+camera.x, y:mousePosition.y+camera.y})
       delayMouseClickEmit = timeDelayOfMouse + 500
     }
@@ -182,7 +185,10 @@ function game(){
       displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100)
       displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health)
       displays['energybar'].draw(ctxChat, 1,cvs.height - 20, 100, players[socket.id].state.health)
-      buttons['inventoryopen'].isHovered()
+      if(inCrafting){
+        displays['crafting'].draw(ctxChat,0,0,players[socket.id].state.inventory)
+
+      }
       if(inInventory){
         displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)
         buttons['inventoryopen'].draw(ctxChat,0,0)

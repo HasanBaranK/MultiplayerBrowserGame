@@ -7,11 +7,13 @@ let meter = new FPSMeter();
 let perf = window.performance
 let delayMouseClickEmit = perf.now()
 let inChat = false
+let inCrafting = false
 let sizeOfChar = 64
 let messageHistory = []
 let shouldUpdateUI = true
 let showThisManyMessages = 9
 let scrollChat = 0
+let informationToPresent = {}
 
 
 
@@ -81,6 +83,9 @@ class Inventory{
     this.textOffsetY = textOffsetY
     this.xOfItem = 0
     this.yOfItem = 0
+    this.xOfGrid = 0
+    this.yOfGrid = 0
+    this.infoOffset = 16
   }
   draw(ctx,ctX,ctY,inventory){
     this.currentRow = 0
@@ -89,13 +94,29 @@ class Inventory{
       if(item % this.columnCount == 0 && item != 0){
         this.currentRow++
       }
-      this.xOfItem = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + this.actualSizeOffset/2
-      this.yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
-      ctx.drawImage(images[inventory[item].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
+      this.xOfGrid = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + 1
+      this.xOfItem = this.xOfGrid + this.actualSizeOffset/2
+
+      this.yOfGrid = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize) + 1
+      this.yOfItem = this.yOfGrid + (this.actualSizeOffset/2)
+
+      if(mousePosition.x > this.xOfGrid && mousePosition.y > this.yOfGrid && mousePosition.x < this.xOfGrid + this.gridSize && mousePosition.y < this.yOfGrid + this.gridSize){
+        if(leftMousePressed){
+          ctx.fillStyle = 'rgba(255,0,0,0.5)'
+          ctx.fillRect(this.xOfGrid, this.yOfGrid, 31, 31)
+          informationToPresent = inventory[item]
+        }
+      }
+      ctx.drawImage(images[inventory[item].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset - 1,this.gridSize - this.actualSizeOffset - 1)
       ctx.font = '16px bold'
       ctx.fillStyle = 'white'
       ctx.fillText(inventory[item].amount, this.xOfItem + this.textOffsetX, this.yOfItem + this.textOffsetY)
     }
+    for(let info in informationToPresent){
+      ctx.fillText(info + ': ' + informationToPresent[info], this.x + 220, this.y + 40 + this.infoOffset)
+      this.infoOffset+=16
+    }
+    this.infoOffset = 16
   }
 }
 
@@ -157,6 +178,7 @@ class UIButton {
       inInventory = !inInventory
       leftMousePressed = false
       rightMousePressed = false
+      informationToPresent = {}
     }
     return true
   }
@@ -247,6 +269,45 @@ class MessageBox {
   }
 }
 
+class Crafting {
+
+  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
+    this.name = name
+    this.img = img
+    this.x = x
+    this.y = y
+    this.xOffset = xOffset
+    this.yOffset = yOffset
+    this.columnCount = columnCount
+    this.rowCount = rowCount
+    this.gridSize = gridSize
+    this.currentRow = 0
+    this.actualSizeOffset = actualSizeOffset
+
+    this.xOfItem = 0
+    this.yOfItem = 0
+    this.xOfGrid = 0
+    this.yOfGrid = 0
+  }
+  draw(ctx,ctX,ctY,inventory){
+    this.currentRow = 0
+    ctx.drawImage(this.img,this.x+ctX, this.y+ctY)
+    for(let item in inventory){
+      if(item % this.columnCount == 0 && item != 0){
+        this.currentRow++
+      }
+      this.xOfGrid = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + 1
+      this.xOfItem = this.xOfGrid + this.actualSizeOffset/2
+      this.yOfGrid = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize) + 1
+      this.yOfItem = this.yOfGrid + (this.actualSizeOffset/2)
+      ctx.drawImage(images[inventory[item].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
+      // ctx.font = '16px bold'
+      // ctx.fillStyle = 'white'
+      // ctx.fillText(inventory[item].amount, this.xOfItem + this.textOffsetX, this.yOfItem + this.textOffsetY)
+    }
+  }
+}
+
 let camera = new Camera(0, 0, 0, 0, 5);
 let images = {}
 let promises = []
@@ -268,13 +329,14 @@ function loadImagesThen(folders){
     console.log('Finished loading images');
     buttons['inventory'] = new UIButton('Inventory', 0, 0, images['inventory'], 32, 32)
     buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen'], 32, 32)
-    displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 12,14,29)
+    displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 16,14,29)
     displays['quickselect'] = new QuickSelect('Quickselect', images['quickselect_UI'], 0,0,0,0,1,9,32,12,2,17)
     displays['healthbarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     displays['messagebox'] = new MessageBox(cvs.width - 311, cvs.height - 29 - 150 - 10, 308, 150)
+    displays['crafting'] = new Crafting('Crafting',images['craft_UI'], cvs.width / 2 - 240, 200, 0, 2, 13, 2, 32, 12)
     socket.emit('new player')
     socket.emit('map',)
     //ctxBackground.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
@@ -371,7 +433,8 @@ document.body.onload = () => {
     });
 
     socket.on('crafting', (message) => {
-      console.log('crafting is not yet implemented!')
+      inCrafting = true
+      shouldUpdateUI = true
     });
 
     document.onkeydown = (key) => {
@@ -381,6 +444,8 @@ document.body.onload = () => {
         if(key.key == 'Escape'){
           inInventory = false
           inChat = false
+          inCrafting = false
+          informationToPresent = {}
           input.blur()
           return
         }
@@ -429,32 +494,22 @@ document.body.onload = () => {
         inChat = false
       }
       shouldUpdateUI = true
-      if(!inInventory){
-        if(evt.button == 0){
-          leftMousePressed = true
-          buttons['inventory'].isClicked()
-
-        }
-        else{
-          rightMousePressed = true
-        }
+      if(evt.button == 0){
+        leftMousePressed = true
+        buttons['inventory'].isClicked()
       }
       else{
-        if(evt.button == 0){
-          buttons['inventory'].isClicked()
-        }
+        rightMousePressed = true
       }
     });
 
     cvsChat.addEventListener('mouseup', function(evt) {
-      if(!inInventory){
         if(evt.button == 0){
           leftMousePressed = false
         }
         else{
           rightMousePressed = false
         }
-      }
     });
 
     cvsChat.addEventListener('mousemove', function(event) {
