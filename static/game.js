@@ -117,7 +117,6 @@ function game(){
     //   yComm = 0
     // }
     ctx.clearRect(camera.x, camera.y, cvs.width, cvs.height);
-    ctxChat.clearRect(0, 0, cvs.width, cvs.height);
     for(let player in players){
       if(players[player].state.isDead){
         players[player].drawFinal(ctx, 'dieR')
@@ -171,20 +170,24 @@ function game(){
     drawItems(items);
     drawProjectiles(projectiles)
 
-    input.render()
-    displays['messagebox'].draw(ctxChat, inChat)
-    displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
-    displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100)
-    displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100)
-    displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health)
-    displays['energybar'].draw(ctxChat, 1,cvs.height - 20, 100, players[socket.id].state.health)
-    buttons['inventoryopen'].isHovered()
-    if(inInventory){
-      displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)
-      buttons['inventoryopen'].draw(ctxChat,0,0)
-    }
-    else{
-      buttons['inventory'].draw(ctxChat,0,0)
+    if(shouldUpdateUI){
+      ctxChat.clearRect(0, 0, cvs.width, cvs.height);
+      input.render()
+      displays['messagebox'].draw(ctxChat, inChat)
+      displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
+      displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100)
+      displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100)
+      displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health)
+      displays['energybar'].draw(ctxChat, 1,cvs.height - 20, 100, players[socket.id].state.health)
+      buttons['inventoryopen'].isHovered()
+      if(inInventory){
+        displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)
+        buttons['inventoryopen'].draw(ctxChat,0,0)
+      }
+      else{
+        buttons['inventory'].draw(ctxChat,0,0)
+      }
+      shouldUpdateUI = false
     }
     meter.tick()
     requestAnimationFrame(game)

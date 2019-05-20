@@ -9,6 +9,7 @@ let delayMouseClickEmit = perf.now()
 let inChat = false
 let sizeOfChar = 64
 let messageHistory = []
+let shouldUpdateUI = true
 
 
 
@@ -315,6 +316,7 @@ document.body.onload = () => {
 
     socket.on('generalmessage', (message) => {
       messageHistory.push(message)
+      shouldUpdateUI = true
     });
 
     socket.on('projectiles', (projectilesServer) => {
@@ -358,7 +360,9 @@ document.body.onload = () => {
     });
 
     document.onkeydown = (key) => {
-
+        if(key.key != "w" || key.key != "a" || key.key != "s" || key.key != "d"){
+          shouldUpdateUI = true
+        }
         if(key.key == 'Escape'){
           inInventory = false
           inChat = false
@@ -409,6 +413,7 @@ document.body.onload = () => {
       else{
         inChat = false
       }
+      shouldUpdateUI = true
       if(!inInventory){
         if(evt.button == 0){
           leftMousePressed = true
