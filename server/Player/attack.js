@@ -34,19 +34,37 @@ function heal(player, amount) {
     }
 }
 
-function meleeAttack(players, playerKey, item) {
+function meleeAttack(players, attackerKey, item,mobs,isMob) {
     let peopleHit = []
     let range = item.range;
-    console.log(playerKey + "Attacking")
-    for (let otherPlayer in players) {
+    console.log(attackerKey + "Attacking")
+    if(isMob === false) {
+        for (let otherPlayer in players) {
 
-        if (otherPlayer !== playerKey) {
-            console.log(otherPlayer)
-            if (checkPlayerInRange(players[playerKey].x + players[playerKey].sizex, players[playerKey].y + players[playerKey].sizey, players[otherPlayer], range, players[playerKey].facing, players[playerKey].sizey)) {
+            if (otherPlayer !== attackerKey) {
+                console.log(otherPlayer)
+                if (checkPlayerInRange(players[attackerKey].x + players[attackerKey].sizex, players[attackerKey].y + players[attackerKey].sizey, players[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
+                    console.log("damaged: " + otherPlayer)
+                    lowerHealth(players[otherPlayer], item.damage);
+                    peopleHit.push(otherPlayer)
+                }
+            }
+        }
+        for (let otherPlayer in mobs) {
+            if (checkPlayerInRange(players[attackerKey].x + players[attackerKey].sizex, players[attackerKey].y + players[attackerKey].sizey, mobs[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
+                console.log("damaged: " + otherPlayer)
+                lowerHealth(mobs[otherPlayer], item.damage);
+                peopleHit.push(otherPlayer)
+            }
+        }
+    }else {
+        for (let otherPlayer in players) {
+            if (checkPlayerInRange(mobs[attackerKey].x + mobs[attackerKey].sizex, mobs[attackerKey].y + mobs[attackerKey].sizey, players[otherPlayer], range, mobs[attackerKey].facing, mobs[attackerKey].sizey)) {
                 console.log("damaged: " + otherPlayer)
                 lowerHealth(players[otherPlayer], item.damage);
                 peopleHit.push(otherPlayer)
             }
+
         }
     }
     return peopleHit

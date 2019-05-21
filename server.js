@@ -67,6 +67,7 @@ itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0,
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 
+mobsFunctions.mobController(players,mobs,collisionMap,10,100);
 
 function getImages(images) {
     fs.readdir(imageFolder, (err, files) => {
@@ -152,7 +153,7 @@ io.on('connection', function (socket) {
             let holding = player.holding[0]
             if (holding !== undefined && holding !== null) {
                 if (holding.type === "melee") {
-                    let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, holding)
+                    let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, holding,mobs,false)
                     if (peopleGotHit.length > 0) {
                         io.sockets.emit('peoplegothit', peopleGotHit);
                     }
@@ -270,7 +271,7 @@ setInterval(function () {
     rightEdge= edges.rightEdge
     leftEdge = edges.leftEdge
     mobs = edges.mobs
-    mobsFunctions.playerCloseToMob(players,mobs,100,collisionMap)
+    //mobsFunctions.playerCloseToMob(players,mobs,1000,collisionMap)
     collisionFunctions.gravity(players,mobs, gridSize, collisionMap, projectiles,5);
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);

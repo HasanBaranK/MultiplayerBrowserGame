@@ -32,7 +32,7 @@ function move(direction,player,gridSize,collisionMap,speed){
         player.status = 2;
         player.facing = "left"
         if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
-            player.x += 5;
+            player.x += speed;
         }
     }if(direction === "right"){
         player.x += speed;

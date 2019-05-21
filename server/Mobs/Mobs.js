@@ -5,31 +5,34 @@ const {generateItem} = require("./../Player/items");
 module.exports = {
     generateMobs,
     generateMob,
-    playerCloseToMob
+    playerCloseToMob,
+    mobController
 }
 
-function MobAI(players,player,mob, collisionMap,attackRange) {
+function MobAI(players,player,mobs,mob, collisionMap,attackRange) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
-    //if he is close enogh then attack not then follow him
+    //if he is close enough then attack not then follow him
 
     if (player == null) {
-        let number = Math.floor(Math.random());
+        let number = Math.floor(Math.random()*2);
+        //console.log(number)
         if (number == 0) {
-            move("left", mob, 32, collisionMap, 5)
+            move("left", mob, 32, collisionMap, 0.5)
         } else {
-            move("right", mob, 32, collisionMap, 5)
+            move("right", mob, 32, collisionMap, 1)
         }
 
     } else {
-        if (player.x > mob.x) {
-            move("right", mob, 32, collisionMap, 5)
+
+        if (player.x > mobs[mob].x) {
+            move("right", mobs[mob], 32, collisionMap, 6)
         } else {
-            move("left", mob, 32, collisionMap, 5)
+            move("left", mobs[mob], 32, collisionMap, 6)
         }
-        let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mob.x + mob.sizex, mob.y + mob.sizey)
+        let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mobs[mob].x + mobs[mob].sizex, mobs[mob].y + mobs[mob].sizey)
         if(distance < attackRange){
-            meleeAttack(players,null,mob.inventory[0])
+            meleeAttack(players,mob,mobs[mob].inventory[0],mobs,true)
         }
     }
 }
@@ -86,9 +89,12 @@ function getHeight(x, collisionMap, gridSize, start) {
 function playerCloseToMob(players, mobs, range,collisionMap) {
 
     for (let mob in mobs) {
+        let mobKey = mob
+        mob = mobs[mob];
         let minRange= range + 1;
         let closestPlayer;
         for (let player in players) {
+            player = players[player];
             let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mob.x + mob.sizex, mob.y + mob.sizey)
             if (range >= distance) {
                 if (minRange > distance) {
@@ -97,10 +103,47 @@ function playerCloseToMob(players, mobs, range,collisionMap) {
                 }
             }
         }
-        MobAI(players,closestPlayer,mob,collisionMap,50)
+        MobAI(players,closestPlayer,mobs,mobKey,collisionMap,50)
     }
 }
 
 function calculateDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+}
+
+function getVisibleMobs(mobs) {
+    //will be implemented
+    return mobs
+}
+
+async function mobController(players,mobs,collisionMap,attackRange,range) {
+
+    setInterval(function () {
+    {
+        let visibleMobs = getVisibleMobs(mobs);
+
+        for (let mob in visibleMobs){
+            let player = calculateClosestPlayer(players,mobs,mob,range)
+            MobAI(players,player,mobs,mob, collisionMap,attackRange);
+        }
+    }
+    }, 300);
+}
+
+function calculateClosestPlayer(players,mobs,mob,range) {
+    let mobKey = mob
+    mob = mobs[mob];
+    let minRange= range + 1;
+    let closestPlayer;
+    for (let player in players) {
+        player = players[player];
+        let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mob.x + mob.sizex, mob.y + mob.sizey)
+        if (range >= distance) {
+            if (minRange > distance) {
+                minRange = distance;
+                closestPlayer = player;
+            }
+        }
+    }
+    return closestPlayer;
 }

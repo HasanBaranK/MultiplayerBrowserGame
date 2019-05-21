@@ -457,7 +457,7 @@ document.body.onload = () => {
           if (!mobs[mob]){
             console.log('New Mob Generated');
             mobs[mob] = new Mob(mobsServer[mob])
-            mobs[mob].addAnimation('idle',images['Skeleton_Idle'],0,10,0,24,32,24,32,100)
+            mobs[mob].addAnimation('idle',images['Skeleton_Idle'],0,10,0,24,32,64,64,100)
           }
           else{
             if(mobs[mob].state.status != mobsServer[mob].status){
