@@ -41,12 +41,18 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange) {
 
             let interval = setInterval(function () {
                 mobs[mob].progress = mobs[mob].progress + 10;
-                clearInterval(interval)
+                if(mobs[mob].progress > 100) {
+                    clearInterval(interval)
+                    meleeAttack(players, mob, mobs[mob].inventory[0], mobs, true)
+                    mobs[mob].progress = 0;
+                    mobs[mob].isAttacking = false;
+                    mobs[mob].inThread = false;
+                }
             }, 100);
             console.log("not blocking")
-            meleeAttack(players, mob, mobs[mob].inventory[0], mobs, true)
-            mobs[mob].progress = 0;
-            mobs[mob].isAttacking = false;
+
+            mobs[mob].inThread = true;
+            return
 
         }
 
