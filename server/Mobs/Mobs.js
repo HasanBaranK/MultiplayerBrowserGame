@@ -9,12 +9,12 @@ module.exports = {
     mobController
 }
 
-async function MobAI(players,player,mobs,mob, collisionMap,attackRange) {
+async function MobAI(players, player, mobs, mob, collisionMap, attackRange) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
     //if he is close enough then attack not then follow him
     if (player == null) {
-        let number = Math.floor(Math.random()*2);
+        let number = Math.floor(Math.random() * 2);
         //console.log(number)
         if (number == 0) {
             move("left", mob, 32, collisionMap, 5)
@@ -30,30 +30,31 @@ async function MobAI(players,player,mobs,mob, collisionMap,attackRange) {
             move("left", mobs[mob], 32, collisionMap, 5)
         }
         let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mobs[mob].x + mobs[mob].sizex, mobs[mob].y + mobs[mob].sizey)
-        if(distance < attackRange){
-            if(player.x > mobs[mob].x){
+        if (distance < attackRange) {
+            if (player.x > mobs[mob].x) {
                 mobs[mob].facing = "right"
-            }else {
+            } else {
                 mobs[mob].facing = "left"
             }
             mobs[mob].isAttacking = true;
             mobs[mob].progress = 0;
-            for (let i = 0; i < 10; i++) {
-                setTimeout(function () {
-                    mobs[mob].progress = mobs[mob].progress +1;
-                }, 100)
-            }
-            meleeAttack(players,mob,mobs[mob].inventory[0],mobs,true)
+
+            let interval = setInterval(function () {
+                mobs[mob].progress = mobs[mob].progress + 10;
+                clearInterval(interval)
+            }, 100);
+            console.log("not blocking")
+            meleeAttack(players, mob, mobs[mob].inventory[0], mobs, true)
             mobs[mob].progress = 0;
             mobs[mob].isAttacking = false;
 
         }
 
     }
-    mobs[mob].inThread =false;
+    mobs[mob].inThread = false;
 }
 
-function generateMobs(startX, amount, mobs, collisionMap, gridSize,items) {
+function generateMobs(startX, amount, mobs, collisionMap, gridSize, items) {
     let amountOfMobs = Math.floor(Math.random() * Math.floor((amount / 10))) + 1;
     let density = 10
     let lastMob = startX + 5
@@ -64,14 +65,14 @@ function generateMobs(startX, amount, mobs, collisionMap, gridSize,items) {
             break
         }
         lastMob = start + 5
-        mobs = generateMob(start, collisionMap, gridSize, mobs,items);
+        mobs = generateMob(start, collisionMap, gridSize, mobs, items);
     }
 
     return mobs;
 
 }
 
-function generateMob(start, collisionMap, gridSize, mobs,items) {
+function generateMob(start, collisionMap, gridSize, mobs, items) {
     let id = Math.floor(Math.random() * 100000000);
     mobs["asd" + id + "asd"] = {
         name: "Skeleton",
@@ -106,12 +107,12 @@ function getHeight(x, collisionMap, gridSize, start) {
     }
 }
 
-function playerCloseToMob(players, mobs, range,collisionMap) {
+function playerCloseToMob(players, mobs, range, collisionMap) {
 
     for (let mob in mobs) {
         let mobKey = mob
         mob = mobs[mob];
-        let minRange= range + 1;
+        let minRange = range + 1;
         let closestPlayer;
         for (let player in players) {
             player = players[player];
@@ -123,7 +124,7 @@ function playerCloseToMob(players, mobs, range,collisionMap) {
                 }
             }
         }
-        MobAI(players,closestPlayer,mobs,mobKey,collisionMap,50)
+        MobAI(players, closestPlayer, mobs, mobKey, collisionMap, 50)
     }
 }
 
@@ -136,28 +137,28 @@ function getVisibleMobs(mobs) {
     return mobs
 }
 
-async function mobController(players,mobs,collisionMap,attackRange,range) {
+async function mobController(players, mobs, collisionMap, attackRange, range) {
 
     setInterval(function () {
-    {
-        let visibleMobs = getVisibleMobs(mobs);
+        {
+            let visibleMobs = getVisibleMobs(mobs);
 
-        for (let mob in visibleMobs){
-            let player = calculateClosestPlayer(players,mobs,mob,range)
+            for (let mob in visibleMobs) {
+                let player = calculateClosestPlayer(players, mobs, mob, range)
 
-            if(mobs[mob].inThread == false) {
-                mobs[mob].inThread = true
-                MobAI(players, player, mobs, mob, collisionMap, attackRange);
+                if (mobs[mob].inThread == false) {
+                    mobs[mob].inThread = true;
+                    MobAI(players, player, mobs, mob, collisionMap, attackRange);
+                }
             }
         }
-    }
     }, 300);
 }
 
-function calculateClosestPlayer(players,mobs,mob,range) {
+function calculateClosestPlayer(players, mobs, mob, range) {
     let mobKey = mob
     mob = mobs[mob];
-    let minRange= range + 1;
+    let minRange = range + 1;
     let closestPlayer;
     for (let player in players) {
         player = players[player];
