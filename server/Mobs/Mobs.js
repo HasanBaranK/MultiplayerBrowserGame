@@ -1,4 +1,4 @@
-const {move} = require("./../collision");
+const {move,jump} = require("./../collision");
 const {meleeAttack} = require("./../Player/attack");
 const {addItemInventory} = require("./../Player/inventory");
 const {generateItem} = require("./../Player/items");
@@ -13,21 +13,32 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
     //if he is close enough then attack not then follow him
+    let moveSpeed = 8;
     if (player == null) {
         let number = Math.floor(Math.random() * 2);
         //console.log(number)
         if (number == 0) {
-            move("left", mob, 32, collisionMap, 5)
+            move("left", mob, 32, collisionMap, moveSpeed)
         } else {
-            move("right", mob, 32, collisionMap, 5)
+            move("right", mob, 32, collisionMap, moveSpeed)
         }
 
     } else {
 
         if (player.x > mobs[mob].x) {
-            move("right", mobs[mob], 32, collisionMap, 5)
+            let before = mobs[mob].x;
+            move("right", mobs[mob], 32, collisionMap, moveSpeed)
+            if(before == mobs[mob].x){
+                jump(mobs[mob],50,collisionMap,32,4,6);
+                move("right", mobs[mob], 32, collisionMap, moveSpeed)
+            }
         } else {
-            move("left", mobs[mob], 32, collisionMap, 5)
+            let before = mobs[mob].x;
+            move("left", mobs[mob], 32, collisionMap, moveSpeed)
+            if(before == mobs[mob].x){
+                jump(mobs[mob],50,collisionMap,32,4,6);
+                move("left", mobs[mob], 32, collisionMap, moveSpeed)
+            }
         }
         let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mobs[mob].x + mobs[mob].sizex, mobs[mob].y + mobs[mob].sizey)
         if (distance < attackRange) {
