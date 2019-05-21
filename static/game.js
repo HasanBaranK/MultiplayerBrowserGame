@@ -48,6 +48,21 @@ function determineAnimation(player){
     default:
   }
 }
+function determineAnimationSkeleton(skeleton){
+  switch (skeleton.state.status) {
+    case 0: if(skeleton.state.facing == 'right'){skeleton.draw(ctx, 'idleR')}else{skeleton.draw(ctx, 'idleL')}
+      break;
+    case 1: skeleton.draw(ctx, 'up')
+      break;
+    case 2: skeleton.draw(ctx, 'walkL');
+      break;
+    case 3: skeleton.draw(ctx, 'down')
+      break;
+    case 4: skeleton.draw(ctx, 'walkR')
+      break;
+    default:
+  }
+}
 let xDifference = 0
 let yDifference = 0
 let xComm = 0
@@ -165,7 +180,10 @@ function game(){
       }
     }
     for(let mob in mobs){
-      mobs[mob].draw(ctx, 'idle')
+      if(mobs[mob].state.attacking){
+        console.log(mobs[mob].animations['attackL'].currentColumn);
+      }
+      determineAnimationSkeleton(mobs[mob])
     }
     drawMap(map);
     drawItems(items);

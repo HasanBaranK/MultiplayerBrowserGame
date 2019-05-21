@@ -458,7 +458,12 @@ document.body.onload = () => {
           if (!mobs[mob]){
             console.log('New Mob Generated');
             mobs[mob] = new Mob(mobsServer[mob])
-            mobs[mob].addAnimation('idle',images['Skeleton_Idle'],0,10,0,24,32,64,64,100)
+            mobs[mob].addAnimation('idleL',images['Skeleton_Idle_left'],0,10,0,24,32,64,64,100)
+            mobs[mob].addAnimation('idleR',images['Skeleton_Idle'],0,10,0,24,32,64,64,100)
+            mobs[mob].addAnimation('walkL',images['Skeleton_Walk_left'],0,12,0,22,33,64,64,100)
+            mobs[mob].addAnimation('walkR',images['Skeleton_Walk'],0,12,0,22,33,64,64,100)
+            mobs[mob].addAnimation('attackL',images['Skeleton_Attack_left'],0,17,0,24,32,64,64,100)
+            mobs[mob].addAnimation('attackR',images['Skeleton_Attack'],0,17,0,24,32,64,64,100)
           }
           else{
             if(mobs[mob].state.status != mobsServer[mob].status){
@@ -474,9 +479,13 @@ document.body.onload = () => {
       socket.emit('mobs',)
     });
 
-    socket.on('peoplegothit', (peoplewhogothit) => {
-      for(let player in peoplewhogothit){
-        players[peoplewhogothit[player]].isHit = true
+    socket.on('peoplegothit', (entities) => {
+      for(let entity in entities){
+        console.log(entities[entity]);
+        if(entities[entity].state.isMob){
+          mobs[entity].isHit = true
+        }
+        players[entity].isHit = true
       }
     });
 
