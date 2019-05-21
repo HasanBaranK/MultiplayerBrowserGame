@@ -163,7 +163,7 @@ async function mobController(players, mobs, collisionMap, attackRange, range) {
             for (let mob in visibleMobs) {
                 let player = calculateClosestPlayer(players, mobs, mob, range)
 
-                if (mobs[mob].inThread == false) {
+                if (mobs[mob].inThread == false && mobs[mob].isDead == false ) {
                     mobs[mob].inThread = true;
                     MobAI(players, player, mobs, mob, collisionMap, attackRange);
                 }
