@@ -9,32 +9,48 @@ module.exports = {
     mobController
 }
 
-function MobAI(players,player,mobs,mob, collisionMap,attackRange) {
+async function MobAI(players,player,mobs,mob, collisionMap,attackRange) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
     //if he is close enough then attack not then follow him
-
     if (player == null) {
         let number = Math.floor(Math.random()*2);
         //console.log(number)
         if (number == 0) {
-            move("left", mob, 32, collisionMap, 0.5)
+            move("left", mob, 32, collisionMap, 5)
         } else {
-            move("right", mob, 32, collisionMap, 1)
+            move("right", mob, 32, collisionMap, 5)
         }
 
     } else {
 
         if (player.x > mobs[mob].x) {
-            move("right", mobs[mob], 32, collisionMap, 6)
+            move("right", mobs[mob], 32, collisionMap, 5)
         } else {
-            move("left", mobs[mob], 32, collisionMap, 6)
+            move("left", mobs[mob], 32, collisionMap, 5)
         }
         let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mobs[mob].x + mobs[mob].sizex, mobs[mob].y + mobs[mob].sizey)
         if(distance < attackRange){
+            if(player.x > mobs[mob].x){
+                mobs[mob].facing = "right"
+            }else {
+                mobs[mob].facing = "left"
+            }
+            mobs[mob].isAttacking = true;
+            mobs[mob].progress = 0;
+            for (let i = 0; i < 10; i++) {
+                setTimeout(function () {
+                    mobs[mob].progress = mobs[mob].progress +1;
+                }, 100)
+            }
             meleeAttack(players,mob,mobs[mob].inventory[0],mobs,true)
+            mobs[mob].progress = 0;
+            mobs[mob].isAttacking = false;
+
         }
+
     }
+    mobs[mob].inThread =false;
 }
 
 function generateMobs(startX, amount, mobs, collisionMap, gridSize,items) {
@@ -67,13 +83,17 @@ function generateMob(start, collisionMap, gridSize, mobs,items) {
         sizex: 32,
         sizey: 32,
         isDead: false,
+        isMob: true,
+        isAttacking: false,
+        progress: 0,
+        inThread: false,
         inventory: [],
         attacking: false,
         facing: "right",
         equipped: [],
         holding: []
     };
-    let sword = generateItem(mobs["asd" + id + "asd"].x, mobs["asd" + id + "asd"].y, "sword_item", "melee", 25, 50, 0, 0, items, 1)
+    let sword = generateItem(mobs["asd" + id + "asd"].x, mobs["asd" + id + "asd"].y, "sword_item", "melee", 25, 60, 0, 0, items, 1)
     addItemInventory(mobs["asd" + id + "asd"], sword, items)
     return mobs
 }
@@ -124,7 +144,11 @@ async function mobController(players,mobs,collisionMap,attackRange,range) {
 
         for (let mob in visibleMobs){
             let player = calculateClosestPlayer(players,mobs,mob,range)
-            MobAI(players,player,mobs,mob, collisionMap,attackRange);
+
+            if(mobs[mob].inThread == false) {
+                mobs[mob].inThread = true
+                MobAI(players, player, mobs, mob, collisionMap, attackRange);
+            }
         }
     }
     }, 300);

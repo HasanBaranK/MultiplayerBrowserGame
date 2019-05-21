@@ -70,7 +70,7 @@ itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0,
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 
-mobsFunctions.mobController(players,mobs,collisionMap,10,100);
+mobsFunctions.mobController(players,mobs,collisionMap,10,1000);
 
 function getImages(images) {
     fs.readdir(imageFolder, (err, files) => {
@@ -95,6 +95,7 @@ io.on('connection', function (socket) {
             sizex: 32,
             sizey: 32,
             isDead: false,
+            isMob: false,
             inventory: [],
             attacking: false,
             facing: "right",
