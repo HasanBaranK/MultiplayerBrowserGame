@@ -464,6 +464,8 @@ document.body.onload = () => {
             mobs[mob].addAnimation('walkR',images['Skeleton_Walk'],0,12,0,22,33,64,64,100)
             mobs[mob].addAnimationOnce('attackL',images['Skeleton_Attack_left'],0,17,0,43,37,64,64,100)
             mobs[mob].addAnimationOnce('attackR',images['Skeleton_Attack'],0,17,0,43,37,64,64,100)
+            mobs[mob].addAnimationFinal('dead',images['Skeleton_Dead'],0,14,0,33,32,64,64,100)
+
           }
           else{
             if(mobs[mob].state.status != mobsServer[mob].status){

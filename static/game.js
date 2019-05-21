@@ -180,18 +180,23 @@ function game(){
       }
     }
     for(let mob in mobs){
-      if(mobs[mob].state.isAttacking){
-        if(mobs[mob].state.facing == 'left'){
-          mobs[mob].animationsOnce['attackL'].currentColumn = Math.round(mobs[mob].state.progress/100*mobs[mob].animationsOnce['attackL'].endColumn)
-          mobs[mob].drawOnce(ctx, 'attackL')
-        }
-        else{
-          mobs[mob].animationsOnce['attackR'].currentColumn = Math.round(mobs[mob].state.progress/100*mobs[mob].animationsOnce['attackL'].endColumn)
-          mobs[mob].drawOnce(ctx, 'attackR')
-        }
+      if(mobs[mob].state.isDead){
+        mobs[mob].drawFinal(ctx, 'dead')
       }
       else{
-        determineAnimationSkeleton(mobs[mob])
+        if(mobs[mob].state.isAttacking){
+          if(mobs[mob].state.facing == 'left'){
+            mobs[mob].animationsOnce['attackL'].currentColumn = Math.round(mobs[mob].state.progress/100*mobs[mob].animationsOnce['attackL'].endColumn)
+            mobs[mob].drawOnce(ctx, 'attackL')
+          }
+          else{
+            mobs[mob].animationsOnce['attackR'].currentColumn = Math.round(mobs[mob].state.progress/100*mobs[mob].animationsOnce['attackL'].endColumn)
+            mobs[mob].drawOnce(ctx, 'attackR')
+          }
+        }
+        else{
+          determineAnimationSkeleton(mobs[mob])
+        }
       }
     }
     drawMap(map);
