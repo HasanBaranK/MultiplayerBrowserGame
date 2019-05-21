@@ -15,6 +15,7 @@ let showThisManyMessages = 9
 let scrollChat = 0
 let informationToPresent = {}
 let craftingRecipes = []
+let gameTime = {}
 
 
 
@@ -28,11 +29,11 @@ let itemHoldingIndex = 0
 let itemKeyThing = 0
 
 cvs = document.getElementById('canvas')
-// cvsBackground = document.getElementById('background')
-// ctxBackground = cvsBackground.getContext('2d')
-// cvsBackground.height = 32*22
-// cvsBackground.width = 32*42
-// cvsBackground.style['z-index'] = 0
+cvsBackground = document.getElementById('background')
+ctxBackground = cvsBackground.getContext('2d')
+cvsBackground.height = 32*22
+cvsBackground.width = 32*42
+cvsBackground.style['z-index'] = 0
 cvsChat = document.getElementById('chat')
 ctxChat = cvsChat.getContext('2d')
 cvsChat.height = 32*22
@@ -390,7 +391,7 @@ function loadImagesThen(folders){
     displays['crafting'] = new Crafting('Crafting',images['craft_UI'], cvs.width / 2 - 240, 200, 0, 2, 13, 2, 32, 12, images['craftbutton_UI'])
     socket.emit('new player')
     socket.emit('map',)
-    //ctxBackground.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
+    ctxBackground.drawImage(images['background01'], 0, 0, cvs.width, cvs.height)
     window.requestAnimationFrame(game)
   });
 }
@@ -481,6 +482,11 @@ document.body.onload = () => {
 
     socket.on('images', (folders) => {
       loadImagesThen(folders)
+    });
+
+    socket.on('gametime', (gameTimeServer) => {
+      gameTime = gameTimeServer
+      socket.emit('gametime',)
     });
 
     socket.on('craftingui', (craftingRecipesServer) => {

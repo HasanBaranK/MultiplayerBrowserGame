@@ -55,8 +55,11 @@ let craftingRecipes = []
 
 let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
 
+//Crafting recipes
+let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 50, 0, 0, items, 1)
 let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
-craftingRecipes.push(worktable)
+let healthPotion = itemFunctions.generateItem(0, 0, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+craftingRecipes.push(worktable, sword, healthPotion)
 
 map = maps.map;
 collisionMap = maps.collisionMap;
@@ -104,6 +107,7 @@ io.on('connection', function (socket) {
         io.sockets.emit('items', items);
         io.sockets.emit('state', players);
         io.sockets.emit('mobs', mobs);
+        io.sockets.emit('gametime', gameTime);
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 250, 50, 0, 0, items, 1)
@@ -116,7 +120,7 @@ io.on('connection', function (socket) {
         if (player.isDead === false) {
             let speed = 5//5
             let jumpAmount = 4//5
-            let jumpSpeed = 5//5
+            let jumpSpeed = 6//5
             if (data.a || data.w || data.d || data.s) {
                 if (data.a) {
                     collisionFunctions.move("left", player, gridSize, collisionMap,speed)
@@ -228,7 +232,7 @@ io.on('connection', function (socket) {
         socket.emit('images', images);
     });
     socket.on('gametime', function (click) {
-        socket.emit('images', timeFunctions.getGameTime(gameTime));
+        socket.emit('gametime', timeFunctions.getGameTime(gameTime));
     });
     socket.on('generalmessage', function (message) {
         message.sender = socket.id
@@ -276,5 +280,5 @@ setInterval(function () {
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
-    //gameTime = timeFunctions.updateGameTime(gameTime,1)
+    gameTime = timeFunctions.updateGameTime(gameTime,60)
 }, 1000 / 60);

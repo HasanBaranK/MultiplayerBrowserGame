@@ -13,7 +13,7 @@ function generateItem(x, y, name, type, damage,range, defence, health,items,amou
         health: health,
         amount: amount,
         equipable: equipable,
-        recipe:{wood0_item:4, dirt0_item:4}
+        recipe: {stone0_item:1, wood0_item:1, dirt0_item:1}
     };
     items.push(item)
     return item

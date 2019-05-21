@@ -176,6 +176,9 @@ function game(){
     currentuiTime = perf.now()
     if(shouldUpdateUI || currentuiTime > uiDelay){
       ctxChat.clearRect(0, 0, cvs.width, cvs.height);
+      ctxChat.fillStyle = 'black'
+      ctxChat.font = '16px bold'
+      ctxChat.fillText('Time: '+gameTime.hour + ':' + gameTime.minute, cvs.width / 2, 32)
       input.render()
       displays['messagebox'].draw(ctxChat, inChat)
       displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
