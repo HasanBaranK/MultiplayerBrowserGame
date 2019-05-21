@@ -1,7 +1,8 @@
 module.exports={
     inPlayerInventory,
     deleteItemInventory,
-    addItemInventory
+    addItemInventory,
+    deleteItemInventoryWithAmount
 }
 
 function inPlayerInventory(player,name) {
@@ -26,6 +27,39 @@ function deleteItemInventory(player,name) {
         }
     }
     return false
+}
+
+function deleteItemInventoryWithAmount(player,recipes) {
+  let itemsFound = 0
+  for (let recipe in recipes) {
+    for(let item in player.inventory){
+      if(player.inventory[item].name === recipe){
+        if(player.inventory[item].amount < recipes[recipe]){
+          return false
+        }
+        itemsFound++
+      }
+    }
+  }
+  if(itemsFound != Object.keys(recipes).length){
+    return false
+  }
+    for(let recipe in recipes){
+      loop1:
+      for(let item in player.inventory){
+          if(player.inventory[item].name === recipe){
+              if(player.inventory[item].amount >= recipes[recipe]){
+                player.inventory[item].amount -= recipes[recipe];
+                if(player.inventory[item].amount === 0) {
+                    player.inventory.splice(item, 1);
+                }
+                continue loop1
+              }
+              console.log(player)
+          }
+      }
+    }
+    return true
 }
 
 function addItemInventory(player,item,items) {

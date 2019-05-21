@@ -51,8 +51,12 @@ images = getImages(images)
 let leftEdge = 0;
 let rightEdge = 70;
 
+let craftingRecipes = []
 
 let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
+
+let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
+craftingRecipes.push(worktable)
 
 map = maps.map;
 collisionMap = maps.collisionMap;
@@ -102,7 +106,6 @@ io.on('connection', function (socket) {
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 250, 50, 0, 0, items, 1)
-        let worktable = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "table0_item", "block", 0, 0, 0, 100, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
@@ -200,7 +203,7 @@ io.on('connection', function (socket) {
             let blockAtClick = fastMap[blockGrid.x][blockGrid.y]
             if(blockAtClick){
               if(blockAtClick.type.includes("table")){
-                socket.emit('crafting', "hello")
+                socket.emit('craftingui', craftingRecipes)
               }
             }
             if (holding !== undefined) {
@@ -211,6 +214,14 @@ io.on('connection', function (socket) {
                 }
             }
         }
+    });
+    socket.on('craft', function (recipe) {
+        let player = players[socket.id]
+        if(!inventoryFunctions.deleteItemInventoryWithAmount(players[socket.id],recipe['recipe'])){
+          socket.emit('generalmessage', {message:'FAILED CRAFTING', sender:'SERVER'})
+          return
+        }
+        inventoryFunctions.addItemInventory(players[socket.id], recipe, items)
     });
     socket.on('getimages', function (click) {
         socket.emit('images', images);

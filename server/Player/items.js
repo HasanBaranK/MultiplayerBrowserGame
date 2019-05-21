@@ -12,8 +12,9 @@ function generateItem(x, y, name, type, damage,range, defence, health,items,amou
         defence: defence,
         health: health,
         amount: amount,
-        equipable: equipable
+        equipable: equipable,
+        recipe:{wood0_item:4, dirt0_item:4}
     };
-    items.push(item);
+    items.push(item)
     return item
 }

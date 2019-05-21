@@ -186,8 +186,7 @@ function game(){
       displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health)
       displays['energybar'].draw(ctxChat, 1,cvs.height - 20, 100, players[socket.id].state.health)
       if(inCrafting){
-        displays['crafting'].draw(ctxChat,0,0,players[socket.id].state.inventory)
-
+        displays['crafting'].draw(ctxChat,0,0,craftingRecipes)
       }
       if(inInventory){
         displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)

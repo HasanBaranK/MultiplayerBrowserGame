@@ -14,6 +14,7 @@ let shouldUpdateUI = true
 let showThisManyMessages = 9
 let scrollChat = 0
 let informationToPresent = {}
+let craftingRecipes = []
 
 
 
@@ -187,6 +188,33 @@ class UIButton {
   }
 }
 
+class CraftingButton {
+  constructor(name,x,y,img,width,height){
+    this.name = name
+    this.x = x
+    this.y = y
+    this.img = img
+    this.width = width
+    this.height = height
+  }
+  isHovered(){
+    if(mousePosition.x >= this.x && mousePosition.x <= this.x + this.width && mousePosition.y >= this.y && mousePosition.y <= this.y + this.height){
+      return true
+    }
+  }
+  isClicked(){
+    if(this.isHovered()){
+      if(informationToPresent.name){
+        socket.emit('craft', informationToPresent)
+      }
+    }
+    return true
+  }
+  draw(ctx,ctX,ctY){
+    ctx.drawImage(this.img, this.x,this.y, this.width, this.height)
+  }
+}
+
 class Bar {
   constructor(name, x, y,img, width, height){
     this.name = name
@@ -271,7 +299,7 @@ class MessageBox {
 
 class Crafting {
 
-  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
+  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset,craftingButtonImage){
     this.name = name
     this.img = img
     this.x = x
@@ -288,11 +316,16 @@ class Crafting {
     this.yOfItem = 0
     this.xOfGrid = 0
     this.yOfGrid = 0
+    this.infoOffset = 0
+    this.havingAmount = 0
+    this.craftingButton = new CraftingButton('craft', x + img.width - 32 - 5, y + img.height-32 - 5 ,craftingButtonImage,32,32)
   }
   draw(ctx,ctX,ctY,inventory){
+
     this.currentRow = 0
     ctx.drawImage(this.img,this.x+ctX, this.y+ctY)
-    for(let item in inventory){
+    this.craftingButton.draw(ctx, 0, 0)
+    for(let item in craftingRecipes){
       if(item % this.columnCount == 0 && item != 0){
         this.currentRow++
       }
@@ -300,11 +333,29 @@ class Crafting {
       this.xOfItem = this.xOfGrid + this.actualSizeOffset/2
       this.yOfGrid = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize) + 1
       this.yOfItem = this.yOfGrid + (this.actualSizeOffset/2)
-      ctx.drawImage(images[inventory[item].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
-      // ctx.font = '16px bold'
-      // ctx.fillStyle = 'white'
-      // ctx.fillText(inventory[item].amount, this.xOfItem + this.textOffsetX, this.yOfItem + this.textOffsetY)
+      if(mousePosition.x > this.xOfGrid && mousePosition.y > this.yOfGrid && mousePosition.x < this.xOfGrid + this.gridSize && mousePosition.y < this.yOfGrid + this.gridSize){
+        if(leftMousePressed){
+          ctx.fillStyle = 'rgba(255,0,0,0.5)'
+          ctx.fillRect(this.xOfGrid, this.yOfGrid, 31, 31)
+          informationToPresent = craftingRecipes[item]
+        }
+      }
+      ctx.drawImage(images[inventory[item].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset - 1,this.gridSize - this.actualSizeOffset - 1)
     }
+    ctx.fillStyle = 'white'
+    ctx.font = "16px Arial"
+    for(let recipe in informationToPresent['recipe']){
+      for(let item in players[socket.id].state.inventory){
+        if(players[socket.id].state.inventory[item].name == recipe){
+          this.havingAmount = players[socket.id].state.inventory[item].amount
+          break
+        }
+        this.havingAmount = 0
+      }
+      ctx.fillText(recipe + ': ' + this.havingAmount + ' / ' + informationToPresent['recipe'][recipe], this.x + 5, this.y + 130 + this.infoOffset)
+      this.infoOffset+=16
+    }
+    this.infoOffset = 16
   }
 }
 
@@ -336,7 +387,7 @@ function loadImagesThen(folders){
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     displays['messagebox'] = new MessageBox(cvs.width - 311, cvs.height - 29 - 150 - 10, 308, 150)
-    displays['crafting'] = new Crafting('Crafting',images['craft_UI'], cvs.width / 2 - 240, 200, 0, 2, 13, 2, 32, 12)
+    displays['crafting'] = new Crafting('Crafting',images['craft_UI'], cvs.width / 2 - 240, 200, 0, 2, 13, 2, 32, 12, images['craftbutton_UI'])
     socket.emit('new player')
     socket.emit('map',)
     //ctxBackground.drawImage(images['background01'], currentTransform.x, currentTransform.y - 500, cvs.width, cvs.height + 500)
@@ -432,8 +483,9 @@ document.body.onload = () => {
       loadImagesThen(folders)
     });
 
-    socket.on('crafting', (message) => {
+    socket.on('craftingui', (craftingRecipesServer) => {
       inCrafting = true
+      craftingRecipes = craftingRecipesServer
       shouldUpdateUI = true
     });
 
@@ -497,6 +549,9 @@ document.body.onload = () => {
       if(evt.button == 0){
         leftMousePressed = true
         buttons['inventory'].isClicked()
+        if(inCrafting){
+          displays['crafting'].craftingButton.isClicked()
+        }
       }
       else{
         rightMousePressed = true
