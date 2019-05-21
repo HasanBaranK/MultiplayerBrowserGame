@@ -287,3 +287,85 @@ function buildRange(players, gridSize) {
     ctx.fill();
     ctx.restore()
 }
+
+function visualizeCollision(players, gridSize) {
+  for (let player in players) {
+    player = players[player]
+    let sizex = player.state.sizex
+    let sizey = player.state.sizey
+
+
+
+    let xcoordinate = player.state.x + sizex;
+    let ycoordinate = player.state.y + sizey;
+
+
+    let MAXX;
+    let MINX;
+    let MAXY;
+    let MINY;
+    if (xcoordinate > 0 && ycoordinate > 0) {
+      if (ycoordinate < gridSize) {
+        MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize));
+        MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize);
+      } else {
+        MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize));
+        MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize) + gridSize;
+      }
+      MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize)) - gridSize;
+      MINX = xcoordinate - sizex - ((xcoordinate - sizex) % gridSize) + gridSize;
+
+    } else if (xcoordinate > 0 && ycoordinate <= 0) {
+
+      console.log(ycoordinate)
+      MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize)) - gridSize;
+      MINX = xcoordinate - sizex - ((xcoordinate - sizex) % gridSize) + gridSize;
+
+      if ((-gridSize) < ycoordinate) {
+        MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize));
+        MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize);
+      } else {
+        MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize)) - gridSize;
+        MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize);
+      }
+    } else if (xcoordinate < 0 && ycoordinate > 0) {
+      MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize)) - gridSize - gridSize;
+      MINX = xcoordinate - sizex - ((xcoordinate - sizex) % gridSize);
+      MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize));
+      MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize) + gridSize;
+    } else if (xcoordinate < 0 && ycoordinate < 0) {
+      MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize)) - gridSize - gridSize;
+      MINX = xcoordinate - sizex - ((xcoordinate - sizex) % gridSize);
+      MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize)) - gridSize;
+      MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize);
+    } else {
+      MAXX = xcoordinate + sizex + (gridSize - ((xcoordinate + sizex) % gridSize)) - gridSize;
+      MINX = xcoordinate - sizex - ((xcoordinate - sizex) % gridSize) + gridSize;
+      MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize));
+      MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize);
+
+    }
+
+    if (MAXX === MINX) {
+      MAXX = MAXX + gridSize
+    }
+    // if(MAXY -32 === MINY ){
+    //   MINY = MINY -32;
+    // }
+    //
+    // console.log("X")
+    // console.log(MAXX)
+    // console.log(MINX)
+    // console.log("Y")
+    // console.log(MAXY)
+    // console.log(MINY)
+    ctx.fillRect(MINX, MINY, MAXX - MINX, MAXY - MINY);
+    ctx.beginPath();
+    ctx.fillStyle="red";
+    ctx.arc(xcoordinate, ycoordinate, 10, 0, 2 * Math.PI);
+    ctx.fillStyle="green";
+    ctx.arc(player.state.x, player.state.y, 10, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle="black";
+  }
+}

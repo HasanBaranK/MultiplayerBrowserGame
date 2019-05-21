@@ -152,6 +152,12 @@ io.on('connection', function (socket) {
             player.attacking = true
         }
     });
+    socket.on('consume', function (consumable){
+      if(consumable.name == 'healthpotion_item'){
+        attackFunctions.heal(players[socket.id], 25)
+        inventoryFunctions.deleteItemInventory(players[socket.id],'healthpotion_item')
+      }
+    });
     socket.on('stopattack', function (evt) {
         let player = players[socket.id] || {};
         if (player.isDead === false) {

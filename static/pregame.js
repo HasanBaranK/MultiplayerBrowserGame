@@ -462,8 +462,8 @@ document.body.onload = () => {
             mobs[mob].addAnimation('idleR',images['Skeleton_Idle'],0,10,0,24,32,64,64,100)
             mobs[mob].addAnimation('walkL',images['Skeleton_Walk_left'],0,12,0,22,33,64,64,100)
             mobs[mob].addAnimation('walkR',images['Skeleton_Walk'],0,12,0,22,33,64,64,100)
-            mobs[mob].addAnimation('attackL',images['Skeleton_Attack_left'],0,17,0,24,32,64,64,100)
-            mobs[mob].addAnimation('attackR',images['Skeleton_Attack'],0,17,0,24,32,64,64,100)
+            mobs[mob].addAnimationOnce('attackL',images['Skeleton_Attack_left'],0,17,0,43,37,64,64,100)
+            mobs[mob].addAnimationOnce('attackR',images['Skeleton_Attack'],0,17,0,43,37,64,64,100)
           }
           else{
             if(mobs[mob].state.status != mobsServer[mob].status){
@@ -478,14 +478,12 @@ document.body.onload = () => {
       }
       socket.emit('mobs',)
     });
-
     socket.on('peoplegothit', (entities) => {
-      for(let entity in entities){
-        console.log(entities[entity]);
-        if(entities[entity].state.isMob){
-          mobs[entity].isHit = true
-        }
-        players[entity].isHit = true
+      for(let entity in entities.mobs){
+        mobs[entities.mobs[entity]].isHit = true
+      }
+      for(let entity in entities.players){
+        players[entities.players[entity]].isHit = true
       }
     });
 
@@ -530,9 +528,14 @@ document.body.onload = () => {
           if(!inInventory){
             if(key.key == ' ' && !players[socket.id].attacking){
               let holding = players[socket.id].state.holding[0]
+              console.log(holding.type);
               if(holding){
                 if(holding.type == 'melee'){
                   socket.emit('attack', null)
+                  keys[key.key] = true
+                }
+                else if(holding.type == 'Consumable'){
+                  socket.emit('consume', holding)
                   keys[key.key] = true
                 }
               }
