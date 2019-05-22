@@ -9,7 +9,7 @@ module.exports = {
     mobController
 }
 
-async function MobAI(players, player, mobs, mob, collisionMap, attackRange) {
+async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
     //if he is close enough then attack not then follow him
@@ -54,7 +54,8 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange) {
                 mobs[mob].progress = mobs[mob].progress + 10;
                 if(mobs[mob].progress > 100) {
                     clearInterval(interval)
-                    meleeAttack(players, mob, mobs[mob].inventory[0], mobs, true)
+                    let peopleGothit = meleeAttack(players, mob, mobs[mob].inventory[0], mobs, true)
+                    io.sockets.emit('peoplegothit', peopleGothit);
                     mobs[mob].progress = 0;
                     mobs[mob].isAttacking = false;
                     mobs[mob].inThread = false;
@@ -154,7 +155,7 @@ function getVisibleMobs(mobs) {
     return mobs
 }
 
-async function mobController(players, mobs, collisionMap, attackRange, range) {
+async function mobController(players, mobs, collisionMap, attackRange, range, io) {
 
     setInterval(function () {
         {
@@ -165,7 +166,7 @@ async function mobController(players, mobs, collisionMap, attackRange, range) {
 
                 if (mobs[mob].inThread == false && mobs[mob].isDead == false ) {
                     mobs[mob].inThread = true;
-                    MobAI(players, player, mobs, mob, collisionMap, attackRange);
+                    MobAI(players, player, mobs, mob, collisionMap, attackRange, io);
                 }
             }
         }

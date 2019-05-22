@@ -465,7 +465,7 @@ document.body.onload = () => {
             mobs[mob].addAnimationOnce('attackL',images['Skeleton_Attack_left'],0,17,0,43,37,64,64,100)
             mobs[mob].addAnimationOnce('attackR',images['Skeleton_Attack'],0,17,0,43,37,64,64,100)
             mobs[mob].addAnimationFinal('dead',images['Skeleton_Dead'],0,14,0,33,32,64,64,100)
-
+            mobs[mob].addAnimationOnce('gothit',images['Skeleton_Hit'],0,7,0,30,32,64,64,100)
           }
           else{
             if(mobs[mob].state.status != mobsServer[mob].status){
@@ -482,10 +482,14 @@ document.body.onload = () => {
     });
     socket.on('peoplegothit', (entities) => {
       for(let entity in entities.mobs){
-        mobs[entities.mobs[entity]].isHit = true
+        mobs[entities.mobs[entity].id].isHit = true
+        mobs[entities.mobs[entity].id].damaged = entities.mobs[entity].damage
+        mobs[entities.mobs[entity].id].yUp = -30
       }
       for(let entity in entities.players){
-        players[entities.players[entity]].isHit = true
+        players[entities.players[entity].id].isHit = true
+        players[entities.players[entity].id].damaged = entities.players[entity].damage
+        players[entities.players[entity].id].yUp = 0
       }
     });
 
@@ -530,7 +534,6 @@ document.body.onload = () => {
           if(!inInventory){
             if(key.key == ' ' && !players[socket.id].attacking){
               let holding = players[socket.id].state.holding[0]
-              console.log(holding.type);
               if(holding){
                 if(holding.type == 'melee'){
                   socket.emit('attack', null)

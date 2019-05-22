@@ -137,12 +137,27 @@ function game(){
     //   yComm = 0
     // }
     ctx.clearRect(camera.x, camera.y, cvs.width, cvs.height);
+    drawMap(map);
+    drawItems(items);
+    drawProjectiles(projectiles)
     for(let player in players){
       if(players[player].state.isDead){
-        players[player].drawFinal(ctx, 'dieR')
+        if(players[player].isHit){
+          ctx.font = '20px Courier New'
+          ctx.fillStyle = 'white'
+          ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
+          players[player].yUp += 2
+        }
+        if(players[player].drawFinal(ctx, 'dieR')){
+          players[player].isHit = false
+        }
       }
       else{
         if(players[player].isHit){
+          ctx.font = '20px Courier New'
+          ctx.fillStyle = 'white'
+          ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
+          players[player].yUp += 2
           if(players[player].facing == 'right'){
             if(players[player].drawOnce(ctx, 'gothitR')){
               players[player].isHit = false
@@ -181,10 +196,27 @@ function game(){
     }
     for(let mob in mobs){
       if(mobs[mob].state.isDead){
-        mobs[mob].drawFinal(ctx, 'dead')
+        if(mobs[mob].isHit){
+          ctx.font = '20px Courier New'
+          ctx.fillStyle = 'white'
+          ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
+          mobs[mob].yUp += 1
+        }
+        if(mobs[mob].drawFinal(ctx, 'dead')){
+          mobs[mob].isHit = false
+        }
       }
       else{
-        if(mobs[mob].state.isAttacking){
+        if(mobs[mob].isHit){
+          ctx.font = '20px Courier New'
+          ctx.fillStyle = 'white'
+          ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
+          mobs[mob].yUp += 1
+          if(mobs[mob].drawOnce(ctx, 'gothit')){
+            mobs[mob].isHit = false
+          }
+        }
+        else if(mobs[mob].state.isAttacking){
           if(mobs[mob].state.facing == 'left'){
             mobs[mob].animationsOnce['attackL'].currentColumn = Math.round(mobs[mob].state.progress/100*mobs[mob].animationsOnce['attackL'].endColumn)
             mobs[mob].drawOnce(ctx, 'attackL')
@@ -199,9 +231,6 @@ function game(){
         }
       }
     }
-    drawMap(map);
-    drawItems(items);
-    drawProjectiles(projectiles)
     //visualizeCollision(mobs,32)
     //visualizeCollision(players,32)
 

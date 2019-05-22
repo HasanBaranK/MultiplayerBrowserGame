@@ -48,7 +48,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
                 if (checkPlayerInRange(players[attackerKey].x + players[attackerKey].sizex, players[attackerKey].y + players[attackerKey].sizey, players[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
                     console.log("damaged: " + otherPlayer)
                     lowerHealth(players[otherPlayer], item.damage);
-                    peopleHit.players.push(otherPlayer)
+                    peopleHit.players.push({id:otherPlayer, damage:item.damage})
                 }
             }
         }
@@ -56,7 +56,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
             if (checkPlayerInRange(players[attackerKey].x + players[attackerKey].sizex, players[attackerKey].y + players[attackerKey].sizey, mobs[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
                 console.log("damaged: " + otherPlayer)
                 lowerHealth(mobs[otherPlayer], item.damage);
-                peopleHit.mobs.push(otherPlayer)
+                peopleHit.mobs.push({id:otherPlayer, damage:item.damage})
             }
         }
     }else {
@@ -64,7 +64,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
             if (checkPlayerInRange(mobs[attackerKey].x + mobs[attackerKey].sizex, mobs[attackerKey].y + mobs[attackerKey].sizey, players[otherPlayer], range, mobs[attackerKey].facing, mobs[attackerKey].sizey)) {
                 console.log("damaged: " + otherPlayer)
                 lowerHealth(players[otherPlayer], item.damage);
-                peopleHit.players.push(otherPlayer)
+                peopleHit.players.push({id:otherPlayer, damage:item.damage})
             }
 
         }

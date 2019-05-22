@@ -84,9 +84,12 @@ class AnimationFinal {
     ctx.drawImage(this.img, this.currentColumn * this.width, this.row * this.height,
                   this.width, this.height, x, y, this.cWidth, this.cHeight)
     this.currentTime = perf.now()
-    if(this.currentTime > this.animTime && this.currentColumn < this.endColumn){
+    if(this.currentColumn < this.endColumn && this.currentTime > this.animTime){
       this.currentColumn++
       this.animTime = this.currentTime + this.speed
+    }
+    if(this.currentColumn == this.endColumn){
+      return true
     }
   }
 }
