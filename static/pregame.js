@@ -482,14 +482,18 @@ document.body.onload = () => {
     });
     socket.on('peoplegothit', (entities) => {
       for(let entity in entities.mobs){
-        mobs[entities.mobs[entity].id].isHit = true
-        mobs[entities.mobs[entity].id].damaged = entities.mobs[entity].damage
-        mobs[entities.mobs[entity].id].yUp = -30
+        if(entities.mobs[entity].attackerId){
+          players[entities.mobs[entity].attackerId].xpGained = entities.mobs[entity].xp
+          mobs[entities.mobs[entity].attackedId].killer = entities.mobs[entity].attackerId
+        }
+        mobs[entities.mobs[entity].attackedId].isHit = true
+        mobs[entities.mobs[entity].attackedId].damaged = entities.mobs[entity].damage
+        mobs[entities.mobs[entity].attackedId].yUp = 0
       }
       for(let entity in entities.players){
-        players[entities.players[entity].id].isHit = true
-        players[entities.players[entity].id].damaged = entities.players[entity].damage
-        players[entities.players[entity].id].yUp = 0
+        players[entities.players[entity].attackedId].isHit = true
+        players[entities.players[entity].attackedId].damaged = entities.players[entity].damage
+        players[entities.players[entity].attackedId].yUp = 0
       }
     });
 

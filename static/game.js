@@ -143,10 +143,12 @@ function game(){
     for(let player in players){
       if(players[player].state.isDead){
         if(players[player].isHit){
-          ctx.font = '20px Courier New'
-          ctx.fillStyle = 'white'
-          ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
-          players[player].yUp += 2
+          if(players[player].yUp < 30){
+            ctx.font = '20px Courier New'
+            ctx.fillStyle = 'white'
+            ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
+          }
+          players[player].yUp += 1
         }
         if(players[player].drawFinal(ctx, 'dieR')){
           players[player].isHit = false
@@ -154,10 +156,13 @@ function game(){
       }
       else{
         if(players[player].isHit){
-          ctx.font = '20px Courier New'
-          ctx.fillStyle = 'white'
-          ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
-          players[player].yUp += 2
+          console.log(players[player].yUp);
+          if(players[player].yUp < 20){
+            ctx.font = '20px Courier New'
+            ctx.fillStyle = 'white'
+            ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
+          }
+          players[player].yUp += 1
           if(players[player].facing == 'right'){
             if(players[player].drawOnce(ctx, 'gothitR')){
               players[player].isHit = false
@@ -197,9 +202,15 @@ function game(){
     for(let mob in mobs){
       if(mobs[mob].state.isDead){
         if(mobs[mob].isHit){
-          ctx.font = '20px Courier New'
-          ctx.fillStyle = 'white'
-          ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
+          if(mobs[mob].yUp < 20){
+            ctx.font = 'bold 20px Courier New'
+            ctx.fillStyle = 'yellow'
+            ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
+          }
+          if(mobs[mob].yUp < 30){
+            ctx.fillStyle = 'rgba(255,0,255,1)'
+            ctx.fillText('XP ' + players[mobs[mob].killer].xpGained,players[mobs[mob].killer].state.x, players[mobs[mob].killer].state.y - mobs[mob].yUp -10)
+          }
           mobs[mob].yUp += 1
         }
         if(mobs[mob].drawFinal(ctx, 'dead')){
@@ -208,9 +219,11 @@ function game(){
       }
       else{
         if(mobs[mob].isHit){
-          ctx.font = '20px Courier New'
-          ctx.fillStyle = 'white'
-          ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
+          if(mobs[mob].yUp < 20){
+            ctx.font = '20px Courier New'
+            ctx.fillStyle = 'yellow'
+            ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
+          }
           mobs[mob].yUp += 1
           if(mobs[mob].drawOnce(ctx, 'gothit')){
             mobs[mob].isHit = false
