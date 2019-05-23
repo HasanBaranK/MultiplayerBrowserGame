@@ -131,7 +131,7 @@ function generateMob(start, collisionMap, gridSize, mobs, items) {
         equipped: [],
         holding: []
     };
-    let sword = generateItem(mobs["asd" + id + "asd"].x, mobs["asd" + id + "asd"].y, "sword_item", "melee", 25, 60, 0, 0, items, 1)
+    let sword = generateItem(mobs["asd" + id + "asd"].x, mobs["asd" + id + "asd"].y, "sword_item", "melee", 25, 66, 0, 0, items, 1)
     addItemInventory(mobs["asd" + id + "asd"], sword, items)
     return mobs
 }

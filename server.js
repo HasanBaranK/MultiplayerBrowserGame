@@ -56,7 +56,7 @@ let craftingRecipes = []
 let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
 
 //Crafting recipes
-let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 50, 0, 0, items, 1)
+let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 66, 0, 0, items, 1)
 let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
 let healthPotion = itemFunctions.generateItem(0, 0, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 craftingRecipes.push(worktable, sword, healthPotion)
@@ -114,7 +114,7 @@ io.on('connection', function (socket) {
         io.sockets.emit('gametime', gameTime);
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
-        let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 250, 50, 0, 0, items, 1)
+        let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 55, 0, 0, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
