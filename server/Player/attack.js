@@ -47,8 +47,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
     if(isMob === false) {
         for (let otherPlayer in players) {
             if (otherPlayer !== attackerKey) {
-                console.log(otherPlayer)
-                if (checkPlayerInRange(players[attackerKey].x + players[attackerKey].sizex, players[attackerKey].y + players[attackerKey].sizey, players[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
+                if (checkPlayerInRange(players[attackerKey],players[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
                     console.log("damaged: " + otherPlayer)
                     lowerHealth(players[otherPlayer], item.damage);
                     if(players[otherPlayer].health <= 0){
@@ -62,7 +61,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
             }
         }
         for (let otherPlayer in mobs) {
-            if (checkPlayerInRange(players[attackerKey].x + players[attackerKey].sizex, players[attackerKey].y + players[attackerKey].sizey, mobs[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
+            if (checkPlayerInRange(players[attackerKey], mobs[otherPlayer],range, players[attackerKey].facing, players[attackerKey].sizey)) {
                 console.log("damaged: " + otherPlayer)
                 lowerHealth(mobs[otherPlayer], item.damage);
                 if(mobs[otherPlayer].health <= 0){
@@ -76,7 +75,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
         }
     }else {
         for (let otherPlayer in players) {
-            if (checkPlayerInRange(mobs[attackerKey].x + mobs[attackerKey].sizex, mobs[attackerKey].y + mobs[attackerKey].sizey, players[otherPlayer], range, mobs[attackerKey].facing, mobs[attackerKey].sizey)) {
+            if (checkPlayerInRange(mobs[attackerKey],players[otherPlayer] , range, mobs[attackerKey].facing, mobs[attackerKey].sizey)) {
                 console.log("damaged: " + otherPlayer)
                 lowerHealth(players[otherPlayer], item.damage);
                 peopleHit.players.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage})
@@ -86,25 +85,57 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
     return peopleHit
 }
 
-function checkPlayerInRange(x, y, player, range, facing, attackingSizey) {
+function checkPlayerInRange(attacker, attacked, range, facing, attackingSizey) {
 
+    if(attacked === 0 || attacked.isDead == true){
+        return false;
+    }
+    var attackedHitBox = {
+        left:   attacked.x,
+        top:    attacked.y + (attacked.sizey *2),
+        right:  attacked.x + (attacked.sizex *2),
+        bottom: attacked.y
+    };
+    var attackerLeftAttackBox = {
+        left:   attacker.x - range,
+        top:    attacker.y  + (attacker.sizex *2),
+        right:  attacker.x + (attacker.sizex *1.5),
+        bottom: attacker.y
+    };
+    var attackerRightAttackBox = {
+        left:   attacker.x + (attacker.sizex *0.5),
+        top:    attacker.y + (attacker.sizex *2),
+        right:  attacker.x + range,
+        bottom: attacker.y
+    };
 
     if (facing === "both") {
-        if (x - range <= player.x + player.sizex && player.x + player.sizex <= x + range && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey && player.health >0) {
+        if (attacker.x - range <= attacked.x + attacked.sizex && attacked.x + attacked.sizex <= attacker.x + range && attacker.y - attackingSizey <= attacked.y + attacked.sizey && attacked.y + attacked.sizey <= attacker.y + attackingSizey && attacked.health >0) {
             return true;
         }
     } else if (facing === "left") {
-        if (x - range <= player.x + player.sizex && player.x + player.sizex <= x && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey && player.health >0) {
+        if (doesBoxesIntersect(attackerLeftAttackBox,attackedHitBox)) {
             return true;
         }
     } else if (facing === "right") {
-        if (x <= player.x + player.sizex && player.x + player.sizex <= x + range && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey && player.health >0) {
+        if (doesBoxesIntersect(attackerRightAttackBox,attackedHitBox)) {
             return true;
         }
     }
     return false
 }
+function doesBoxesIntersect(a, b) {
+    if (a.left > b.right || b.left > a.right) {
+        return false;
+    }
 
+    // If one rectangle is above other
+    if (a.top < b.bottom || a.bottom < a.bottom) {
+        return false;
+    }
+
+    return true;
+}
 function generateProjectile(projectiles, name, speed, startx, starty, range, finishX, finishY, xdirection,ydirection, damage, power) {
     let xLength = Math.abs(finishX - startx)
     let yLength = Math.abs(finishY - starty)
