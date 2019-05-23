@@ -28,11 +28,15 @@ function killPlayer(player,items) {
 }
 
 function heal(player, amount) {
-    if (player.health + amount > 100) {
-        player.health = 100;
+  if(player.health == player.maximumHealth){
+    return false
+  }
+    if (player.health + amount > player.maximumHealth) {
+        player.health = player.maximumHealth;
     } else {
         player.health += amount
     }
+    return true
 }
 
 function meleeAttack(players, attackerKey, item,mobs,isMob,items) {
