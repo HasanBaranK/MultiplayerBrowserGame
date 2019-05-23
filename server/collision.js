@@ -269,44 +269,39 @@ function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
 function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize,collisionMap) {
 
     //console.log(items);
-    let arrayLength = items.length;
-    if(arrayLength > 0) {
-        let xcoordinate = player.x + sizex;
-        let ycoordinate = player.y + sizey;
+    if(player.isDead == false) {
+        let arrayLength = items.length;
+        if (arrayLength > 0) {
+            let xcoordinate = player.x + sizex;
+            let ycoordinate = player.y + sizey;
 
 
-        let MAXX = xcoordinate + sizePerimeter;
-        let MINX = xcoordinate - sizePerimeter;
-        let MAXY = ycoordinate + sizePerimeter;
-        let MINY = ycoordinate - sizePerimeter;
-        for (let i = 0; i < arrayLength; i++) {
-            let item = items[i];
-            if (item !== undefined) {
-                if (item.x <= MAXX && item.x >= MINX && item.y < MAXY && item.y > MINY) {
-                    let difx = xcoordinate - item.x;
-                    let dify = ycoordinate - item.y;
-                    if (difx <= 16 && difx >= -16 && dify <= 16 && dify >= -16) {
+            let MAXX = xcoordinate + sizePerimeter;
+            let MINX = xcoordinate - sizePerimeter;
+            let MAXY = ycoordinate + sizePerimeter;
+            let MINY = ycoordinate - sizePerimeter;
+            for (let i = 0; i < arrayLength; i++) {
+                let item = items[i];
+                if (item !== undefined) {
+                    if (item.x <= MAXX && item.x >= MINX && item.y < MAXY && item.y > MINY) {
+                        let difx = xcoordinate - item.x;
+                        let dify = ycoordinate - item.y;
+                        if (difx <= 16 && difx >= -16 && dify <= 16 && dify >= -16) {
 
-                        addItemInventory(player,item,items);
-                        arrayLength = items.length;
-                    } else {
-                        if (difx > 0) {
-                            item.x = item.x + 5
+                            addItemInventory(player, item, items);
+                            arrayLength = items.length;
                         } else {
-                            item.x = item.x - 5
+                            if (difx > 0) {
+                                item.x = item.x + 5
+                            } else {
+                                item.x = item.x - 5
+                            }
+                            if (dify > 0) {
+                                item.y = item.y + 5
+                            } else {
+                                item.y = item.y - 5
+                            }
                         }
-                        if (dify > 0) {
-                            item.y = item.y + 5
-                        } else {
-                            item.y = item.y - 5
-                        }
-                    }
-                } else {
-                    //gravity for the item
-                    item.y += 3;
-                    //console.log(item)
-                    if (checkCollision(item, 16,16, gridSize,collisionMap)) {
-                        item.y -= 3;
                     }
                 }
             }
@@ -320,6 +315,15 @@ function checkPlayerCloseToItems(players,items,gridSize,collisionMap) {
     for (let player in players) {
         let currentPlayer = players[player];
         checkPlayerPerimeter(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, 150,items,gridSize,collisionMap);
+    }
+    for(let item in items){
+        item = items[item]
+        //gravity for the item
+        item.y += 3;
+        //console.log(item)
+        if (checkCollision(item, 16, 16, gridSize, collisionMap)) {
+            item.y -= 3;
+        }
     }
 }
 

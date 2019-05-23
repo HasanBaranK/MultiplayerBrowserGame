@@ -1,6 +1,6 @@
 const {move, jump} = require("./../collision");
 const {meleeAttack} = require("./../Player/attack");
-const {addItemInventory} = require("./../Player/inventory");
+const {addItemInventory,deleteItemFromWorld} = require("./../Player/inventory");
 const {generateItem} = require("./../Player/items");
 module.exports = {
     generateMobs,
@@ -9,7 +9,7 @@ module.exports = {
     mobController
 }
 
-async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) {
+async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io,items) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
     //if he is close enough then attack not then follow him
@@ -33,7 +33,7 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) 
             let times = 0;
             let interval = setInterval(function () {
                 times++;
-                move("right",mobs[mob], 32, collisionMap, moveSpeed)
+                move("right", mobs[mob], 32, collisionMap, moveSpeed)
                 if (times > 5) {
                     mobs[mob].inThread = false;
                     clearInterval(interval);
@@ -74,11 +74,17 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) 
                 mobs[mob].progress = mobs[mob].progress + 10;
                 if (mobs[mob].progress > 100) {
                     clearInterval(interval)
-                    let peopleGothit = meleeAttack(players, mob, mobs[mob].inventory[0], mobs, true)
-                    io.sockets.emit('peoplegothit', peopleGothit);
+                    if (mobs[mob].isDead == false) {
+                        let peopleGothit = meleeAttack(players, mob, mobs[mob].holding[0], mobs, true,items)
+                        io.sockets.emit('peoplegothit', peopleGothit);
+                    }
                     mobs[mob].progress = 0;
                     mobs[mob].isAttacking = false;
-                    mobs[mob].inThread = false;
+                    setTimeout(function () {
+
+                        mobs[mob].inThread = false;
+                    }, 500)
+
                 }
             }, 100);
 
@@ -111,7 +117,8 @@ function generateMobs(startX, amount, mobs, collisionMap, gridSize, items) {
 
 function generateMob(start, collisionMap, gridSize, mobs, items) {
     let id = Math.floor(Math.random() * 100000000);
-    mobs["asd" + id + "asd"] = {
+    id = "asd" + id + "asd";
+    mobs[id] = {
         name: "Skeleton",
         x: start * 32,
         y: getHeight(start, collisionMap, gridSize, 640) - gridSize * 2,
@@ -131,8 +138,11 @@ function generateMob(start, collisionMap, gridSize, mobs, items) {
         equipped: [],
         holding: []
     };
-    let sword = generateItem(mobs["asd" + id + "asd"].x, mobs["asd" + id + "asd"].y, "sword_item", "melee", 25, 66, 0, 0, items, 1)
-    addItemInventory(mobs["asd" + id + "asd"], sword, items)
+    let sword = generateItem(mobs[id].x, mobs[id].y, "sword_item", "melee", 25, 60, 0, 0, items, 1)
+    mobs[id].holding.push(sword);
+    deleteItemFromWorld(items,sword)
+    let potion = generateItem(mobs[id].x, mobs[id].y, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+    addItemInventory(mobs[id],potion,items)
     return mobs
 }
 
@@ -144,7 +154,7 @@ function getHeight(x, collisionMap, gridSize, start) {
     }
 }
 
-function playerCloseToMob(players, mobs, range, collisionMap) {
+function playerCloseToMob(players, mobs, range, collisionMap,io,items) {
 
     for (let mob in mobs) {
         let mobKey = mob
@@ -161,7 +171,7 @@ function playerCloseToMob(players, mobs, range, collisionMap) {
                 }
             }
         }
-        MobAI(players, closestPlayer, mobs, mobKey, collisionMap, 50)
+        MobAI(players, closestPlayer, mobs, mobKey, collisionMap, 50,io,items)
     }
 }
 
@@ -174,8 +184,7 @@ function getVisibleMobs(mobs) {
     return mobs
 }
 
-async function mobController(players, mobs, collisionMap, attackRange, range, io) {
-
+async function mobController(players, mobs, collisionMap, attackRange, range, io,items) {
     setInterval(function () {
         {
             let visibleMobs = getVisibleMobs(mobs);
@@ -185,7 +194,7 @@ async function mobController(players, mobs, collisionMap, attackRange, range, io
 
                 if (mobs[mob].inThread == false && mobs[mob].isDead == false) {
                     mobs[mob].inThread = true;
-                    MobAI(players, player, mobs, mob, collisionMap, attackRange, io);
+                    MobAI(players, player, mobs, mob, collisionMap, attackRange, io,items);
                 }
             }
         }

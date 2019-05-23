@@ -1,10 +1,20 @@
 function drawPlayerPosition(players) {
+    ctx.save()
+    ctx.fillStyle = "rgba(240, 52, 52, 1)";
     for (let player in players) {
-        ctx.fillRect(players[player].state.x + players[player].state.sizex, players[player].state.y + players[player].state.sizey, 2, 2);
+        ctx.fillRect(players[player].state.x + players[player].state.sizex, players[player].state.y + players[player].state.sizey, 3, 3);
     }
+    ctx.restore()
 }
 
-
+function visualizeHitBoxes(players,gridSize) {
+    ctx.save()
+    ctx.fillStyle = "rgba(240, 52, 52, 1)";
+    for(let player in players){
+        ctx.fillRect(players[player].state.x, players[player].state.y, players[player].state.sizex + players[player].state.sizex, players[player].state.sizey + players[player].state.sizey);
+    }
+    ctx.restore()
+}
 function visualizeCollision2(players, gridSize) {
 
 
@@ -111,15 +121,22 @@ function rangeVisualizer(players, range) {
     for (let player in players) {
         player = players[player]
         if (player.facing === "left") {
-            ctx.fillRect(player.state.x + player.state.sizex - range, player.state.y, range, 2 * player.state.sizey);
+            ctx.fillRect(player.state.x + (player.state.sizex *1.5) - range, player.state.y, range, 2 * player.state.sizey);
         }
         if (player.facing === "right") {
-            ctx.fillRect(player.state.x + player.state.sizex, player.state.y, range, 2 * player.state.sizey);
+            ctx.fillRect(player.state.x + ( player.state.sizex *0.5), player.state.y, range, 2 * player.state.sizey);
         }
     }
     ctx.restore()
 }
-
+function visualizeHitBoxes(players,gridSize) {
+    ctx.save()
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    for(let player in players){
+        ctx.fillRect(player.x, player.y, player.x + player.sizex, player.y + player.sizey);
+    }
+    ctx.restore()
+}
 function visualizeCollision(players, gridSize) {
     for (let player in players) {
         player = players[player]

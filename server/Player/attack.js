@@ -1,5 +1,6 @@
 const {checkCollision} = require("../collision");
 const {generateItem} = require("./items");
+const {dropAllInventory} = require("./inventory");
 module.exports = {
     lowerHealth,
     killPlayer,
@@ -12,18 +13,18 @@ module.exports = {
 }
 
 
-function lowerHealth(player, amount) {
+function lowerHealth(player, amount,items) {
     player.health -= amount
     console.log("Health: " + player.health)
     if (player.health <= 0) {
         console.log("should Dİe")
-        killPlayer(player)
+        killPlayer(player,items)
     }
 }
 
-function killPlayer(player) {
+function killPlayer(player,items) {
     player.isDead = true;
-
+    dropAllInventory(player,items)
 }
 
 function heal(player, amount) {
@@ -34,7 +35,7 @@ function heal(player, amount) {
     }
 }
 
-function meleeAttack(players, attackerKey, item,mobs,isMob) {
+function meleeAttack(players, attackerKey, item,mobs,isMob,items) {
     let peopleHit = {}
     peopleHit.mobs =[]
     peopleHit.players =[]
@@ -45,7 +46,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
             if (otherPlayer !== attackerKey) {
                 if (checkPlayerInRange(players[attackerKey],players[otherPlayer], range, players[attackerKey].facing, players[attackerKey].sizey)) {
                     console.log("damaged: " + otherPlayer)
-                    lowerHealth(players[otherPlayer], item.damage);
+                    lowerHealth(players[otherPlayer], item.damage,items);
                     if(players[otherPlayer].health <= 0){
                       peopleHit.players.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage, xpGained:50, isMob:false})
                       players[attackerKey].xp += 50
@@ -59,7 +60,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
         for (let otherPlayer in mobs) {
             if (checkPlayerInRange(players[attackerKey], mobs[otherPlayer],range, players[attackerKey].facing, players[attackerKey].sizey)) {
                 console.log("damaged: " + otherPlayer)
-                lowerHealth(mobs[otherPlayer], item.damage);
+                lowerHealth(mobs[otherPlayer], item.damage,items);
                 if(mobs[otherPlayer].health <= 0){
                   peopleHit.mobs.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage, xpGained:200, isMob:true})
                   players[attackerKey].xp += 200
@@ -73,7 +74,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
         for (let otherPlayer in players) {
             if (checkPlayerInRange(mobs[attackerKey],players[otherPlayer] , range, mobs[attackerKey].facing, mobs[attackerKey].sizey)) {
                 console.log("damaged: " + otherPlayer)
-                lowerHealth(players[otherPlayer], item.damage);
+                lowerHealth(players[otherPlayer], item.damage,items);
                 peopleHit.players.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage})
             }
         }
@@ -88,21 +89,21 @@ function checkPlayerInRange(attacker, attacked, range, facing, attackingSizey) {
     }
     var attackedHitBox = {
         left:   attacked.x,
-        top:    attacked.y + (attacked.sizey *2),
+        top:    attacked.y ,
         right:  attacked.x + (attacked.sizex *2),
-        bottom: attacked.y
+        bottom: attacked.y + (attacked.sizey *2)
     };
     var attackerLeftAttackBox = {
-        left:   attacker.x - range,
-        top:    attacker.y  + (attacker.sizex *2),
-        right:  attacker.x + (attacker.sizex *1.5),
-        bottom: attacker.y
+        left:   attacker.x + (attacker.sizex *1.5) - range,
+        top:    attacker.y  ,
+        right:  attacker.x + (attacker.sizex *1.5) ,
+        bottom: attacker.y + (attacker.sizex *2)
     };
     var attackerRightAttackBox = {
         left:   attacker.x + (attacker.sizex *0.5),
-        top:    attacker.y + (attacker.sizex *2),
+        top:    attacker.y ,
         right:  attacker.x + range,
-        bottom: attacker.y
+        bottom: attacker.y + (attacker.sizex *2)
     };
 
     if (facing === "both") {
@@ -120,17 +121,23 @@ function checkPlayerInRange(attacker, attacked, range, facing, attackingSizey) {
     }
     return false
 }
-function doesBoxesIntersect(a, b) {
-    if (a.left > b.right || b.left > a.right) {
-        return false;
-    }
-
-    // If one rectangle is above other
-    if (a.top < b.bottom || a.bottom < a.bottom) {
-        return false;
-    }
-
-    return true;
+// function doesBoxesIntersect(a, b) {
+//     if (a.left > b.right || b.left > a.right) {
+//         return false;
+//     }
+//
+//     // If one rectangle is above other
+//     if (a.top < b.bottom || a.bottom < a.bottom) {
+//         return false;
+//     }
+//
+//     return true;
+// }
+function doesBoxesIntersect(r1, r2) {
+    return !(r2.left > r1.right ||
+        r2.right < r1.left ||
+        r2.top > r1.bottom ||
+        r2.bottom < r1.top);
 }
 function generateProjectile(projectiles, name, speed, startx, starty, range, finishX, finishY, xdirection,ydirection, damage, power) {
     let xLength = Math.abs(finishX - startx)
@@ -198,7 +205,7 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
         for (let player in players) {
             player = players[player]
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
-                lowerHealth(player, projectile.damage);
+                lowerHealth(player, projectile.damage,items);
             }
         }
         projectile.angle = getAngleRad(xamountTraveled,yamountTraveled+gravityAmount)
@@ -225,7 +232,7 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
         for (let player in players) {
             player = players[player]
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
-                lowerHealth(player, projectile.damage);
+                lowerHealth(player, projectile.damage,items);
             }
         }
         projectile.angle = getAngleRad(xamountTraveled,gravityAmount)
@@ -254,7 +261,7 @@ function projectileGravity(projectiles, players, gridSize, collisionMap, items,g
         for (let player in players) {
             player = players[player]
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
-                lowerHealth(player, projectile.damage);
+                lowerHealth(player, projectile.damage,items);
             }
         }
         if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {

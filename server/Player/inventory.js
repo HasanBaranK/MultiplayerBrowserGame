@@ -1,8 +1,14 @@
+const {generateItem} = require("./items");
+
+
 module.exports={
     inPlayerInventory,
     deleteItemInventory,
     addItemInventory,
-    deleteItemInventoryWithAmount
+    deleteItemInventoryWithAmount,
+    dropItem,
+    dropAllInventory,
+    deleteItemFromWorld
 }
 
 function inPlayerInventory(player,name) {
@@ -26,6 +32,11 @@ function deleteItemInventory(player,name) {
             return true
         }
     }
+    return false
+}
+function fullyDeleteInventory(player) {
+
+    player.inventory=[];
     return false
 }
 
@@ -72,6 +83,32 @@ function addItemInventory(player,item,items) {
         }
     }
     player.inventory.push(item)
-    items.splice(items.indexOf(item), 1);
+    deleteItemFromWorld(items,item)
     return 0;
+}
+function deleteItemFromWorld(items,item) {
+    items.splice(items.indexOf(item), 1);
+}
+function dropItem(player,name,items) {
+    for(let inventoryItem in player.inventory){
+        if(player.inventory[inventoryItem].name === name){
+            let item = player.inventory[inventoryItem];
+            deleteItemInventory(player,name);
+            generateItem(item.x, item.y, item.name, item.type, item.damage,item.range, item.defence, item.health,items,1,item.equipable)
+        }
+    }
+}
+
+function dropAllInventory(player,items) {
+    for(let inventoryItem in player.inventory){
+            let item = player.inventory[inventoryItem];
+            let number = getRandomInt(30)-10;
+            generateItem(player.x + number, player.y, item.name, item.type, item.damage,item.range, item.defence, item.health,items,item.amount,item.equipable)
+    }
+    fullyDeleteInventory(player)
+}
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
+function holdItem(player) {
 }
