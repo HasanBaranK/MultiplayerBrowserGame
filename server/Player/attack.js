@@ -86,15 +86,15 @@ function checkPlayerInRange(x, y, player, range, facing, attackingSizey) {
 
 
     if (facing === "both") {
-        if (x - range <= player.x + player.sizex && player.x + player.sizex <= x + range && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey) {
+        if (x - range <= player.x + player.sizex && player.x + player.sizex <= x + range && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey && player.health >0) {
             return true;
         }
     } else if (facing === "left") {
-        if (x - range <= player.x + player.sizex && player.x + player.sizex <= x && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey) {
+        if (x - range <= player.x + player.sizex && player.x + player.sizex <= x && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey && player.health >0) {
             return true;
         }
     } else if (facing === "right") {
-        if (x <= player.x + player.sizex && player.x + player.sizex <= x + range && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey) {
+        if (x <= player.x + player.sizex && player.x + player.sizex <= x + range && y - attackingSizey <= player.y + player.sizey && player.y + player.sizey <= y + attackingSizey && player.health >0) {
             return true;
         }
     }
