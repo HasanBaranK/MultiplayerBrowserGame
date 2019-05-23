@@ -141,6 +141,7 @@ function game(){
     drawItems(items);
     drawProjectiles(projectiles)
     drawPopUps()
+    drawHealedPops()
     for(let player in players){
       if(players[player].state.isDead){
         if(players[player].drawFinal(ctx, 'dieR')){
@@ -213,40 +214,9 @@ function game(){
       }
     }
 
-
-
     currentuiTime = perf.now()
     if(shouldUpdateUI || currentuiTime > uiDelay){
-      ctxChat.clearRect(0, 0, cvs.width, cvs.height);
-      ctxChat.fillStyle = 'black'
-      ctxChat.font = '16px bold'
-      ctxChat.drawImage(images['player_info_bg'], 100, 0, 250, 250/3.5)
-      ctxChat.fillText(socket.id, 170, 22)
-      ctxChat.fillText('Level: ' + players[socket.id].state.level, 175, 38)
-      ctxChat.fillText('Gold: ' + 0, 171, 54)
-      ctxChat.fillText('Time: '+gameTime.hour + ':' + gameTime.minute, cvs.width / 2, 32)
-      ctxChat.drawImage(images['hasan'], 75, 0, 100, 80)
-      input.render()
-      displays['messagebox'].draw(ctxChat, inChat)
-      displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
-      displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100, 100)
-      displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100, 100)
-      displays['xpbarframe'].draw(ctxChat, 300,cvs.height - 20, 100, 100)
-
-      displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health, 100)
-      displays['energybar'].draw(ctxChat, 1,cvs.height - 20, players[socket.id].state.energy, 100)
-      displays['xpbar'].draw(ctxChat, 301,cvs.height - 20,players[socket.id].state.xp, players[socket.id].state.xpToLevel)
-
-      if(inCrafting){
-        displays['crafting'].draw(ctxChat,0,0,craftingRecipes)
-      }
-      if(inInventory){
-        displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)
-        buttons['inventoryopen'].draw(ctxChat,0,0)
-      }
-      else{
-        buttons['inventory'].draw(ctxChat,0,0)
-      }
+      updateUI()
       shouldUpdateUI = false
       uiDelay = currentuiTime + 1000
     }

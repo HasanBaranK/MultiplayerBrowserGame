@@ -7,7 +7,6 @@ module.exports={
 
 function inPlayerInventory(player,name) {
     for(let item in player.inventory){
-        console.log(player.inventory[item])
         if(player.inventory[item].name === name){
             return true
         }
@@ -17,12 +16,10 @@ function inPlayerInventory(player,name) {
 function deleteItemInventory(player,name) {
     for(let item in player.inventory){
         if(player.inventory[item].name === name){
-            console.log(player)
             player.inventory[item].amount -= 1;
             if(player.inventory[item].amount === 0) {
                 player.inventory.splice(item, 1);
             }
-            console.log(player)
             return true
         }
     }
@@ -55,7 +52,6 @@ function deleteItemInventoryWithAmount(player,recipes) {
                 }
                 continue loop1
               }
-              console.log(player)
           }
       }
     }

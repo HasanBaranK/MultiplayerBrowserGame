@@ -90,7 +90,9 @@ io.on('connection', function (socket) {
             x: 320,
             y: 287,
             status: 0,
+            maximumHealth: 150,
             health: 100,
+            maximumEnergy: 100,
             energy: 100,
             sizex: 32,
             sizey: 32,
@@ -157,8 +159,11 @@ io.on('connection', function (socket) {
     });
     socket.on('consume', function (consumable){
       if(consumable.name == 'healthpotion_item'){
-        attackFunctions.heal(players[socket.id], 25)
-        inventoryFunctions.deleteItemInventory(players[socket.id],'healthpotion_item')
+        if(attackFunctions.heal(players[socket.id], 25)){
+          if(inventoryFunctions.deleteItemInventory(players[socket.id],'healthpotion_item')){
+            socket.emit('gothealed', 25)
+          }
+        }
       }
     });
     socket.on('stopattack', function (evt) {

@@ -177,10 +177,10 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
         let gridy = position.y
 
         if (calculateDistance(gridx, gridy, player.x+ gridSize, player.y+gridSize+gridSize/2) <= range) {
-            console.log(player.x + "," + player.y)
+            //console.log(player.x + "," + player.y)
             if (fastMap[gridx][gridy] !== undefined) {
 
-                    console.log("found")
+                    //console.log("found")
 
                     let block = fastMap[gridx][gridy];
                     if (block !== undefined && block !== null) {

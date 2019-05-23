@@ -20,6 +20,10 @@ let popUps = {}
 let popUpsIncrementer = 0
 let popUpTimeDelay = 0
 
+let healedPops = {}
+let healedPopsIncrementer = 0
+let healedPopsTimeDelay = 0
+
 
 
 let keys = {}
@@ -71,6 +75,39 @@ $('body').on('contextmenu', '#chat', function (e) {
   return false;
 });
 
+function updateUI(){
+  ctxChat.clearRect(0, 0, cvs.width, cvs.height);
+  ctxChat.fillStyle = 'black'
+  ctxChat.font = '16px bold'
+  ctxChat.drawImage(images['player_info_bg'], 100, 0, 250, 250/3.5)
+  ctxChat.fillText(socket.id, 170, 22)
+  ctxChat.fillText('Level: ' + players[socket.id].state.level, 175, 38)
+  ctxChat.fillText('Gold: ' + 0, 171, 54)
+  ctxChat.fillText('Time: '+gameTime.hour + ':' + gameTime.minute, cvs.width / 2, 32)
+  ctxChat.drawImage(images['hasan'], 75, 0, 100, 80)
+  input.render()
+  displays['messagebox'].draw(ctxChat, inChat)
+  displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
+  displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100, 100)
+  displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100, 100)
+  displays['xpbarframe'].draw(ctxChat, 300,cvs.height - 20, 100, 100)
+
+  displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health, players[socket.id].state.maximumHealth)
+  displays['energybar'].draw(ctxChat, 1,cvs.height - 20, players[socket.id].state.energy, players[socket.id].state.maximumEnergy)
+  displays['xpbar'].draw(ctxChat, 301,cvs.height - 20,players[socket.id].state.xp, players[socket.id].state.xpToLevel)
+
+  if(inCrafting){
+    displays['crafting'].draw(ctxChat,0,0,craftingRecipes)
+  }
+  if(inInventory){
+    displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)
+    buttons['inventoryopen'].draw(ctxChat,0,0)
+  }
+  else{
+    buttons['inventory'].draw(ctxChat,0,0)
+  }
+}
+
 function drawPopUps(){
   popUpTimeDelay = perf.now()
   for(let popUp in popUps){
@@ -82,7 +119,7 @@ function drawPopUps(){
         if(popUps[popUp].damageLife > popUpTimeDelay){
           ctx.font = 'bold 20px Arial'
           ctx.fillStyle = 'white'
-          ctx.fillText(popUps[popUp].damage, mobs[popUps[popUp].attackedId].state.x, mobs[popUps[popUp].attackedId].state.y - popUps[popUp].ySpeed)
+          ctx.fillText('-' + popUps[popUp].damage, mobs[popUps[popUp].attackedId].state.x, mobs[popUps[popUp].attackedId].state.y - popUps[popUp].ySpeed)
         }
         if(popUps[popUp].attackerId == socket.id && ![popUp].xpGained && popUps[popUp].xpLife > popUpTimeDelay){
           ctx.fillStyle = 'rgba(255,0,255,1)'
@@ -93,7 +130,7 @@ function drawPopUps(){
         if(popUps[popUp].attackedId == socket.id && popUps[popUp].damageLife > popUpTimeDelay){
         ctx.font = 'bold 20px Arial'
         ctx.fillStyle = 'white'
-        ctx.fillText(popUps[popUp].damage, players[popUps[popUp].attackedId].state.x, players[popUps[popUp].attackedId].state.y - popUps[popUp].ySpeed)
+        ctx.fillText('-' + popUps[popUp].damage, players[popUps[popUp].attackedId].state.x, players[popUps[popUp].attackedId].state.y - popUps[popUp].ySpeed)
         }
         if(popUps[popUp].attackerId == socket.id && !popUps[popUp].xpGained && popUps[popUp].xpLife > popUpTimeDelay){
           ctx.fillStyle = 'rgba(255,0,255,1)'
@@ -102,6 +139,21 @@ function drawPopUps(){
       }
       popUps[popUp].ySpeed++
     }
+  }
+}
+
+function drawHealedPops(){
+  healedPopsTimeDelay = perf.now()
+  for(let healedPop in healedPops){
+    if(healedPops[healedPop].life < healedPopsTimeDelay){
+      delete healedPops[healedPop]
+    }
+    else{
+      ctx.font = 'bold 20px Arial'
+      ctx.fillStyle = 'rgba(0,255,0,1)'
+      ctx.fillText('+' + healedPops[healedPop].heal, players[socket.id].state.x, players[socket.id].state.y - healedPops[healedPop].ySpeed)
+    }
+    healedPops[healedPop].ySpeed ++
   }
 }
 
@@ -547,22 +599,30 @@ document.body.onload = () => {
         popUps[popUpsIncrementer].ySpeed = -10
         popUps[popUpsIncrementer].damageLife = 500 + perf.now()
         if(popUps[popUpsIncrementer].xpGained){
-          popUps[popUpsIncrementer].ySpeed = -30
+          popUps[popUpsIncrementer].ySpeed = -32
           popUps[popUpsIncrementer].xpLife = 1000 + perf.now()
         }
         mobs[entities.mobs[entity].attackedId].isHit = true
       }
       for(let entity in entities.players){
+        if(entities.players[entity].attackedId == socket.id){
+          shouldUpdateUI = true
+        }
         popUpsIncrementer++
         popUps[popUpsIncrementer] = entities.players[entity]
         popUps[popUpsIncrementer].ySpeed = -10
         popUps[popUpsIncrementer].damageLife = 500 + perf.now()
         if(popUps[popUpsIncrementer].xpGained){
-          popUps[popUpsIncrementer].ySpeed = -30
+          popUps[popUpsIncrementer].ySpeed = -32
           popUps[popUpsIncrementer].xpLife = 1000 + perf.now()
         }
         players[entities.players[entity].attackedId].isHit = true
       }
+    });
+    socket.on('gothealed', (healed) => {
+      healedPopsIncrementer++
+      healedPops[healedPopsIncrementer] = {heal:healed, life:perf.now() + 500, ySpeed:-32}
+      shouldUpdateUI = true
     });
 
     socket.on('images', (folders) => {
