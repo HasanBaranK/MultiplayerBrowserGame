@@ -1,4 +1,4 @@
-const {move,jump} = require("./../collision");
+const {move, jump} = require("./../collision");
 const {meleeAttack} = require("./../Player/attack");
 const {addItemInventory} = require("./../Player/inventory");
 const {generateItem} = require("./../Player/items");
@@ -16,11 +16,31 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) 
     let moveSpeed = 8;
     if (player == null) {
         let number = Math.floor(Math.random() * 2);
-        //console.log(number)
         if (number == 0) {
-            move("left", mob, 32, collisionMap, moveSpeed)
+            let times = 0;
+            let interval = setInterval(function () {
+                times++;
+                move("left", mobs[mob], 32, collisionMap, moveSpeed);
+
+                if (times > 5) {
+                    mobs[mob].inThread = false;
+                    clearInterval(interval);
+                }
+            }, 200);
+            mobs[mob].inThread = true;
+            return
         } else {
-            move("right", mob, 32, collisionMap, moveSpeed)
+            let times = 0;
+            let interval = setInterval(function () {
+                times++;
+                move("right",mobs[mob], 32, collisionMap, moveSpeed)
+                if (times > 5) {
+                    mobs[mob].inThread = false;
+                    clearInterval(interval);
+                }
+            }, 200);
+            mobs[mob].inThread = true;
+            return
         }
 
     } else {
@@ -28,15 +48,15 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) 
         if (player.x > mobs[mob].x) {
             let before = mobs[mob].x;
             move("right", mobs[mob], 32, collisionMap, moveSpeed)
-            if(before == mobs[mob].x){
-                jump(mobs[mob],50,collisionMap,32,4,6);
+            if (before == mobs[mob].x) {
+                jump(mobs[mob], 50, collisionMap, 32, 4, 6);
                 move("right", mobs[mob], 32, collisionMap, moveSpeed)
             }
         } else {
             let before = mobs[mob].x;
             move("left", mobs[mob], 32, collisionMap, moveSpeed)
-            if(before == mobs[mob].x){
-                jump(mobs[mob],50,collisionMap,32,4,6);
+            if (before == mobs[mob].x) {
+                jump(mobs[mob], 50, collisionMap, 32, 4, 6);
                 move("left", mobs[mob], 32, collisionMap, moveSpeed)
             }
         }
@@ -52,7 +72,7 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) 
 
             let interval = setInterval(function () {
                 mobs[mob].progress = mobs[mob].progress + 10;
-                if(mobs[mob].progress > 100) {
+                if (mobs[mob].progress > 100) {
                     clearInterval(interval)
                     let peopleGothit = meleeAttack(players, mob, mobs[mob].inventory[0], mobs, true)
                     io.sockets.emit('peoplegothit', peopleGothit);
@@ -61,7 +81,6 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io) 
                     mobs[mob].inThread = false;
                 }
             }, 100);
-            console.log("not blocking")
 
             mobs[mob].inThread = true;
             return
@@ -164,7 +183,7 @@ async function mobController(players, mobs, collisionMap, attackRange, range, io
             for (let mob in visibleMobs) {
                 let player = calculateClosestPlayer(players, mobs, mob, range)
 
-                if (mobs[mob].inThread == false && mobs[mob].isDead == false ) {
+                if (mobs[mob].inThread == false && mobs[mob].isDead == false) {
                     mobs[mob].inThread = true;
                     MobAI(players, player, mobs, mob, collisionMap, attackRange, io);
                 }
@@ -180,7 +199,7 @@ function calculateClosestPlayer(players, mobs, mob, range) {
     let closestPlayer;
     for (let player in players) {
         player = players[player];
-        if(player.health > 0) {
+        if (player.health > 0) {
             let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mob.x + mob.sizex, mob.y + mob.sizey)
             if (range >= distance) {
                 if (minRange > distance) {
