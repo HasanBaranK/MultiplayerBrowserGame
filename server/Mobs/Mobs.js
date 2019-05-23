@@ -180,11 +180,13 @@ function calculateClosestPlayer(players, mobs, mob, range) {
     let closestPlayer;
     for (let player in players) {
         player = players[player];
-        let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mob.x + mob.sizex, mob.y + mob.sizey)
-        if (range >= distance) {
-            if (minRange > distance) {
-                minRange = distance;
-                closestPlayer = player;
+        if(player.health > 0) {
+            let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mob.x + mob.sizex, mob.y + mob.sizey)
+            if (range >= distance) {
+                if (minRange > distance) {
+                    minRange = distance;
+                    closestPlayer = player;
+                }
             }
         }
     }
