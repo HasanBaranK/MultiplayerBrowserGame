@@ -16,6 +16,9 @@ let scrollChat = 0
 let informationToPresent = {}
 let craftingRecipes = []
 let gameTime = {}
+let popUps = {}
+let popUpsIncrementer = 0
+let popUpTimeDelay = 0
 
 
 
@@ -67,6 +70,41 @@ var input = new CanvasInput({
 $('body').on('contextmenu', '#chat', function (e) {
   return false;
 });
+
+function drawPopUps(){
+  popUpTimeDelay = perf.now()
+  for(let popUp in popUps){
+    if(popUps[popUp].xpLife < popUpTimeDelay){
+      delete popUps[popUp]
+    }
+    else{
+      if(popUps[popUp].isMob){
+        if(popUps[popUp].damageLife > popUpTimeDelay){
+          ctx.font = 'bold 20px Arial'
+          ctx.fillStyle = 'white'
+          ctx.fillText(popUps[popUp].damage, mobs[popUps[popUp].attackedId].state.x, mobs[popUps[popUp].attackedId].state.y - popUps[popUp].ySpeed)
+        }
+        if(popUps[popUp].attackerId == socket.id && ![popUp].xpGained && popUps[popUp].xpLife > popUpTimeDelay){
+          console.log(popUps[popUp].attackerId == socket.id);
+          ctx.fillStyle = 'rgba(255,0,255,1)'
+          ctx.fillText('XP ' + popUps[popUp].xpGained, players[popUps[popUp].attackerId].state.x, players[popUps[popUp].attackerId].state.y - popUps[popUp].ySpeed)
+        }
+      }
+      else{
+        if(popUps[popUp].attackedId == socket.id && popUps[popUp].damageLife > popUpTimeDelay){
+        ctx.font = 'bold 20px Arial'
+        ctx.fillStyle = 'white'
+        ctx.fillText(popUps[popUp].damage, players[popUps[popUp].attackedId].state.x, players[popUps[popUp].attackedId].state.y - popUps[popUp].ySpeed)
+        }
+        if(popUps[popUp].attackerId == socket.id && !popUps[popUp].xpGained && popUps[popUp].xpLife > popUpTimeDelay){
+          ctx.fillStyle = 'rgba(255,0,255,1)'
+          ctx.fillText('XP ' + popUps[popUp].xpGained, players[popUps[popUp].attackerId].state.x, players[popUps[popUp].attackerId].state.y - popUps[popUp].ySpeed)
+        }
+      }
+      popUps[popUp].ySpeed++
+    }
+  }
+}
 
 class Inventory{
   constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset,textOffsetX,textOffsetY){
@@ -225,8 +263,8 @@ class Bar {
     this.width = width || img.width
     this.height = height || img.height
   }
-  draw(ctx,ctX,ctY,width){
-    ctx.drawImage(this.img, this.x+ctX, this.y+ctY, (width / 100) * this.width, this.height)
+  draw(ctx,ctX,ctY,value,max){
+    ctx.drawImage(this.img, this.x+ctX, this.y+ctY, (value / max) * this.width, this.height)
   }
 }
 
@@ -383,10 +421,16 @@ function loadImagesThen(folders){
     buttons['inventoryopen'] = new UIButton('Inventoryopen', 0, 0, images['inventoryopen'], 32, 32)
     displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 16,14,29)
     displays['quickselect'] = new QuickSelect('Quickselect', images['quickselect_UI'], 0,0,0,0,1,9,32,12,2,17)
+
     displays['healthbarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
     displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
+    displays['xpbarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 600, 200/12.75)
+
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
+    displays['xpbar'] = new Bar('xpbar', 0, 0, images['energy_fg_upscaled'], 595, 200/12.75)
+
+
     displays['messagebox'] = new MessageBox(cvs.width - 311, cvs.height - 29 - 150 - 10, 308, 150)
     displays['crafting'] = new Crafting('Crafting',images['craft_UI'], cvs.width / 2 - 240, 200, 0, 2, 13, 2, 32, 12, images['craftbutton_UI'])
     socket.emit('new player')
@@ -482,18 +526,26 @@ document.body.onload = () => {
     });
     socket.on('peoplegothit', (entities) => {
       for(let entity in entities.mobs){
-        if(entities.mobs[entity].attackerId){
-          players[entities.mobs[entity].attackerId].xpGained = entities.mobs[entity].xp
-          mobs[entities.mobs[entity].attackedId].killer = entities.mobs[entity].attackerId
+        popUpsIncrementer++
+        popUps[popUpsIncrementer] = entities.mobs[entity]
+        popUps[popUpsIncrementer].ySpeed = -10
+        popUps[popUpsIncrementer].damageLife = 500 + perf.now()
+        if(popUps[popUpsIncrementer].xpGained){
+          popUps[popUpsIncrementer].ySpeed = -30
+          popUps[popUpsIncrementer].xpLife = 1000 + perf.now()
         }
         mobs[entities.mobs[entity].attackedId].isHit = true
-        mobs[entities.mobs[entity].attackedId].damaged = entities.mobs[entity].damage
-        mobs[entities.mobs[entity].attackedId].yUp = 0
       }
       for(let entity in entities.players){
+        popUpsIncrementer++
+        popUps[popUpsIncrementer] = entities.players[entity]
+        popUps[popUpsIncrementer].ySpeed = -10
+        popUps[popUpsIncrementer].damageLife = 500 + perf.now()
+        if(popUps[popUpsIncrementer].xpGained){
+          popUps[popUpsIncrementer].ySpeed = -30
+          popUps[popUpsIncrementer].xpLife = 1000 + perf.now()
+        }
         players[entities.players[entity].attackedId].isHit = true
-        players[entities.players[entity].attackedId].damaged = entities.players[entity].damage
-        players[entities.players[entity].attackedId].yUp = 0
       }
     });
 

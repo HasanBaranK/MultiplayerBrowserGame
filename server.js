@@ -101,7 +101,9 @@ io.on('connection', function (socket) {
             facing: "right",
             equipped: [],
             holding: [],
-            xp:0
+            xp:0,
+            xpToLevel:1000,
+            level:1
         };
         let player = players[socket.id]
         let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)

@@ -140,29 +140,15 @@ function game(){
     drawMap(map);
     drawItems(items);
     drawProjectiles(projectiles)
+    drawPopUps()
     for(let player in players){
       if(players[player].state.isDead){
-        if(players[player].isHit){
-          if(players[player].yUp < 30){
-            ctx.font = '20px Courier New'
-            ctx.fillStyle = 'white'
-            ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
-          }
-          players[player].yUp += 1
-        }
         if(players[player].drawFinal(ctx, 'dieR')){
           players[player].isHit = false
         }
       }
       else{
         if(players[player].isHit){
-          console.log(players[player].yUp);
-          if(players[player].yUp < 20){
-            ctx.font = '20px Courier New'
-            ctx.fillStyle = 'white'
-            ctx.fillText(players[player].damaged,players[player].state.x, players[player].state.y - players[player].yUp)
-          }
-          players[player].yUp += 1
           if(players[player].facing == 'right'){
             if(players[player].drawOnce(ctx, 'gothitR')){
               players[player].isHit = false
@@ -201,30 +187,12 @@ function game(){
     }
     for(let mob in mobs){
       if(mobs[mob].state.isDead){
-        if(mobs[mob].isHit){
-          if(mobs[mob].yUp < 20){
-            ctx.font = 'bold 20px Courier New'
-            ctx.fillStyle = 'yellow'
-            ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
-          }
-          if(mobs[mob].yUp < 30){
-            ctx.fillStyle = 'rgba(255,0,255,1)'
-            ctx.fillText('XP ' + players[mobs[mob].killer].xpGained,players[mobs[mob].killer].state.x, players[mobs[mob].killer].state.y - mobs[mob].yUp -10)
-          }
-          mobs[mob].yUp += 1
-        }
         if(mobs[mob].drawFinal(ctx, 'dead')){
           mobs[mob].isHit = false
         }
       }
       else{
         if(mobs[mob].isHit){
-          if(mobs[mob].yUp < 20){
-            ctx.font = '20px Courier New'
-            ctx.fillStyle = 'yellow'
-            ctx.fillText(mobs[mob].damaged,mobs[mob].state.x, mobs[mob].state.y - mobs[mob].yUp)
-          }
-          mobs[mob].yUp += 1
           if(mobs[mob].drawOnce(ctx, 'gothit')){
             mobs[mob].isHit = false
           }
@@ -244,8 +212,8 @@ function game(){
         }
       }
     }
-    //visualizeCollision(mobs,32)
-    //visualizeCollision(players,32)
+
+
 
     currentuiTime = perf.now()
     if(shouldUpdateUI || currentuiTime > uiDelay){
@@ -256,10 +224,14 @@ function game(){
       input.render()
       displays['messagebox'].draw(ctxChat, inChat)
       displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
-      displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100)
-      displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100)
-      displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health)
-      displays['energybar'].draw(ctxChat, 1,cvs.height - 20, 100, players[socket.id].state.health)
+      displays['healthbarframe'].draw(ctxChat, 0,cvs.height - 40, 100, 100)
+      displays['energybarframe'].draw(ctxChat, 0,cvs.height - 20, 100, 100)
+      displays['xpbarframe'].draw(ctxChat, 300,cvs.height - 20, 100, 100)
+
+      displays['healthbar'].draw(ctxChat, 1,cvs.height - 40, players[socket.id].state.health, 100)
+      displays['energybar'].draw(ctxChat, 1,cvs.height - 20, players[socket.id].state.energy, 100)
+      displays['xpbar'].draw(ctxChat, 301,cvs.height - 20,players[socket.id].state.xp, players[socket.id].state.xpToLevel)
+
       if(inCrafting){
         displays['crafting'].draw(ctxChat,0,0,craftingRecipes)
       }
