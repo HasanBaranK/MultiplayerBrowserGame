@@ -220,7 +220,12 @@ function game(){
       ctxChat.clearRect(0, 0, cvs.width, cvs.height);
       ctxChat.fillStyle = 'black'
       ctxChat.font = '16px bold'
+      ctxChat.drawImage(images['player_info_bg'], 100, 0, 250, 250/3.5)
+      ctxChat.fillText(socket.id, 170, 22)
+      ctxChat.fillText('Level: ' + players[socket.id].state.level, 175, 38)
+      ctxChat.fillText('Gold: ' + 0, 171, 54)
       ctxChat.fillText('Time: '+gameTime.hour + ':' + gameTime.minute, cvs.width / 2, 32)
+      ctxChat.drawImage(images['hasan'], 75, 0, 100, 80)
       input.render()
       displays['messagebox'].draw(ctxChat, inChat)
       displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)

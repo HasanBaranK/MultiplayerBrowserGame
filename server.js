@@ -280,6 +280,13 @@ io.on('connection', function (socket) {
 setInterval(function () {
     //console.log(items)
     //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
+    for (let player in players) {
+      if(players[player].xp >= players[player].xpToLevel){
+        players[player].level++
+        players[player].xp = 0
+        players[player].xpToLevel *= 2
+      }
+    }
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
     let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap,mobs,items)
 

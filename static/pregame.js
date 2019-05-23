@@ -85,7 +85,6 @@ function drawPopUps(){
           ctx.fillText(popUps[popUp].damage, mobs[popUps[popUp].attackedId].state.x, mobs[popUps[popUp].attackedId].state.y - popUps[popUp].ySpeed)
         }
         if(popUps[popUp].attackerId == socket.id && ![popUp].xpGained && popUps[popUp].xpLife > popUpTimeDelay){
-          console.log(popUps[popUp].attackerId == socket.id);
           ctx.fillStyle = 'rgba(255,0,255,1)'
           ctx.fillText('XP ' + popUps[popUp].xpGained, players[popUps[popUp].attackerId].state.x, players[popUps[popUp].attackerId].state.y - popUps[popUp].ySpeed)
         }
@@ -254,6 +253,20 @@ class CraftingButton {
   }
 }
 
+class BarFrame {
+  constructor(name, x, y,img, width, height){
+    this.name = name
+    this.x = x
+    this.y = y
+    this.img = img
+    this.width = width || img.width
+    this.height = height || img.height
+  }
+  draw(ctx,ctX,ctY,value,max){
+    ctx.drawImage(this.img, this.x+ctX, this.y+ctY, (value / max) * this.width, this.height)
+  }
+}
+
 class Bar {
   constructor(name, x, y,img, width, height){
     this.name = name
@@ -265,6 +278,9 @@ class Bar {
   }
   draw(ctx,ctX,ctY,value,max){
     ctx.drawImage(this.img, this.x+ctX, this.y+ctY, (value / max) * this.width, this.height)
+    ctx.font = 'bold 14px Arial'
+    ctx.fillStyle = 'white'
+    ctx.fillText(value + '/' + max, this.x+ctX + this.width / 2 - 30, this.y+ctY+12)
   }
 }
 
@@ -422,13 +438,13 @@ function loadImagesThen(folders){
     displays['inventory'] = new Inventory('Inventory',images['inventory_UI'], 80, 50, 1, 9, 13, 5, 32, 16,14,29)
     displays['quickselect'] = new QuickSelect('Quickselect', images['quickselect_UI'], 0,0,0,0,1,9,32,12,2,17)
 
-    displays['healthbarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
-    displays['energybarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
-    displays['xpbarframe'] = new Bar('barframe', 0, 0, images['health_bg_upscaled'], 600, 200/12.75)
+    displays['healthbarframe'] = new BarFrame('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
+    displays['energybarframe'] = new BarFrame('barframe', 0, 0, images['health_bg_upscaled'], 200, 200/12.75)
+    displays['xpbarframe'] = new BarFrame('barframe', 0, 0, images['health_bg_upscaled'], 600, 200/12.75)
 
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
-    displays['xpbar'] = new Bar('xpbar', 0, 0, images['energy_fg_upscaled'], 595, 200/12.75)
+    displays['xpbar'] = new Bar('xpbar', 0, 0, images['xp_fg_upscaled'], 595, 200/12.75)
 
 
     displays['messagebox'] = new MessageBox(cvs.width - 311, cvs.height - 29 - 150 - 10, 308, 150)

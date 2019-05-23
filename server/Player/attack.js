@@ -62,8 +62,8 @@ function meleeAttack(players, attackerKey, item,mobs,isMob) {
                 console.log("damaged: " + otherPlayer)
                 lowerHealth(mobs[otherPlayer], item.damage);
                 if(mobs[otherPlayer].health <= 0){
-                  peopleHit.mobs.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage, xpGained:10, isMob:true})
-                  players[attackerKey].xp += 10
+                  peopleHit.mobs.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage, xpGained:200, isMob:true})
+                  players[attackerKey].xp += 200
                 }
                 else{
                   peopleHit.mobs.push({attackerId:attackerKey,attackedId:otherPlayer, damage:item.damage, isMob:true})
