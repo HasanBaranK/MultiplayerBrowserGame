@@ -105,7 +105,8 @@ io.on('connection', function (socket) {
             holding: [],
             xp:0,
             xpToLevel:1000,
-            level:1
+            level:1,
+            healingDelay:0
         };
         let player = players[socket.id]
         let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
@@ -127,7 +128,7 @@ io.on('connection', function (socket) {
             let speed = 5//5
             let jumpAmount = 4//5
             let jumpSpeed = 6//5
-            if (data.a || data.w || data.d || data.s) {
+            if (data.a || data.w || data.d || data.s || data[' ']) {
                 if (data.a) {
                     collisionFunctions.move("left", player, gridSize, collisionMap,speed)
                 }
@@ -146,25 +147,28 @@ io.on('connection', function (socket) {
                 if (data.s) {
                     collisionFunctions.move("down", player, gridSize, collisionMap,speed)
                 }
+                if(data[' ']){
+                  if(player.holding[0]){
+                    if(player.holding[0].type == 'melee'){
+                      player.attacking = true
+                    }
+                    else if(player.holding[0].name == 'healthpotion_item'){
+                      let dateNow = Date.now()
+                      if(player.healingDelay < dateNow){
+                        if(attackFunctions.heal(players[socket.id], 25)){
+                          if(inventoryFunctions.deleteItemInventory(players[socket.id],'healthpotion_item')){
+                            socket.emit('gothealed', 25)
+                            player.healingDelay = dateNow + 2000
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
             } else {
                 player.status = 0;
             }
         }
-    });
-    socket.on('attack', function (evt) {
-        let player = players[socket.id] || {};
-        if (player.isDead === false) {
-            player.attacking = true
-        }
-    });
-    socket.on('consume', function (consumable){
-      if(consumable.name == 'healthpotion_item'){
-        if(attackFunctions.heal(players[socket.id], 25)){
-          if(inventoryFunctions.deleteItemInventory(players[socket.id],'healthpotion_item')){
-            socket.emit('gothealed', 25)
-          }
-        }
-      }
     });
     socket.on('stopattack', function (evt) {
         let player = players[socket.id] || {};
@@ -257,6 +261,7 @@ io.on('connection', function (socket) {
     });
     socket.on('holding', function (player) {
         players[socket.id] = player
+        players[socket.id].attacking = false
     });
     socket.on('map', function () {
         let player = players[socket.id]

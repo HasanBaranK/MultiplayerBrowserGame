@@ -145,15 +145,15 @@ function drawPopUps(){
 function drawHealedPops(){
   healedPopsTimeDelay = perf.now()
   for(let healedPop in healedPops){
-    if(healedPops[healedPop].life < healedPopsTimeDelay){
+    if(healedPops[healedPop].life <= healedPopsTimeDelay){
       delete healedPops[healedPop]
     }
     else{
       ctx.font = 'bold 20px Arial'
       ctx.fillStyle = 'rgba(0,255,0,1)'
       ctx.fillText('+' + healedPops[healedPop].heal, players[socket.id].state.x, players[socket.id].state.y - healedPops[healedPop].ySpeed)
+      healedPops[healedPop].ySpeed ++
     }
-    healedPops[healedPop].ySpeed ++
   }
 }
 
@@ -229,8 +229,10 @@ class QuickSelect{
     this.itemCurrent = 0
     this.xOfItem = 0
     this.yOfItem = 0
+    this.currentTime = Date.now()
   }
   draw(ctx,ctX,ctY,inventory){
+    this.currentTime = Date.now()
     ctx.drawImage(this.img,this.x+ctX, this.y+ctY)
     for(this.currentRow = 0; this.currentRow < 9; this.currentRow++){
       this.itemCurrent = inventory[this.currentRow]
@@ -238,9 +240,19 @@ class QuickSelect{
       this.yOfItem = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize)+ (this.actualSizeOffset/2)
       if(this.itemCurrent){
         ctx.drawImage(images[inventory[this.currentRow].name],this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset,this.gridSize - this.actualSizeOffset)
-        ctx.font = '16px '
+        ctx.font = '16px Arial'
         ctx.fillStyle = 'white'
         ctx.fillText(inventory[this.currentRow].amount, this.xOfItem + this.textOffsetX, this.yOfItem + this.textOffsetY)
+        if(this.itemCurrent.name == 'healthpotion_item'){
+          this.currentTime = players[socket.id].state.healingDelay - this.currentTime
+          this.currentTime = ((this.currentTime % 60000) / 1000).toFixed(0)
+          if(this.currentTime <= 0){
+            this.currentTime = ''
+          }
+          ctx.font = '20px Arial'
+          ctx.fillStyle = 'red'
+          ctx.fillText(this.currentTime, this.xOfItem + this.textOffsetX - 30, this.yOfItem + this.textOffsetY)
+        }
       }
       if(this.currentRow == itemHoldingIndex){
         ctx.fillStyle = 'rgba(250,0,0,0.2)'
@@ -664,24 +676,10 @@ document.body.onload = () => {
             return
           }
           if(!inInventory){
-            if(key.key == ' ' && !players[socket.id].attacking){
-              let holding = players[socket.id].state.holding[0]
-              if(holding){
-                if(holding.type == 'melee'){
-                  socket.emit('attack', null)
-                  keys[key.key] = true
-                }
-                else if(holding.type == 'Consumable'){
-                  socket.emit('consume', holding)
-                  keys[key.key] = true
-                }
-              }
-              return
-            }
             keys[key.key] = true
           }
            itemKeyThing = key.key-1
-          if(!isNaN(itemKeyThing)){
+          if(!isNaN(itemKeyThing) && key.key != ' '){
             itemHoldingIndex = itemKeyThing
             players[socket.id].state.holding = [players[socket.id].state.inventory[itemKeyThing]]
             socket.emit('holding', players[socket.id].state)

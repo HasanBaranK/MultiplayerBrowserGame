@@ -168,6 +168,7 @@ function game(){
             if(players[player].drawOnce(ctx, 'attackR')){
               if(player == socket.id){
                 socket.emit('stopattack', players[player].facing)
+                players[player].state.attacking = false
                 }
               determineAnimation(players[player])
               }
@@ -176,6 +177,7 @@ function game(){
             if(players[player].drawOnce(ctx, 'attackL')){
               if(player == socket.id){
                 socket.emit('stopattack', players[player].facing)
+                players[player].state.attacking
                 }
               determineAnimation(players[player])
               }
