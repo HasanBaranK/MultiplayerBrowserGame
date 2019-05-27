@@ -243,29 +243,21 @@ function game(){
             }
         }
 
-<<<<<<< HEAD
-    // darkenWorld(gameLightConnection[gameTime.hour], 'black')
-
-    currentTimeKeepTrack = perf.now()
-    if(shouldUpdateUI || currentTimeKeepTrack > uiDelay){
-      updateUI()
-      shouldUpdateUI = false
-      uiDelay = currentTimeKeepTrack + 1000
-=======
         //darkenWorld(gameLightConnection[gameTime.hour], 'black')
-
+        
         currentTimeKeepTrack = perf.now()
         if(shouldUpdateUI || currentTimeKeepTrack > uiDelay){
             updateUI()
             shouldUpdateUI = false
             uiDelay = currentTimeKeepTrack + 1000
         }
+
         meter.tick()
         requestAnimationFrame(game)
+
     } catch (e) {
         console.log(e);
         meter.tick()
         requestAnimationFrame(game)
->>>>>>> 12ba744cb650f241f85d87bd1de5bdc63130498b
     }
 }
