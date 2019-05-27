@@ -300,7 +300,6 @@ io.on('connection', function (socket) {
                 if (blockAtClick.type.includes("table")) {
                     socket.emit('craftingui', craftingRecipes)
                 }
->>>>>>> 12ba744cb650f241f85d87bd1de5bdc63130498b
             }
             else{
               if (holding !== undefined) {
