@@ -92,7 +92,7 @@ function getImages(images) {
 }
 
 function movePlayer(player, data, speed, jumpAmount, jumpSpeed) {
-    if(data == null){
+    if (data == null) {
         return
     }
     let d = new Date();
@@ -163,6 +163,8 @@ io.on('connection', function (socket) {
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 55, 0, 0, items, 1)
+        let torchP = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "torch_item", "light", 150, 128, 0, 1, items, 1)
+
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
     });
@@ -273,32 +275,30 @@ io.on('connection', function (socket) {
     socket.on('rightclick', function (click) {
 
         let player = players[socket.id] || {};
-        console.log(player)
         if (player.isDead === false) {
             let holding = player.holding[0]
             let blockGrid = mapFunctions.myGrid(click.x, click.y, 32)
             let blockAtClick = fastMap[blockGrid.x][blockGrid.y]
-            if(blockAtClick){
-              if(blockAtClick.type.includes("table")){
-                socket.emit('craftingui', craftingRecipes)
-              }
-              else if(blockAtClick.type.includes("chest")){
-                socket.emit('chestgui', chests[blockGrid.x][blockGrid.y])
-              }
+            if (blockAtClick) {
+                if (blockAtClick.type.includes("table")) {
+                    socket.emit('craftingui', craftingRecipes)
+                } else if (blockAtClick.type.includes("chest")) {
+                    socket.emit('chestgui', chests[blockGrid.x][blockGrid.y])
+                }
+            }
+            if (holding !== undefined) {
+                if (holding !== null) {
+                    if (holding.type === "block") {
+                        mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
+                        if (holding.name === "chest0_item") {
+                            let blockGrid = mapFunctions.myGrid(click.x, click.y, 32)
+                            itemFunctions.generateChest(blockGrid.x, blockGrid.y, 12, chests)
+                        }
+                    }
+                }
+            }
         }
-        else{
-          if (holding !== undefined) {
-              if (holding !== null) {
-                  if (holding.type === "block") {
-                      mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
-                      if(holding.name === "chest0_item"){
-                        itemFunctions.generateChest(blockGrid.x, blockGrid.y, 12, chests)
-                      }
-                  }
-              }
-          }
-        }
-    }});
+    });
     socket.on('craft', function (recipe) {
         let player = players[socket.id]
         if (!inventoryFunctions.deleteItemInventoryWithAmount(players[socket.id], recipe['recipe'])) {
@@ -323,9 +323,9 @@ io.on('connection', function (socket) {
         players[socket.id].attacking = false
     });
     socket.on('map', function () {
-        let player = players[socket.id]
+        let player = players[socket.id] || {};
         let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32);//30//20
-        partialMap = mapFunctions.calculateUnreachableBlocks(partialMap, collisionMap, gridSize, lightMap);
+        //partialMap = mapFunctions.calculateUnreachableBlocks(partialMap, collisionMap, gridSize, lightMap);
         let partialLightMap = illuminationFunctions.getPartialLightMap(player.x, player.y, 32, 30, 20, lightMap)
         //partialMap = mapFunctions.takeOutFullShadows(partialMap);
         let maps = {
@@ -358,15 +358,20 @@ function movePlayers(players) {
     let speed = 5//5
     let jumpAmount = 5//5
     let jumpSpeed = 6//5
-    for (let player in players){
+    for (let player in players) {
         player = players[player];
-        if(player.isDead == false) {
+        if (player.isDead == false) {
             movePlayer(player, player.data, speed, jumpAmount, jumpSpeed);
         }
     }
 }
 
+let count = 0;
 setInterval(function () {
+    count++;
+    if (count === 30) {
+        count = 0;
+    }
     //console.log(items)
     //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
     for (let player in players) {
@@ -378,15 +383,17 @@ setInterval(function () {
     }
     movePlayers(players);
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
+
     let edges = mapFunctions.checkPlayerAtEdge(players, leftEdge, rightEdge, 256, 200, collisionMap, fastMap, mobs, items, lightMap)
     illuminationFunctions.calculateLighting(lightSources, lightMap, collisionMap, generalLightAmount, players, timeFunctions.getGameTime(gameTime));
     rightEdge = edges.rightEdge
     leftEdge = edges.leftEdge
     mobs = edges.mobs
+
     //mobsFunctions.playerCloseToMob(players,mobs,1000,collisionMap)
     collisionFunctions.gravity(players, mobs, gridSize, collisionMap, projectiles, 5);
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
-    gameTime = timeFunctions.updateGameTime(gameTime,60)
+    gameTime = timeFunctions.updateGameTime(gameTime, 3600)
 }, 1000 / 60);

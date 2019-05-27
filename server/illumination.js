@@ -93,6 +93,7 @@ function cleanLightMap(lightMap, generalLightAmount,players,gridSize,rangex,rang
         }
     }
     console.log(count)
+    //console.log(count)
     // for (let mapX in lightMap) {
     //     for (let mapY in lightMap[mapX]) {
     //         if (mapY <= 352) {
@@ -129,20 +130,20 @@ function calculateLighting(lightSources, lightMap, collisionMap, generalLightAmo
                     if (lightMap[lightSource.x + i] !== undefined) {
 
                         if (lightMap[lightSource.x + i][lightSource.y + k] !== undefined) {
-                            lightMap[lightSource.x + i][lightSource.y + k] = generalLightAmount + lightAmount;
+                            lightMap[lightSource.x + i][lightSource.y + k] +=  generalLightAmount + lightAmount;
 
                         }
                         if (lightMap[lightSource.x + i][lightSource.y - k] !== undefined) {
-                            lightMap[lightSource.x + i][lightSource.y - k] = generalLightAmount + lightAmount;
+                            lightMap[lightSource.x + i][lightSource.y - k] += generalLightAmount + lightAmount;
 
                         }
                     }
                     if (lightMap[lightSource.x - i] !== undefined) {
                         if (lightMap[lightSource.x - i][lightSource.y + k] !== undefined) {
-                            lightMap[lightSource.x - i][lightSource.y + k] = generalLightAmount + lightAmount;
+                            lightMap[lightSource.x - i][lightSource.y + k] += generalLightAmount + lightAmount;
                         }
                         if (lightMap[lightSource.x - i][lightSource.y - k] !== undefined) {
-                            lightMap[lightSource.x - i][lightSource.y - k] = generalLightAmount + lightAmount
+                            lightMap[lightSource.x - i][lightSource.y - k] += generalLightAmount + lightAmount
 
                         }
                     }
