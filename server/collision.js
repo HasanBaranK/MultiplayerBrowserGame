@@ -2,7 +2,7 @@ const {myGrid} = require("./map");
 const {addItemInventory} = require("./Player/inventory");
 
 
-module.exports={
+module.exports = {
     checkCollision,
     checkPlayerPerimeter,
     checkPlayerCloseToItems,
@@ -11,59 +11,70 @@ module.exports={
     move
 }
 
-async function jump(player, amount,collisionMap,gridSize,jumpAmount,speed) {
-    for (let i = 0; i < amount ; i++) {
-        player.y -= jumpAmount
-        if(checkCollision(player,player.sizex,player.sizey,gridSize,collisionMap)){
-            player.y += jumpAmount
-            break;
+async function jump(player, amount, collisionMap, gridSize, jumpAmount, speed) {
+
+    let d = new Date();
+    let currentTime = Math.round(d.getTime());
+    if (player.lastJumpTime + 500 < currentTime) {
+        player.lastJumpTime = currentTime;
+        for (let i = 0; i < amount; i++) {
+            player.y -= jumpAmount
+            if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
+                player.y += jumpAmount
+                break;
+            }
+            await sleep(speed);
         }
-        await sleep(speed);
     }
-    function sleep(ms){
-        return new Promise(resolve=>{
-            setTimeout(resolve,ms)
+
+    function sleep(ms) {
+        return new Promise(resolve => {
+            setTimeout(resolve, ms)
         })
     }
 }
-function move(direction,player,gridSize,collisionMap,speed){
-    if(direction === "left") {
+
+function move(direction, player, gridSize, collisionMap, speed) {
+    if (direction === "left") {
         player.x -= speed;
         player.status = 2;
         player.facing = "left"
         if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
             player.x += speed;
         }
-    }if(direction === "right"){
+    }
+    if (direction === "right") {
         player.x += speed;
         player.status = 4;
         player.facing = "right"
-        if (checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
+        if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
             player.x -= speed;
 
         }
-    }if(direction === "down"){
+    }
+    if (direction === "down") {
         player.y += speed;
         player.status = 3;
-        if (checkCollision(player, player.sizex, player.sizey, gridSize,collisionMap)) {
+        if (checkCollision(player, player.sizex, player.sizey, gridSize, collisionMap)) {
             player.y -= speed;
         }
     }
 }
-function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
 
-    let xcoordinate = player.x  + sizex;
-    let ycoordinate = player.y  + sizey;
+function checkCollision(player, sizex, sizey, gridSize, collisionMap) {
+
+    let xcoordinate = player.x + sizex;
+    let ycoordinate = player.y + sizey;
 
     let MAXX;
     let MINX;
     let MAXY;
     let MINY;
     if (xcoordinate > 0 && ycoordinate > 0) {
-        if(ycoordinate < gridSize ){
+        if (ycoordinate < gridSize) {
             MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize));
             MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize);
-        }else{
+        } else {
             MAXY = ycoordinate + sizey + (gridSize - ((ycoordinate + sizey) % gridSize));
             MINY = ycoordinate - sizey - ((ycoordinate - sizey) % gridSize) + gridSize;
         }
@@ -111,10 +122,10 @@ function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
                 if (collisionMap[i][j] === undefined) {
                     //console.log("no collision")
 
-                } else if(collisionMap[i][j]){
+                } else if (collisionMap[i][j]) {
                     //console.log("collision with: " + i +","+ j)
                     return true;
-                } else{
+                } else {
                 }
             } catch (e) {
                 return false;
@@ -124,6 +135,7 @@ function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
     return false;
 
 }
+
 // function checkCollision(player, halfSizex, halfSizey, gridSize,collisionMap) {
 //
 //     let position = myGrid(player.x,player.y,gridSize);
@@ -266,10 +278,10 @@ function checkCollision(player, sizex, sizey, gridSize,collisionMap) {
 //     return false
 //
 // }
-function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize,collisionMap) {
+function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter, items, gridSize, collisionMap) {
 
     //console.log(items);
-    if(player.isDead == false) {
+    if (player.isDead == false) {
         let arrayLength = items.length;
         if (arrayLength > 0) {
             let xcoordinate = player.x + sizex;
@@ -311,12 +323,12 @@ function checkPlayerPerimeter(player, sizex, sizey, sizePerimeter,items,gridSize
 
 }
 
-function checkPlayerCloseToItems(players,items,gridSize,collisionMap) {
+function checkPlayerCloseToItems(players, items, gridSize, collisionMap) {
     for (let player in players) {
         let currentPlayer = players[player];
-        checkPlayerPerimeter(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, 150,items,gridSize,collisionMap);
+        checkPlayerPerimeter(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, 150, items, gridSize, collisionMap);
     }
-    for(let item in items){
+    for (let item in items) {
         item = items[item]
         //gravity for the item
         item.y += 3;
@@ -327,13 +339,13 @@ function checkPlayerCloseToItems(players,items,gridSize,collisionMap) {
     }
 }
 
-function gravity(players,mobs,gridSize,collisionMap,projectiles,playerGravity) {
+function gravity(players, mobs, gridSize, collisionMap, projectiles, playerGravity) {
     for (let player in players) {
 
         let currentPlayer = players[player];
         currentPlayer.y += playerGravity;
         currentPlayer.onair = true;
-        if (checkCollision(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, gridSize,collisionMap)) {
+        if (checkCollision(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, gridSize, collisionMap)) {
             //console.log(collisionMap);
             currentPlayer.y -= playerGravity;
             currentPlayer.onair = false;
@@ -345,7 +357,7 @@ function gravity(players,mobs,gridSize,collisionMap,projectiles,playerGravity) {
         let currentPlayer = mobs[mob];
         currentPlayer.y += playerGravity;
         currentPlayer.onair = true;
-        if (checkCollision(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, gridSize,collisionMap)) {
+        if (checkCollision(currentPlayer, currentPlayer.sizex, currentPlayer.sizey, gridSize, collisionMap)) {
             //console.log(collisionMap);
             currentPlayer.y -= playerGravity;
             currentPlayer.onair = false;
