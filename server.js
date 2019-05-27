@@ -298,7 +298,7 @@ io.on('connection', function (socket) {
               }
           }
         }
-    });
+    }});
     socket.on('craft', function (recipe) {
         let player = players[socket.id]
         if (!inventoryFunctions.deleteItemInventoryWithAmount(players[socket.id], recipe['recipe'])) {
