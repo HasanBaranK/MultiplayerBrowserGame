@@ -40,6 +40,7 @@ var collisionMap = {};
 var fastMap = {};
 var lightMap = {};
 let items = [];
+let chests = {};
 let projectiles = [];
 let map;
 let lightSources = [];
@@ -60,10 +61,11 @@ let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisio
 //Crafting recipes
 let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 66, 0, 0, items, 1)
 let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
+let chest = itemFunctions.generateItem(0, 0, "chest0_item", "block", 0, 0, 0, 100, items, 1)
 let healthPotion = itemFunctions.generateItem(0, 0, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 let torch = itemFunctions.generateItem(0, 0, "torch_item", "light", 150, 256, 0, 1, items, 1)
 
-craftingRecipes.push(worktable, sword, healthPotion, torch)
+craftingRecipes.push(worktable, sword, healthPotion, torch,chest)
 
 
 map = maps.map;
@@ -279,16 +281,24 @@ io.on('connection', function (socket) {
             let blockGrid = mapFunctions.myGrid(click.x, click.y, 32)
             let blockAtClick = fastMap[blockGrid.x][blockGrid.y]
             if (blockAtClick) {
-                if (blockAtClick.type.includes("table")) {
+                if(blockAtClick.type.includes("table")){
                     socket.emit('craftingui', craftingRecipes)
                 }
-            }
-            if (holding !== undefined) {
-                if (holding !== null) {
-                    if (holding.type === "block") {
-                        mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
-                    }
+                else if(blockAtClick.type.includes("chest")){
+                    socket.emit('chestgui', chests[blockGrid.x][blockGrid.y])
                 }
+            }
+            else{
+              if (holding !== undefined) {
+                  if (holding !== null) {
+                      if (holding.type === "block") {
+                          mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
+                          if(holding.name === "chest0_item"){
+                            itemFunctions.generateChest(blockGrid.x, blockGrid.y, 12, chests)
+                          }
+                      }
+                  }
+              }
             }
         }
     });

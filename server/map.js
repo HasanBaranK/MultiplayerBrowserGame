@@ -274,7 +274,7 @@ function calculateDistance(x1, y1, x2, y2) {
 function generateBlock(x, y, health, map, blockName, collisionMap, fastMap, playerAdded) {
     let random = Math.floor(Math.random() * 9)
 
-    if (blockName === "wood" || blockName === "leaves" || blockName == "table") {
+    if (blockName === "wood" || blockName === "leaves" || blockName == "table" || blockName == "chest") {
         random = 0
     } else {
         collisionMap[x][y] = true;
