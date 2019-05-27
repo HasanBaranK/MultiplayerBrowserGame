@@ -11,6 +11,7 @@ module.exports = {
     sendPartialMap,
     checkPlayerAtEdge,
     calculateUnreachableBlocks,
+    calculateDistance
 }
 
 
@@ -96,7 +97,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap, light
                 }
                 lastY = lastY - noise
             } catch (e) {
-                //map not generated for that part yet
+                //lightMap not generated for that part yet
             }
         }
         for (let i = middle; i < end; i++) {
@@ -111,7 +112,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap, light
                 }
                 lastY = lastY + noise
             } catch (e) {
-                //map not generated for that part yet
+                //lightMap not generated for that part yet
             }
         }
 
@@ -149,21 +150,19 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap, light
 
             generateBlock(x * gridSize, height - size * gridSize - 2 * gridSize, 100, blocks, "leaves", collisionMap, fastMap)
         } catch (e) {
-            //map not generated for that part yet
+            //lightMap not generated for that part yet
         }
 
 
     }
     //shadowMap
 
-    for (let lightX in lightMap){
+    for (let lightX in lightMap) {
         for (let i = -10; i < 20; i++) {
-            let block = {};
-            block["light"] = 0;
             if (lightMap[lightX] === undefined) {
                 lightMap[lightX] = {}
             }
-            lightMap[lightX][i*gridSize] = block;
+            lightMap[lightX][i * gridSize] = 0;
         }
     }
     let maps = {
@@ -238,7 +237,7 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
 }
 
 function deleteBlock(gridx, gridy, block, map, collisionMap, fastMap) {
-    //map.splice(map.indexOf(block), 1);
+    //lightMap.splice(lightMap.indexOf(block), 1);
     if (collisionMap[gridx][gridy] !== undefined) {
         collisionMap[gridx][gridy] = false;
     }
@@ -299,6 +298,7 @@ function generateBlock(x, y, health, map, blockName, collisionMap, fastMap, play
     block["type"] = blockName;
     block["health"] = health;
     block["light"] = 0;
+    block["unreachable"] = false;
     map.push(block);
     if (fastMap[x] === undefined) {
         fastMap[x] = {}
@@ -336,7 +336,7 @@ function sendPartialMap(x, y, halfsizex, halfsizey, map, gridSize) {
     let position = myGrid(x, y, gridSize);
     let partialMap = []
 
-    //console.log(map)
+    //console.log(lightMap)
 
     let startx = position.x - (halfsizex * gridSize)
     let endx = position.x + (halfsizex * gridSize)
@@ -384,7 +384,7 @@ function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, coll
 
 }
 
-function calculateUnreachableBlocks(partialMap, collisionMap, gridSize) {
+function calculateUnreachableBlocks(partialMap, collisionMap, gridSize, lightMap,fastMap) {
     for (let block in partialMap) {
         let currentBlockX = partialMap[block].x;
         let currentBlockY = partialMap[block].y;
@@ -395,6 +395,7 @@ function calculateUnreachableBlocks(partialMap, collisionMap, gridSize) {
 
                     if (collisionMap[currentBlockX + gridSize][currentBlockY] && collisionMap[currentBlockX + gridSize][currentBlockY + gridSize] && collisionMap[currentBlockX + gridSize][currentBlockY - gridSize] && collisionMap[currentBlockX][currentBlockY + gridSize] && collisionMap[currentBlockX][currentBlockY - gridSize] && collisionMap[currentBlockX - gridSize][currentBlockY + gridSize] && collisionMap[currentBlockX - gridSize][currentBlockY] && collisionMap[currentBlockX - gridSize][currentBlockY - gridSize]) {
                         partialMap[block].type = "unreachable_block";
+                        //lightMap[currentBlockX][currentBlockY] = 0;
                     }
                 } catch (e) {
 

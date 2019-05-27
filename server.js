@@ -24,7 +24,6 @@ server.listen(5000, function () {
 let gameTimeSpeed = 1;
 
 
-
 let mapFunctions = require("./server/map");
 let collisionFunctions = require("./server/collision");
 let attackFunctions = require("./server/Player/attack");
@@ -49,37 +48,34 @@ let gameTime = 0;
 let day = 0;
 let mapChanged = false;
 let images = {};
-let generalLightAmount = 0;
+let generalLightAmount = 20;
 images = getImages(images)
 
 let leftEdge = 0;
 let rightEdge = 70;
 
 let craftingRecipes = []
-console.log("main part")
-console.log(lightMap)
-let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap,lightMap);
+let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap, lightMap);
 
 //Crafting recipes
 let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 66, 0, 0, items, 1)
 let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
 let healthPotion = itemFunctions.generateItem(0, 0, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+let torch = itemFunctions.generateItem(0, 0, "torch_item", "light", 150, 256, 0, 1, items, 1)
 
-craftingRecipes.push(worktable, sword, healthPotion)
+craftingRecipes.push(worktable, sword, healthPotion, torch)
 
-//lights
-let followLight = illuminationFunctions.generatelightSource(128, 0, "Point",100,150,lightSources);
 
 map = maps.map;
 collisionMap = maps.collisionMap;
 fastMap = maps.fastMap;
-mobs = mobsFunctions.generateMobs(leftEdge,rightEdge-leftEdge,mobs,collisionMap,gridSize,items);
+mobs = mobsFunctions.generateMobs(leftEdge, rightEdge - leftEdge, mobs, collisionMap, gridSize, items);
 itemFunctions.generateItem(320, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(220, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(120, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 itemFunctions.generateItem(420, 200, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
 
-mobsFunctions.mobController(players,mobs,collisionMap,66,500, io,items);
+mobsFunctions.mobController(players, mobs, collisionMap, 66, 500, io, items);
 
 function getImages(images) {
     fs.readdir(imageFolder, (err, files) => {
@@ -90,6 +86,37 @@ function getImages(images) {
         });
     });
     return images
+}
+
+function movePlayer(player, data, speed, jumpAmount, jumpSpeed) {
+    if(data == null){
+        return
+    }
+    let d = new Date();
+    let currentTime = Math.round(d.getTime());
+    if (player.lastMoveTime + 5 < currentTime) {
+        player.lastMoveTime = currentTime;
+        if (data.a) {
+            collisionFunctions.move("left", player, gridSize, collisionMap, speed)
+
+        }
+        if (data.w) {
+            if (player.onair === false && player.jumping === false) {
+                player.y -= 4;
+                player.status = 1;
+                collisionFunctions.jump(player, 50, collisionMap, gridSize, jumpAmount, jumpSpeed);//5,3
+                player.onair = true;
+            }
+
+        }
+        if (data.d) {
+            collisionFunctions.move("right", player, gridSize, collisionMap, speed)
+
+        }
+        if (data.s) {
+            collisionFunctions.move("down", player, gridSize, collisionMap, speed)
+        }
+    }
 }
 
 io.on('connection', function (socket) {
@@ -109,13 +136,19 @@ io.on('connection', function (socket) {
             isMob: false,
             inventory: [],
             attacking: false,
+            jumping: false,
             facing: "right",
             equipped: [],
             holding: [],
-            xp:0,
-            xpToLevel:1000,
-            level:1,
-            healingDelay:0
+            xp: 0,
+            xpToLevel: 1000,
+            level: 1,
+            healingDelay: 0,
+            lastPressTime: 0,
+            lastJumpTime: 0,
+            lastMoveTime: 0,
+            followLight: null,
+            data: null,
         };
         let player = players[socket.id]
         let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
@@ -132,56 +165,57 @@ io.on('connection', function (socket) {
         socket.join('players');
     });
     socket.on('movement', function (data) {
+
         let player = players[socket.id] || {};
+        player.data = data;
         if (player.isDead === false) {
-            let speed = 5//5
-            let jumpAmount = 4//5
-            let jumpSpeed = 6//5
             if (data.a || data.w || data.d || data.s || data[' ']) {
-                if (data.a) {
-                    collisionFunctions.move("left", player, gridSize, collisionMap,speed)
-
-                }
-                if (data.w) {
-                    if (player.onair === false) {
-                        player.y -= 4;
-                        player.status = 1;
-                        collisionFunctions.jump(player, 50, collisionMap, gridSize,jumpAmount,jumpSpeed);//5,3
-                        player.onair = true;
-                    }
-
-                }
-                if (data.d) {
-                    collisionFunctions.move("right", player, gridSize, collisionMap,speed)
-                }
-                if (data.s) {
-                    collisionFunctions.move("down", player, gridSize, collisionMap,speed)
-                }
-                if(data[' ']){
-                  if(player.holding[0]){
-                    if(player.holding[0].type == 'melee'){
-                      player.attacking = true
-                    }
-                    else if(player.holding[0].name == 'healthpotion_item'){
-                      let dateNow = Date.now()
-                      if(player.healingDelay < dateNow){
-                        if(attackFunctions.heal(players[socket.id], 25)){
-                          if(inventoryFunctions.deleteItemInventory(players[socket.id],'healthpotion_item')){
-                            socket.emit('gothealed', 25)
-                            player.healingDelay = dateNow + 2000
-                          }
+                //movePlayer(player, data, speed, jumpAmount, jumpSpeed);
+                if (data[' ']) {
+                    let d = new Date();
+                    let currentTime = Math.round(d.getTime() / 100);
+                    if (players[socket.id].lastPressTime + 5 < currentTime) {
+                        players[socket.id].lastPressTime = currentTime;
+                        if (player.holding[0]) {
+                            if (player.holding[0].type == 'melee') {
+                                player.attacking = true
+                            } else if (player.holding[0].name == 'healthpotion_item') {
+                                let dateNow = Date.now()
+                                if (player.healingDelay < dateNow) {
+                                    if (attackFunctions.heal(players[socket.id], 25)) {
+                                        if (inventoryFunctions.deleteItemInventory(players[socket.id], 'healthpotion_item')) {
+                                            socket.emit('gothealed', 25)
+                                            player.healingDelay = dateNow + 2000
+                                        }
+                                    }
+                                }
+                            } else if (player.holding[0].type == 'light') {
+                                if (player.followLight == null) {
+                                    player.followLight = illuminationFunctions.generatelightSource(player.x, player.y, "Point", player.holding[0].range, player.holding[0].damage, lightSources)
+                                } else {
+                                    //console.log("hello")
+                                    //delete followLight;
+                                    illuminationFunctions.removeLightSource(player.followLight, lightSources);
+                                    player.followLight = null
+                                    //followLight = illuminationFunctions.generatelightSource(player.x, player.y, "Point", player.holding[0].range, player.holding[0].damage, lightSources)
+                                }
+                            }
                         }
-                      }
                     }
-                  }
+
                 }
-                let currentGrid = mapFunctions.myGrid(player.x,player.y,32)
-                followLight.x = currentGrid.x
-                followLight.y = currentGrid.y +32
+                let currentGrid = mapFunctions.myGrid(player.x, player.y, 32)
+                try {
+                    player.followLight.x = currentGrid.x
+                    player.followLight.y = currentGrid.y + 32
+                } catch (e) {
+
+                }
             } else {
                 player.status = 0;
             }
         }
+
     });
     socket.on('stopattack', function (evt) {
         let player = players[socket.id] || {};
@@ -189,7 +223,7 @@ io.on('connection', function (socket) {
             let holding = player.holding[0]
             if (holding !== undefined && holding !== null) {
                 if (holding.type === "melee") {
-                    let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, holding,mobs,false,items)
+                    let peopleGotHit = attackFunctions.meleeAttack(players, socket.id, holding, mobs, false, items)
                     // if (peopleGotHit.length > 0) {
                     //     io.sockets.emit('peoplegothit', peopleGotHit);
                     // }
@@ -204,12 +238,13 @@ io.on('connection', function (socket) {
     socket.on('leftclick', function (click) {
 
         let player = players[socket.id] || {};
+        console.log(player)
         if (player.isDead === false) {
-            let damage =  10;
-            if(players[socket.id].holding[0] !== undefined && players[socket.id].holding[0] !== null){
+            let damage = 10;
+            if (players[socket.id].holding[0] !== undefined && players[socket.id].holding[0] !== null) {
                 damage = players[socket.id].holding[0].damage;
             }
-            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap,damage)
+            mapChanged = mapFunctions.mineBlock(player, click.x, click.y, 32, collisionMap, map, items, 128, fastMap, damage)
 
             // if(mapChanged == false) {
             //     let xdirection;
@@ -236,14 +271,15 @@ io.on('connection', function (socket) {
     socket.on('rightclick', function (click) {
 
         let player = players[socket.id] || {};
+        console.log(player)
         if (player.isDead === false) {
             let holding = player.holding[0]
             let blockGrid = mapFunctions.myGrid(click.x, click.y, 32)
             let blockAtClick = fastMap[blockGrid.x][blockGrid.y]
-            if(blockAtClick){
-              if(blockAtClick.type.includes("table")){
-                socket.emit('craftingui', craftingRecipes)
-              }
+            if (blockAtClick) {
+                if (blockAtClick.type.includes("table")) {
+                    socket.emit('craftingui', craftingRecipes)
+                }
             }
             if (holding !== undefined) {
                 if (holding !== null) {
@@ -256,9 +292,9 @@ io.on('connection', function (socket) {
     });
     socket.on('craft', function (recipe) {
         let player = players[socket.id]
-        if(!inventoryFunctions.deleteItemInventoryWithAmount(players[socket.id],recipe['recipe'])){
-          socket.emit('generalmessage', {message:'FAILED CRAFTING', sender:'SERVER'})
-          return
+        if (!inventoryFunctions.deleteItemInventoryWithAmount(players[socket.id], recipe['recipe'])) {
+            socket.emit('generalmessage', {message: 'FAILED CRAFTING', sender: 'SERVER'})
+            return
         }
         inventoryFunctions.addItemInventory(players[socket.id], recipe, items)
     });
@@ -279,15 +315,15 @@ io.on('connection', function (socket) {
     });
     socket.on('map', function () {
         let player = players[socket.id]
-        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 5, 5, fastMap, 32);//30//20
-        partialMap = mapFunctions.calculateUnreachableBlocks(partialMap,collisionMap,gridSize);
-
+        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32);//30//20
+        partialMap = mapFunctions.calculateUnreachableBlocks(partialMap, collisionMap, gridSize, lightMap);
+        let partialLightMap = illuminationFunctions.getPartialLightMap(player.x, player.y, 32, 30, 20, lightMap)
         //partialMap = mapFunctions.takeOutFullShadows(partialMap);
         let maps = {
             map: partialMap,
-            lightMap: lightMap,
+            lightMap: partialLightMap,
         }
-        socket.emit('map',maps);
+        socket.emit('map', maps);
     });
     socket.on('disconnect', function (some) {
         console.log('Player ' + socket.id + ' has disconnected.');
@@ -297,37 +333,51 @@ io.on('connection', function (socket) {
         socket.emit('items', items);
     });
     socket.on('state', function (some) {
-        socket.emit("state",players)
+        socket.emit("state", players)
     });
     socket.on('projectiles', function (some) {
-        socket.emit('projectiles',projectiles);
+        socket.emit('projectiles', projectiles);
     });
     socket.on('mobs', function (some) {
-        socket.emit('mobs',mobs);
+        socket.emit('mobs', mobs);
     });
-});
+})
+;
 
+
+function movePlayers(players) {
+    let speed = 5//5
+    let jumpAmount = 5//5
+    let jumpSpeed = 6//5
+    for (let player in players){
+        player = players[player];
+        if(player.isDead == false) {
+            movePlayer(player, player.data, speed, jumpAmount, jumpSpeed);
+        }
+    }
+}
 
 setInterval(function () {
     //console.log(items)
     //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
     for (let player in players) {
-      if(players[player].xp >= players[player].xpToLevel){
-        players[player].level++
-        players[player].xp = 0
-        players[player].xpToLevel *= 2
-      }
+        if (players[player].xp >= players[player].xpToLevel) {
+            players[player].level++
+            players[player].xp = 0
+            players[player].xpToLevel *= 2
+        }
     }
+    movePlayers(players);
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
-    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap,mobs,items,lightMap)
-    illuminationFunctions.calculateLighting(lightSources,lightMap,generalLightAmount);
-    rightEdge= edges.rightEdge
+    let edges = mapFunctions.checkPlayerAtEdge(players, leftEdge, rightEdge, 256, 200, collisionMap, fastMap, mobs, items, lightMap)
+    illuminationFunctions.calculateLighting(lightSources, lightMap, collisionMap, generalLightAmount, players, timeFunctions.getGameTime(gameTime));
+    rightEdge = edges.rightEdge
     leftEdge = edges.leftEdge
     mobs = edges.mobs
     //mobsFunctions.playerCloseToMob(players,mobs,1000,collisionMap)
-    collisionFunctions.gravity(players,mobs, gridSize, collisionMap, projectiles,5);
+    collisionFunctions.gravity(players, mobs, gridSize, collisionMap, projectiles, 5);
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
-    gameTime = timeFunctions.updateGameTime(gameTime,2000)
+    gameTime = timeFunctions.updateGameTime(gameTime, 2000)
 }, 1000 / 60);
