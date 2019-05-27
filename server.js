@@ -308,5 +308,5 @@ setInterval(function () {
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
-    gameTime = timeFunctions.updateGameTime(gameTime,60)
+    gameTime = timeFunctions.updateGameTime(gameTime,2000)
 }, 1000 / 60);

@@ -63,27 +63,69 @@ function determineAnimationSkeleton(skeleton){
     default:
   }
 }
+
+function smoothCameraFollow(){
+  xDifference = (currentCoords.x - players[socket.id].state.x)
+  yDifference = (currentCoords.y - players[socket.id].state.y)
+  currentCoords.x = players[socket.id].state.x
+  currentCoords.y = players[socket.id].state.y
+  xComm += xDifference
+  yComm += yDifference
+  if(xComm <= -camera.speed){
+    xComm += camera.speed
+    camera.move(camera.speed, 0)
+  }
+  else if(xComm >= camera.speed){
+    xComm -= camera.speed
+    camera.move(-camera.speed, 0)
+  }
+  else{
+    camera.move(-xComm, 0)
+    xComm = 0
+  }
+  if(yComm <= -camera.speed){
+    yComm += camera.speed
+    camera.move(0, camera.speed)
+  }
+  else if(yComm >= camera.speed){
+    yComm -= camera.speed
+    camera.move(0, -camera.speed)
+  }
+  else{
+    camera.move(0, -yComm)
+    yComm = 0
+  }
+}
+
+function darkenWorld(alpha, color){
+  ctx.save()
+  ctx.globalAlpha = alpha
+  ctx.fillStyle = color
+  ctx.fillRect(camera.x, camera.y, canvas.width, canvas.height)
+  ctx.restore()
+}
+
 let xDifference = 0
 let yDifference = 0
 let xComm = 0
 let yComm = 0
-let timeDelayOfMouse = 0
 let uiDelay = 0
-let currentuiTime = 0
+let currentTimeKeepTrack = 0
+let gameLightConnection = {0:0.8,1:0.8,2:0.7,3:0.7,4:0.7,5:0.6,6:0.5,7:0.4,8:0.4,9:0.3,10:0.2,11:0.1,12:0,13:0,14:0,15:0.1,16:0.1,17:0.2,18:0.4,19:0.6,20:0.7,21:0.7,22:0.8,23:0.8}
 function game(){
   try {
     if(socket.disconnected){
       return
     }
     meter.tickStart();
-    timeDelayOfMouse = perf.now()
-    if(!inInventory && leftMousePressed && timeDelayOfMouse > delayMouseClickEmit){
+    currentTimeKeepTrack = perf.now()
+    if(!inInventory && leftMousePressed && currentTimeKeepTrack > delayMouseClickEmit){
       socket.emit('leftclick', {x:mousePosition.x+camera.x, y:mousePosition.y+camera.y})
-      delayMouseClickEmit = timeDelayOfMouse + 500
+      delayMouseClickEmit = currentTimeKeepTrack + 500
     }
-    else if(!inInventory && rightMousePressed && timeDelayOfMouse > delayMouseClickEmit){
+    else if(!inInventory && rightMousePressed && currentTimeKeepTrack > delayMouseClickEmit){
       socket.emit('rightclick', {x:mousePosition.x+camera.x, y:mousePosition.y+camera.y})
-      delayMouseClickEmit = timeDelayOfMouse + 500
+      delayMouseClickEmit = currentTimeKeepTrack + 500
     }
     if(keys['ArrowLeft']){
       currentCoords.x+=5
@@ -105,37 +147,7 @@ function game(){
       currentCoords.x = players[socket.id].state.x
       currentCoords.y = players[socket.id].state.y
     }
-    // xDifference = (currentCoords.x - players[socket.id].state.x)
-    // yDifference = (currentCoords.y - players[socket.id].state.y)
-    // currentCoords.x = players[socket.id].state.x
-    // currentCoords.y = players[socket.id].state.y
-    // xComm += xDifference
-    // yComm += yDifference
-    // if(xComm <= -camera.speed){
-    //   xComm += camera.speed
-    //   camera.move(camera.speed, 0)
-    // }
-    // else if(xComm >= camera.speed){
-    //   xComm -= camera.speed
-    //   camera.move(-camera.speed, 0)
-    // }
-    // else{
-    //   camera.move(-xComm, 0)
-    //   xComm = 0
-    // }
-    //
-    // if(yComm <= -camera.speed){
-    //   yComm += camera.speed
-    //   camera.move(0, camera.speed)
-    // }
-    // else if(yComm >= camera.speed){
-    //   yComm -= camera.speed
-    //   camera.move(0, -camera.speed)
-    // }
-    // else{
-    //   camera.move(0, -yComm)
-    //   yComm = 0
-    // }
+    // smoothCameraFollow()
     ctx.clearRect(camera.x, camera.y, cvs.width, cvs.height);
     drawMap(map);
     drawItems(items);
@@ -216,11 +228,13 @@ function game(){
       }
     }
 
-    currentuiTime = perf.now()
-    if(shouldUpdateUI || currentuiTime > uiDelay){
+    darkenWorld(gameLightConnection[gameTime.hour], 'black')
+    
+    currentTimeKeepTrack = perf.now()
+    if(shouldUpdateUI || currentTimeKeepTrack > uiDelay){
       updateUI()
       shouldUpdateUI = false
-      uiDelay = currentuiTime + 1000
+      uiDelay = currentTimeKeepTrack + 1000
     }
     meter.tick()
     requestAnimationFrame(game)
