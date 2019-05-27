@@ -63,9 +63,10 @@ let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 66, 0, 
 let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
 let chest = itemFunctions.generateItem(0, 0, "chest0_item", "block", 0, 0, 0, 100, items, 1)
 let healthPotion = itemFunctions.generateItem(0, 0, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+
 let torch = itemFunctions.generateItem(0, 0, "torch_item", "light", 150, 256, 0, 1, items, 1)
 
-craftingRecipes.push(worktable, sword, healthPotion, torch,chest)
+craftingRecipes.push(worktable, sword, healthPotion, torch)
 
 
 map = maps.map;
@@ -162,9 +163,6 @@ io.on('connection', function (socket) {
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 55, 0, 0, items, 1)
-        let torchP = itemFunctions.generateItem(0, 0, "torch_item", "light", 150, 256, 0, 1, items, 1)
-        inventoryFunctions.addItemInventory(players[socket.id], sword, items)
-        inventoryFunctions.addItemInventory(players[socket.id], torchP, items)
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
     });
@@ -280,26 +278,25 @@ io.on('connection', function (socket) {
             let holding = player.holding[0]
             let blockGrid = mapFunctions.myGrid(click.x, click.y, 32)
             let blockAtClick = fastMap[blockGrid.x][blockGrid.y]
-            if (blockAtClick) {
-                if(blockAtClick.type.includes("table")){
-                    socket.emit('craftingui', craftingRecipes)
-                }
-                else if(blockAtClick.type.includes("chest")){
-                    socket.emit('chestgui', chests[blockGrid.x][blockGrid.y])
-                }
-            }
-            else{
-              if (holding !== undefined) {
-                  if (holding !== null) {
-                      if (holding.type === "block") {
-                          mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
-                          if(holding.name === "chest0_item"){
-                            itemFunctions.generateChest(blockGrid.x, blockGrid.y, 12, chests)
-                          }
+            if(blockAtClick){
+              if(blockAtClick.type.includes("table")){
+                socket.emit('craftingui', craftingRecipes)
+              }
+              else if(blockAtClick.type.includes("chest")){
+                socket.emit('chestgui', chests[blockGrid.x][blockGrid.y])
+              }
+        }
+        else{
+          if (holding !== undefined) {
+              if (holding !== null) {
+                  if (holding.type === "block") {
+                      mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
+                      if(holding.name === "chest0_item"){
+                        itemFunctions.generateChest(blockGrid.x, blockGrid.y, 12, chests)
                       }
                   }
               }
-            }
+          }
         }
     });
     socket.on('craft', function (recipe) {
@@ -391,5 +388,5 @@ setInterval(function () {
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
-    gameTime = timeFunctions.updateGameTime(gameTime, 2000)
+    gameTime = timeFunctions.updateGameTime(gameTime,60)
 }, 1000 / 60);
