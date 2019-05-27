@@ -33,6 +33,7 @@ let keys = {}
 let players = {}
 let mobs = {}
 let map;
+let lightMap;
 let items;
 let projectiles;
 let itemHoldingIndex = 0
@@ -632,7 +633,8 @@ document.body.onload = () => {
     });
 
     socket.on('map', (mapServer) => {
-      map = mapServer
+      map = mapServer.map
+      lightMap = mapServer.lightMap
       socket.emit('map',)
     });
 

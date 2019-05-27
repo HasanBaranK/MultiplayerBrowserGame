@@ -98,7 +98,7 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io,i
 }
 
 function generateMobs(startX, amount, mobs, collisionMap, gridSize, items) {
-    let amountOfMobs = Math.floor(Math.random() * Math.floor((amount / 10))) + 1;
+    let amountOfMobs = 0//Math.floor(Math.random() * Math.floor((amount / 10))) + 1;
     let density = 10
     let lastMob = startX + 5
     for (let i = 0; i < amountOfMobs; i++) {
