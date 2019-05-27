@@ -8,6 +8,7 @@ let perf = window.performance
 let delayMouseClickEmit = perf.now()
 let inChat = false
 let inCrafting = false
+let inChest = false
 let sizeOfChar = 64
 let messageHistory = []
 let shouldUpdateUI = true
@@ -19,6 +20,8 @@ let gameTime = {}
 let popUps = {}
 let popUpsIncrementer = 0
 let popUpTimeDelay = 0
+
+let currentChestOpen = {}
 
 let healedPops = {}
 let healedPopsIncrementer = 0
@@ -99,6 +102,9 @@ function updateUI(){
   if(inCrafting){
     displays['crafting'].draw(ctxChat,0,0,craftingRecipes)
   }
+  if(inChest){
+    displays['chest'].draw(ctxChat,0,0)
+  }
   if(inInventory){
     displays['inventory'].draw(ctxChat,0,0,players[socket.id].state.inventory)
     buttons['inventoryopen'].draw(ctxChat,0,0)
@@ -140,6 +146,30 @@ function drawPopUps(){
       popUps[popUp].ySpeed++
     }
   }
+}
+
+function myGrid(x, y, gridSize) {
+    let gridx = x - (x % gridSize)
+    let gridy = y - (y % gridSize)
+
+    if (gridx < 0) {
+        gridx = gridx - gridSize
+    }
+    if (gridy < 0) {
+        gridy = gridy - gridSize
+    }
+
+    if (x < 0 && (0 - gridSize) < x) {
+        gridx = x - (x % gridSize) - gridSize
+    }
+    if (y < 0 && (0 - gridSize) < y) {
+        gridy = y - (y % gridSize) - gridSize
+    }
+    let position = {
+        x: gridx,
+        y: gridy
+    }
+    return position
 }
 
 function drawHealedPops(){
@@ -478,6 +508,50 @@ class Crafting {
   }
 }
 
+class Chest {
+
+  constructor(name,img,x,y,xOffset,yOffset,columnCount,rowCount,gridSize,actualSizeOffset){
+    this.name = name
+    this.img = img
+    this.x = x
+    this.y = y
+    this.xOffset = xOffset
+    this.yOffset = yOffset
+    this.columnCount = columnCount
+    this.rowCount = rowCount
+    this.gridSize = gridSize
+    this.currentRow = 0
+    this.actualSizeOffset = actualSizeOffset
+
+    this.xOfItem = 0
+    this.yOfItem = 0
+    this.xOfGrid = 0
+    this.yOfGrid = 0
+    this.infoOffset = 0
+    this.havingAmount = 0
+  }
+  draw(ctx,ctX,ctY){
+    this.currentRow = 0
+    ctx.drawImage(this.img,this.x+ctX, this.y+ctY)
+    let grid = myGrid(mousePosition.x, mousePosition.y, 32)
+    if(leftMousePressed){
+      ctx.fillRect(grid.x + 1, grid.y + 1, 31, 31)
+    }
+    for(let item in currentChestOpen.items){
+      if(item % this.columnCount == 0 && item != 0){
+        this.currentRow++
+      }
+      this.xOfGrid = (this.x+ctX)+((item%this.columnCount)*this.gridSize)+(this.xOffset*this.gridSize) + 1
+      this.xOfItem = this.xOfGrid + this.actualSizeOffset/2
+      this.yOfGrid = (this.y+ctY)+(this.yOffset*this.gridSize)+(this.currentRow*this.gridSize) + 1
+      this.yOfItem = this.yOfGrid + (this.actualSizeOffset/2)
+      ctx.drawImage(currentChestOpen.items[item].name,this.xOfItem,this.yOfItem,this.gridSize - this.actualSizeOffset - 1,this.gridSize - this.actualSizeOffset - 1)
+    }
+    ctx.fillStyle = 'white'
+    ctx.font = "16px Arial"
+  }
+}
+
 let camera = new Camera(0, 0, 0, 0, 5);
 let images = {}
 let promises = []
@@ -509,7 +583,7 @@ function loadImagesThen(folders){
     displays['healthbar'] = new Bar('healthbar', 0, 0, images['health_fg_upscaled'], 196, 180/12.75)
     displays['energybar'] = new Bar('energybar', 0, 0, images['energy_fg_upscaled'], 196, 180/12.75)
     displays['xpbar'] = new Bar('xpbar', 0, 0, images['xp_fg_upscaled'], 595, 200/12.75)
-
+    displays['chest'] = new Chest('chest', images['chest_UI'], 32*18, 32*6, 0, 3, 10, 3, 32, 32)
 
     displays['messagebox'] = new MessageBox(cvs.width - 311, cvs.height - 29 - 150 - 10, 308, 150)
     displays['crafting'] = new Crafting('Crafting',images['craft_UI'], cvs.width / 2 - 240, 200, 0, 2, 13, 2, 32, 12, images['craftbutton_UI'])
@@ -652,6 +726,14 @@ document.body.onload = () => {
       shouldUpdateUI = true
     });
 
+    socket.on('chestgui', (chest) => {
+      currentChestOpen = chest
+      inChest = true
+      inInventory = true
+      shouldUpdateUI = true
+    });
+
+
     document.onkeydown = (key) => {
         if(key.key != "w" || key.key != "a" || key.key != "s" || key.key != "d"){
           shouldUpdateUI = true
@@ -660,6 +742,7 @@ document.body.onload = () => {
           inInventory = false
           inChat = false
           inCrafting = false
+          inChest = false
           informationToPresent = {}
           input.blur()
           return

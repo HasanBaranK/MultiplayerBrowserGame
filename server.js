@@ -39,6 +39,7 @@ var players = {};
 var collisionMap = {};
 var fastMap = {};
 let items = [];
+let chests = {};
 let projectiles = [];
 let map;
 let mobs = {};
@@ -51,15 +52,16 @@ images = getImages(images)
 let leftEdge = 0;
 let rightEdge = 70;
 
-let craftingRecipes = []
+let craftingRecipes = [];
 
 let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
 
 //Crafting recipes
 let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 66, 0, 0, items, 1)
 let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
+let chest = itemFunctions.generateItem(0, 0, "chest0_item", "block", 0, 0, 0, 100, items, 1)
 let healthPotion = itemFunctions.generateItem(0, 0, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
-craftingRecipes.push(worktable, sword, healthPotion)
+craftingRecipes.push(worktable, sword, healthPotion, chest)
 
 map = maps.map;
 collisionMap = maps.collisionMap;
@@ -118,7 +120,6 @@ io.on('connection', function (socket) {
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 55, 0, 0, items, 1)
-        inventoryFunctions.addItemInventory(players[socket.id], sword, items)
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
     });
@@ -230,13 +231,21 @@ io.on('connection', function (socket) {
               if(blockAtClick.type.includes("table")){
                 socket.emit('craftingui', craftingRecipes)
               }
+              else if(blockAtClick.type.includes("chest")){
+                socket.emit('chestgui', chests[blockGrid.x][blockGrid.y])
+              }
             }
-            if (holding !== undefined) {
-                if (holding !== null) {
-                    if (holding.type === "block") {
-                        mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
-                    }
-                }
+            else{
+              if (holding !== undefined) {
+                  if (holding !== null) {
+                      if (holding.type === "block") {
+                          mapChanged = mapFunctions.addBlock(player, map, collisionMap, gridSize, click.x, click.y, holding.name, 128, fastMap)
+                          if(holding.name === "chest0_item"){
+                            itemFunctions.generateChest(blockGrid.x, blockGrid.y, 12, chests)
+                          }
+                      }
+                  }
+              }
             }
         }
     });
@@ -308,5 +317,5 @@ setInterval(function () {
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
-    gameTime = timeFunctions.updateGameTime(gameTime,2000)
+    gameTime = timeFunctions.updateGameTime(gameTime,60)
 }, 1000 / 60);

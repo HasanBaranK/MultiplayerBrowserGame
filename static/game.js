@@ -228,8 +228,8 @@ function game(){
       }
     }
 
-    darkenWorld(gameLightConnection[gameTime.hour], 'black')
-    
+    // darkenWorld(gameLightConnection[gameTime.hour], 'black')
+
     currentTimeKeepTrack = perf.now()
     if(shouldUpdateUI || currentTimeKeepTrack > uiDelay){
       updateUI()

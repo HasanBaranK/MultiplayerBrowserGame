@@ -1,5 +1,6 @@
 module.exports={
-    generateItem
+    generateItem,
+    generateChest
 }
 function generateItem(x, y, name, type, damage,range, defence, health,items,amount,equipable) {
     let item = {
@@ -17,4 +18,28 @@ function generateItem(x, y, name, type, damage,range, defence, health,items,amou
     };
     items.push(item)
     return item
+}
+
+function generateChest(x, y, capacity, chests){
+  let chest = {
+    x:x,
+    y:y,
+    capacity:capacity,
+    items:[],
+    level:1,
+    owner:null
+  }
+  if(chests[x] == null){
+    chests[x] = {}
+  }
+  chests[x][y] = chest
+  return chest
+}
+
+function addItemToChest(chest, item){
+  chest.items.push(item)
+}
+
+function removeItemFromChest(chest, itemIndex){
+  chest.items.splice(itemIndex, 1)
 }
