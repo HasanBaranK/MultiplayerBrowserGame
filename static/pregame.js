@@ -83,8 +83,8 @@ function updateUI(){
   ctxChat.fillText(socket.id, 170, 22)
   ctxChat.fillText('Level: ' + players[socket.id].state.level, 175, 38)
   ctxChat.fillText('Gold: ' + 0, 171, 54)
+  ctxChat.fillStyle = 'white'
   ctxChat.fillText('Time: '+gameTime.hour + ':' + gameTime.minute, cvs.width / 2, 32)
-  ctxChat.drawImage(images['hasan'], 75, 0, 100, 80)
   input.render()
   displays['messagebox'].draw(ctxChat, inChat)
   displays['quickselect'].draw(ctxChat,cvs.width - 32,cvs.height - 500 ,players[socket.id].state.inventory)
