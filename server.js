@@ -160,7 +160,9 @@ io.on('connection', function (socket) {
         //io.sockets.emit('projectiles', projectiles);
         io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 55, 0, 0, items, 1)
+        let torchP = itemFunctions.generateItem(0, 0, "torch_item", "light", 150, 256, 0, 1, items, 1)
         inventoryFunctions.addItemInventory(players[socket.id], sword, items)
+        inventoryFunctions.addItemInventory(players[socket.id], torchP, items)
         players[socket.id].holding.push(players[socket.id].inventory[0]);
         socket.join('players');
     });

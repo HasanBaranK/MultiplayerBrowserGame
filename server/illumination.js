@@ -46,6 +46,7 @@ function calculateGeneralLight(time, generalLightAmount) {
 
 function cleanLightMap(lightMap, generalLightAmount,players,gridSize,rangex,rangey,lightSources) {
     let count = 0;
+    let playerShadowRange = {}
     for (let player in players) {
         player = players[player];
         if (player.isDead && player.followLight != null) {
@@ -68,17 +69,27 @@ function cleanLightMap(lightMap, generalLightAmount,players,gridSize,rangex,rang
             if (lightMap[i] !== undefined) {
                 for (let k = starty; k < endy;) {
                     if (lightMap[i][k] !== undefined) {
-                        if (k <= 352) {
-                            lightMap[i][k] = generalLightAmount;
-                        } else {
-                            lightMap[i][k] = 0;
+                        if(playerShadowRange[i]== undefined){
+                            playerShadowRange[i] = {}
                         }
-                        count++;
+                        if(playerShadowRange[i][k] == undefined){
+                            playerShadowRange[i][k] = true
+                        }
                     }
                     k = k + gridSize
                 }
             }
             i = i + gridSize
+        }
+    }
+    for (let x in playerShadowRange){
+        for (let y in playerShadowRange[x]){
+            if (y <= 352) {
+                lightMap[x][y] = generalLightAmount;
+            } else {
+                lightMap[x][y] = 0;
+            }
+            count++;
         }
     }
     console.log(count)
