@@ -32,34 +32,43 @@ let itemFunctions = require("./server/Player/items");
 let inventoryFunctions = require("./server/Player/inventory");
 let timeFunctions = require("./server/time.js");
 let mobsFunctions = require("./server/Mobs/Mobs");
+let illuminationFunctions = require("./server/illumination");
 
 const imageFolder = './static/images';
 
 var players = {};
 var collisionMap = {};
 var fastMap = {};
+var lightMap = {};
 let items = [];
 let projectiles = [];
 let map;
+let lightSources = [];
 let mobs = {};
 let gameTime = 0;
 let day = 0;
 let mapChanged = false;
 let images = {};
+let generalLightAmount = 0;
 images = getImages(images)
 
 let leftEdge = 0;
 let rightEdge = 70;
 
 let craftingRecipes = []
-
-let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
+console.log("main part")
+console.log(lightMap)
+let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap,lightMap);
 
 //Crafting recipes
 let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 66, 0, 0, items, 1)
 let worktable = itemFunctions.generateItem(0, 0, "table0_item", "block", 0, 0, 0, 100, items, 1)
 let healthPotion = itemFunctions.generateItem(0, 0, "healthpotion_item", "Consumable", 0, 0, 0, 1, items, 1)
+
 craftingRecipes.push(worktable, sword, healthPotion)
+
+//lights
+let followLight = illuminationFunctions.generatelightSource(128, 0, "Point",100,150,lightSources);
 
 map = maps.map;
 collisionMap = maps.collisionMap;
@@ -131,6 +140,7 @@ io.on('connection', function (socket) {
             if (data.a || data.w || data.d || data.s || data[' ']) {
                 if (data.a) {
                     collisionFunctions.move("left", player, gridSize, collisionMap,speed)
+
                 }
                 if (data.w) {
                     if (player.onair === false) {
@@ -165,6 +175,9 @@ io.on('connection', function (socket) {
                     }
                   }
                 }
+                let currentGrid = mapFunctions.myGrid(player.x,player.y,32)
+                followLight.x = currentGrid.x
+                followLight.y = currentGrid.y +32
             } else {
                 player.status = 0;
             }
@@ -218,6 +231,7 @@ io.on('connection', function (socket) {
             // }
         }
 
+
     });
     socket.on('rightclick', function (click) {
 
@@ -265,8 +279,15 @@ io.on('connection', function (socket) {
     });
     socket.on('map', function () {
         let player = players[socket.id]
-        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
-        socket.emit('map', partialMap);
+        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 5, 5, fastMap, 32);//30//20
+        partialMap = mapFunctions.calculateUnreachableBlocks(partialMap,collisionMap,gridSize);
+
+        //partialMap = mapFunctions.takeOutFullShadows(partialMap);
+        let maps = {
+            map: partialMap,
+            lightMap: lightMap,
+        }
+        socket.emit('map',maps);
     });
     socket.on('disconnect', function (some) {
         console.log('Player ' + socket.id + ' has disconnected.');
@@ -298,8 +319,8 @@ setInterval(function () {
       }
     }
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
-    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap,mobs,items)
-
+    let edges = mapFunctions.checkPlayerAtEdge(players,leftEdge,rightEdge,256,200,collisionMap,fastMap,mobs,items,lightMap)
+    illuminationFunctions.calculateLighting(lightSources,lightMap,generalLightAmount);
     rightEdge= edges.rightEdge
     leftEdge = edges.leftEdge
     mobs = edges.mobs

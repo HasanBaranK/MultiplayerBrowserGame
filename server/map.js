@@ -10,14 +10,15 @@ module.exports = {
     myGrid,
     sendPartialMap,
     checkPlayerAtEdge,
+    calculateUnreachableBlocks,
 }
 
 
-function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) {
+function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap, lightMap) {
     //Rules
     //world has max 2000 depth mountains and and min 500 depth flat land
-    //blocks should be connected and should not defy the laws of gravity(no fling blocks)
-    //no extreme changes (a tower of 2000 in an instant should notdw be possible)
+    //blocks should be connected and should not defy the laws of gravity(no flying blocks)
+    //no extreme changes (a tower of 2000 in an instant should not be possible)
     let minHeight = 10;
     let blocks = [];
     let size = startX + amount;
@@ -36,18 +37,17 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) 
             let end = start + Math.floor(Math.random() * (amount - widthOfHill));
             hill["start"] = start
             hill["end"] = end
-            console.log(start *32 +" ," + end*32)
             //randomize hills lenght
             hills.push(hill);
         }
         let amountOfTrees = Math.floor(Math.random() * Math.floor((amount / 10))) + 1;
         let density = 10
         console.log("Amount of Trees: " + amountOfTrees)
-        let lastTree = startX +5
+        let lastTree = startX + 5
         for (let i = 0; i < amountOfTrees; i++) {
 
-            let start = lastTree + Math.floor(Math.random() * ((amount + startX-lastTree)/density));
-            if(start >= startX + amount-7){
+            let start = lastTree + Math.floor(Math.random() * ((amount + startX - lastTree) / density));
+            if (start >= startX + amount - 7) {
                 break
             }
             lastTree = start + 5
@@ -60,12 +60,13 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) 
 
         collisionMap[i * gridSize] = {};
         fastMap[i * gridSize] = {};
+        lightMap[i * gridSize] = {};
         let k = 20
 
         generateBlock(i * gridSize, k * gridSize, 100, blocks, "stone", collisionMap, fastMap)
         k--;
 
-        for (; k > minHeight+1; k--) {
+        for (; k > minHeight + 1; k--) {
             generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt", collisionMap, fastMap)
         }
         generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt10", collisionMap, fastMap)
@@ -86,7 +87,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) 
         for (let i = start; i < middle; i++) {
             let noise = Math.floor(Math.random() * 3)
             try {
-                let k = minHeight +1
+                let k = minHeight + 1
                 for (; k > lastY + 1; k--) {
                     generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt", collisionMap, fastMap)
                 }
@@ -101,7 +102,7 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) 
         for (let i = middle; i < end; i++) {
             let noise = Math.floor(Math.random() * 3)
             try {
-                let k = minHeight +1
+                let k = minHeight + 1
                 for (; k > lastY + 2; k--) {
                     generateBlock(i * gridSize, k * gridSize, 100, blocks, "dirt", collisionMap, fastMap)
                 }
@@ -121,37 +122,49 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) 
         let x = trees[tree];
         let size = 3 + Math.floor(Math.random() * 3);
 
-        let height = getHeight(x, collisionMap,gridSize,640)
+        let height = getHeight(x, collisionMap, gridSize, 640)
         //console.log(height)
         try {
             let k = height
             for (; k > height - size * gridSize; k -= gridSize) {
-                generateBlock(x*gridSize, k, 100, blocks, "wood", collisionMap, fastMap)
+                generateBlock(x * gridSize, k, 100, blocks, "wood", collisionMap, fastMap)
 
             }
             // hardcoded for now
-            generateBlock(x*gridSize -gridSize -gridSize,height - size * gridSize + gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize -gridSize,height - size * gridSize + gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize +gridSize,height - size * gridSize + gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize +gridSize + gridSize,height - size * gridSize + gridSize,100,blocks,"leaves",collisionMap,fastMap)
+            generateBlock(x * gridSize - gridSize - gridSize, height - size * gridSize + gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize - gridSize, height - size * gridSize + gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize + gridSize, height - size * gridSize + gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize + gridSize + gridSize, height - size * gridSize + gridSize, 100, blocks, "leaves", collisionMap, fastMap)
 
 
-            generateBlock(x*gridSize -gridSize -gridSize,height - size * gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize -gridSize,height - size * gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize ,height - size * gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize +gridSize,height - size * gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize +gridSize + gridSize,height - size * gridSize,100,blocks,"leaves",collisionMap,fastMap)
+            generateBlock(x * gridSize - gridSize - gridSize, height - size * gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize - gridSize, height - size * gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize, height - size * gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize + gridSize, height - size * gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize + gridSize + gridSize, height - size * gridSize, 100, blocks, "leaves", collisionMap, fastMap)
 
-            generateBlock(x*gridSize -gridSize,height - size * gridSize -gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize ,height - size * gridSize -gridSize,100,blocks,"leaves",collisionMap,fastMap)
-            generateBlock(x*gridSize +gridSize,height - size * gridSize -gridSize,100,blocks,"leaves",collisionMap,fastMap)
+            generateBlock(x * gridSize - gridSize, height - size * gridSize - gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize, height - size * gridSize - gridSize, 100, blocks, "leaves", collisionMap, fastMap)
+            generateBlock(x * gridSize + gridSize, height - size * gridSize - gridSize, 100, blocks, "leaves", collisionMap, fastMap)
 
-            generateBlock(x*gridSize ,height - size * gridSize - 2 * gridSize,100,blocks,"leaves",collisionMap,fastMap)
+            generateBlock(x * gridSize, height - size * gridSize - 2 * gridSize, 100, blocks, "leaves", collisionMap, fastMap)
         } catch (e) {
             //map not generated for that part yet
         }
 
 
+    }
+    //shadowMap
+
+    for (let lightX in lightMap){
+        for (let i = -10; i < 20; i++) {
+            let block = {};
+            block["light"] = 0;
+            if (lightMap[lightX] === undefined) {
+                lightMap[lightX] = {}
+            }
+            lightMap[lightX][i*gridSize] = block;
+        }
     }
     let maps = {
         map: blocks,
@@ -162,54 +175,56 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap,mobs) 
 
 
 }
-function getHeight(x, collisionMap,gridSize,start) {
+
+function getHeight(x, collisionMap, gridSize, start) {
     if (collisionMap[x * gridSize] !== undefined) {
         let searched = Object.keys(collisionMap[x * gridSize]).length;
         let result = start - searched * gridSize
         return result
     }
 }
-function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fastMap,damage) {
+
+function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fastMap, damage) {
 
     try {
         let position = myGrid(x, y, gridSize)
         let gridx = position.x
         let gridy = position.y
 
-        if (calculateDistance(gridx, gridy, player.x+ gridSize, player.y+gridSize+gridSize/2) <= range) {
+        if (calculateDistance(gridx, gridy, player.x + gridSize, player.y + gridSize + gridSize / 2) <= range) {
             //console.log(player.x + "," + player.y)
             if (fastMap[gridx][gridy] !== undefined) {
 
-                    //console.log("found")
+                //console.log("found")
 
-                    let block = fastMap[gridx][gridy];
-                    if (block !== undefined && block !== null) {
-                        let blockType = block.type
+                let block = fastMap[gridx][gridy];
+                if (block !== undefined && block !== null) {
+                    let blockType = block.type
 
-                        if(block.type.includes("stone")){
-                            damage = Math.ceil(damage/3);
-                        }
-                        if(damage <= 0){
-                        damage++;
-                        }
-                        block.health = block.health - damage
-                        if(block.health <= 0) {
-                            blockType = blockType.split("_")[0];
-                            blockType = blockType.substr(0, blockType.length - 1)
-                            let itemName = blockType + "0_item";
-                            if(blockType === "dirt1"){
-                                itemName = "dirt0_item"
-                            }
-                            deleteBlock(gridx, gridy, block, map, collisionMap, fastMap)
-                            generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
-                            return true
-                        }else {
-                            fastMap[gridx][gridy] = block;
-                            map[map.indexOf(block)] = block
-
-                        }
-                        return true
+                    if (block.type.includes("stone")) {
+                        damage = Math.ceil(damage / 3);
                     }
+                    if (damage <= 0) {
+                        damage++;
+                    }
+                    block.health = block.health - damage
+                    if (block.health <= 0) {
+                        blockType = blockType.split("_")[0];
+                        blockType = blockType.substr(0, blockType.length - 1)
+                        let itemName = blockType + "0_item";
+                        if (blockType === "dirt1") {
+                            itemName = "dirt0_item"
+                        }
+                        deleteBlock(gridx, gridy, block, map, collisionMap, fastMap)
+                        generateItem(gridx + gridSize / 2, gridy + gridSize / 2, itemName, "block", 0, 0, 0, 100, items, 1);
+                        return true
+                    } else {
+                        fastMap[gridx][gridy] = block;
+                        map[map.indexOf(block)] = block
+
+                    }
+                    return true
+                }
             } else {
                 console.log("undefined")
                 return false
@@ -224,7 +239,7 @@ function mineBlock(player, x, y, gridSize, collisionMap, map, items, range, fast
 
 function deleteBlock(gridx, gridy, block, map, collisionMap, fastMap) {
     //map.splice(map.indexOf(block), 1);
-    if(collisionMap[gridx][gridy] !== undefined ) {
+    if (collisionMap[gridx][gridy] !== undefined) {
         collisionMap[gridx][gridy] = false;
     }
     fastMap[gridx][gridy] = undefined;
@@ -238,14 +253,14 @@ function addBlock(player, map, collisionMap, gridSize, x, y, blockType, range, f
     let k = position.y
 
     //let playerPosition = myGrid(player.x,player.y,gridSize)
-    if (calculateDistance(i, y, player.x+ gridSize, player.y+gridSize+gridSize/2) <= range) {
+    if (calculateDistance(i, y, player.x + gridSize, player.y + gridSize + gridSize / 2) <= range) {
         blockType = blockType.split("_")[0];
         let blockName = blockType + "_block";
         let itemName = blockType + "_item";
-        blockType = blockType.substr(0,blockType.length-1)
+        blockType = blockType.substr(0, blockType.length - 1)
 
         if ((collisionMap[i][k] === undefined || collisionMap[i][k] === false) && inPlayerInventory(player, itemName)) {
-            generateBlock(i, k, 100, map, blockType, collisionMap, fastMap,true)
+            generateBlock(i, k, 100, map, blockType, collisionMap, fastMap, true)
             deleteItemInventory(player, itemName)
         }
         return true;
@@ -257,20 +272,20 @@ function calculateDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
 }
 
-function generateBlock(x, y, health, map, blockName, collisionMap, fastMap,playerAdded) {
+function generateBlock(x, y, health, map, blockName, collisionMap, fastMap, playerAdded) {
     let random = Math.floor(Math.random() * 9)
 
     if (blockName === "wood" || blockName === "leaves" || blockName == "table") {
         random = 0
-    }else {
+    } else {
         collisionMap[x][y] = true;
     }
-    if(playerAdded === true){
+    if (playerAdded === true) {
         collisionMap[x][y] = true;
     }
-    if(blockName === "dirt10"){
+    if (blockName === "dirt10") {
         blockName = blockName + "_block"
-    }else {
+    } else {
         blockName = blockName.replace("0", "");
         blockName = blockName + "" + random;
         blockName = blockName + "_block"
@@ -283,6 +298,7 @@ function generateBlock(x, y, health, map, blockName, collisionMap, fastMap,playe
     block["y"] = y;
     block["type"] = blockName;
     block["health"] = health;
+    block["light"] = 0;
     map.push(block);
     if (fastMap[x] === undefined) {
         fastMap[x] = {}
@@ -333,7 +349,7 @@ function sendPartialMap(x, y, halfsizex, halfsizey, map, gridSize) {
         if (map[i] !== undefined) {
             for (let k = starty; k < endy;) {
                 if (map[i][k] !== undefined) {
-                    partialMap.push(map[i][k])
+                    partialMap.push(JSON.parse(JSON.stringify(map[i][k])))
                 }
                 k = k + gridSize
             }
@@ -343,12 +359,12 @@ function sendPartialMap(x, y, halfsizex, halfsizey, map, gridSize) {
     return partialMap
 }
 
-function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap,mobs,items) {
+function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap, mobs, items, shadowMap) {
     for (let player in players) {
         if (players[player].x + proximity >= rightEdge * 32) {
             //console.log(rightEdge)
-            autoMapGenerator(rightEdge, amount, 32, collisionMap, fastMap)
-            mobs = generateMobs(rightEdge,amount,mobs,collisionMap,32,items);
+            autoMapGenerator(rightEdge, amount, 32, collisionMap, fastMap, shadowMap)
+            mobs = generateMobs(rightEdge, amount, mobs, collisionMap, 32, items);
             rightEdge = rightEdge + (amount - 1)
             //console.log(rightEdge)
         }
@@ -366,4 +382,25 @@ function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, coll
 
     return edges
 
+}
+
+function calculateUnreachableBlocks(partialMap, collisionMap, gridSize) {
+    for (let block in partialMap) {
+        let currentBlockX = partialMap[block].x;
+        let currentBlockY = partialMap[block].y;
+        if (collisionMap[currentBlockX] != undefined || collisionMap[currentBlockX] != null || collisionMap[currentBlockX + gridSize] !== undefined || collisionMap[currentBlockX - gridSize] !== undefined) {
+            if (collisionMap[currentBlockX][currentBlockY]) {
+
+                try {
+
+                    if (collisionMap[currentBlockX + gridSize][currentBlockY] && collisionMap[currentBlockX + gridSize][currentBlockY + gridSize] && collisionMap[currentBlockX + gridSize][currentBlockY - gridSize] && collisionMap[currentBlockX][currentBlockY + gridSize] && collisionMap[currentBlockX][currentBlockY - gridSize] && collisionMap[currentBlockX - gridSize][currentBlockY + gridSize] && collisionMap[currentBlockX - gridSize][currentBlockY] && collisionMap[currentBlockX - gridSize][currentBlockY - gridSize]) {
+                        partialMap[block].type = "unreachable_block";
+                    }
+                } catch (e) {
+
+                }
+            }
+        }
+    }
+    return partialMap;
 }
