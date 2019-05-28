@@ -4,13 +4,14 @@ module.exports = {
     generatelightSource,
     calculateLighting,
     getPartialLightMap,
-    removeLightSource
+    removeLightSource,
+    calculateGeneralLight
 }
 
 function generatelightSource(x, y, name, range, power, lightSources) {
 
     let index = 0
-    if(lightSources.size !== undefined){
+    if (lightSources.size !== undefined) {
         index = lightSources.size
     }
     let lightSource = {
@@ -25,7 +26,8 @@ function generatelightSource(x, y, name, range, power, lightSources) {
     lightSources.push(lightSource);
     return lightSource;
 }
-function removeLightSource(lightSource,lightSources) {
+
+function removeLightSource(lightSource, lightSources) {
     lightSources.splice(lightSource.index, 1)
 }
 
@@ -44,7 +46,7 @@ function calculateGeneralLight(time, generalLightAmount) {
     return generalLightAmount;
 }
 
-function cleanLightMap(lightMap, generalLightAmount,players,gridSize,rangex,rangey,lightSources) {
+function cleanLightMap(lightMap, generalLightAmount, players, gridSize, rangex, rangey, lightSources) {
     let count = 0;
     let playerShadowRange = {}
     for (let player in players) {
@@ -69,10 +71,10 @@ function cleanLightMap(lightMap, generalLightAmount,players,gridSize,rangex,rang
             if (lightMap[i] !== undefined) {
                 for (let k = starty; k < endy;) {
                     if (lightMap[i][k] !== undefined) {
-                        if(playerShadowRange[i]== undefined){
+                        if (playerShadowRange[i] == undefined) {
                             playerShadowRange[i] = {}
                         }
-                        if(playerShadowRange[i][k] == undefined){
+                        if (playerShadowRange[i][k] == undefined) {
                             playerShadowRange[i][k] = true
                         }
                     }
@@ -82,8 +84,8 @@ function cleanLightMap(lightMap, generalLightAmount,players,gridSize,rangex,rang
             i = i + gridSize
         }
     }
-    for (let x in playerShadowRange){
-        for (let y in playerShadowRange[x]){
+    for (let x in playerShadowRange) {
+        for (let y in playerShadowRange[x]) {
             if (y <= 352) {
                 lightMap[x][y] = generalLightAmount;
             } else {
@@ -105,9 +107,10 @@ function cleanLightMap(lightMap, generalLightAmount,players,gridSize,rangex,rang
     // }
 }
 
-function calculateLighting(lightSources, lightMap, collisionMap, generalLightAmount, players, time) {
-    generalLightAmount = calculateGeneralLight(time, generalLightAmount);
-    cleanLightMap(lightMap, generalLightAmount,players,32,25,20,lightSources);
+function calculateLighting(lightSources, lightMap, collisionMap, generalLightAmount, players) {
+
+    let lightMap2 = {};
+    //cleanLightMap(lightMap, generalLightAmount,players,32,25,20,lightSources);
     for (let lightSource in lightSources) {
         lightSource = lightSources[lightSource];
         let distance = lightSource.range + 800;//800 is players vision range
@@ -122,35 +125,48 @@ function calculateLighting(lightSources, lightMap, collisionMap, generalLightAmo
         }
         if (lightSource.type == "Point" && shouldCalculate) {
             for (let i = 0; i < lightSource.range; i += 32) {
+                if (lightMap2[lightSource.x + i] === undefined) {
+                    lightMap2[lightSource.x + i] = {}
+                }
+                if (lightMap2[lightSource.x - i] === undefined) {
+                    lightMap2[lightSource.x - i] = {}
+                }
                 for (let k = 0; k < lightSource.range; k += 32) {
                     let lightAmount = 0;
                     if (lightSource.power - i - k > 0) {
                         lightAmount = lightSource.power - i - k;
-                    }
-                    if (lightMap[lightSource.x + i] !== undefined) {
 
-                        if (lightMap[lightSource.x + i][lightSource.y + k] !== undefined) {
-                            lightMap[lightSource.x + i][lightSource.y + k] +=  generalLightAmount + lightAmount;
 
+                        if (lightMap2[lightSource.x + i][lightSource.y + k] === undefined) {
+                            lightMap2[lightSource.x + i][lightSource.y + k] = 0
                         }
-                        if (lightMap[lightSource.x + i][lightSource.y - k] !== undefined) {
-                            lightMap[lightSource.x + i][lightSource.y - k] += generalLightAmount + lightAmount;
 
-                        }
-                    }
-                    if (lightMap[lightSource.x - i] !== undefined) {
-                        if (lightMap[lightSource.x - i][lightSource.y + k] !== undefined) {
-                            lightMap[lightSource.x - i][lightSource.y + k] += generalLightAmount + lightAmount;
-                        }
-                        if (lightMap[lightSource.x - i][lightSource.y - k] !== undefined) {
-                            lightMap[lightSource.x - i][lightSource.y - k] += generalLightAmount + lightAmount
+                        lightMap2[lightSource.x + i][lightSource.y + k] += lightAmount;
 
+                        if (lightMap2[lightSource.x + i][lightSource.y - k] === undefined) {
+                            lightMap2[lightSource.x + i][lightSource.y - k] = 0
                         }
+
+                        lightMap2[lightSource.x + i][lightSource.y - k] += lightAmount;
+
+                        if (lightMap2[lightSource.x - i][lightSource.y + k] === undefined) {
+                            lightMap2[lightSource.x - i][lightSource.y + k] = 0
+                        }
+
+                        lightMap2[lightSource.x - i][lightSource.y + k] += lightAmount;
+
+                        if (lightMap2[lightSource.x - i][lightSource.y - k] === undefined) {
+                            lightMap2[lightSource.x - i][lightSource.y - k] = 0
+                        }
+
+                        lightMap2[lightSource.x - i][lightSource.y - k] += lightAmount
                     }
                 }
             }
         }
     }
+    lightMap = lightMap2;
+    return lightMap2
 }
 
 function getPartialLightMap(x, y, gridSize, rangex, rangey, lightMap) {
@@ -166,35 +182,15 @@ function getPartialLightMap(x, y, gridSize, rangex, rangey, lightMap) {
     let starty = position.y - (rangey * gridSize)
     let endy = position.y + (rangey * gridSize)
 
-    for (let i = startx; i < endx;) {
-
+    for (let i = startx; i < endx; i += gridSize) {
         if (lightMap[i] !== undefined) {
-            for (let k = starty; k < endy;) {
+            partialMap[i] = {}
+            for (let k = starty; k < endy; k += gridSize) {
                 if (lightMap[i][k] !== undefined) {
-                    if (partialMap[i] === undefined) {
-                        partialMap[i] = {}
-                    }
-                    if (partialMap[i][k] === undefined) {
-                        partialMap[i][k] = {}
-                    }
                     partialMap[i][k] = JSON.parse(JSON.stringify(lightMap[i][k]))
-                } else {
-                    let block = {};
-                    block["light"] = 0
-                    lightMap[i][k] = block;
                 }
-                k = k + gridSize
-            }
-        } else {
-            let block = {};
-            block["light"] = 0
-            lightMap[i] = {}
-            for (let k = starty; k < endy;) {
-                lightMap[i][k] = block;
-                k = k + gridSize
             }
         }
-        i = i + gridSize
     }
     return partialMap;
 }

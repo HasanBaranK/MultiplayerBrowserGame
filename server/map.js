@@ -15,7 +15,7 @@ module.exports = {
 }
 
 
-function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap, lightMap) {
+function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap) {
     //Rules
     //world has max 2000 depth mountains and and min 500 depth flat land
     //blocks should be connected and should not defy the laws of gravity(no flying blocks)
@@ -61,7 +61,6 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap, light
 
         collisionMap[i * gridSize] = {};
         fastMap[i * gridSize] = {};
-        lightMap[i * gridSize] = {};
         let k = 20
 
         generateBlock(i * gridSize, k * gridSize, 100, blocks, "stone", collisionMap, fastMap)
@@ -154,16 +153,6 @@ function autoMapGenerator(startX, amount, gridSize, collisionMap, fastMap, light
         }
 
 
-    }
-    //shadowMap
-
-    for (let lightX in lightMap) {
-        for (let i = -10; i < 20; i++) {
-            if (lightMap[lightX] === undefined) {
-                lightMap[lightX] = {}
-            }
-            lightMap[lightX][i * gridSize] = 0;
-        }
     }
     let maps = {
         map: blocks,
@@ -359,11 +348,11 @@ function sendPartialMap(x, y, halfsizex, halfsizey, map, gridSize) {
     return partialMap
 }
 
-function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap, mobs, items, shadowMap) {
+function checkPlayerAtEdge(players, leftEdge, rightEdge, proximity, amount, collisionMap, fastMap, mobs, items) {
     for (let player in players) {
         if (players[player].x + proximity >= rightEdge * 32) {
             //console.log(rightEdge)
-            autoMapGenerator(rightEdge, amount, 32, collisionMap, fastMap, shadowMap)
+            autoMapGenerator(rightEdge, amount, 32, collisionMap, fastMap)
             mobs = generateMobs(rightEdge, amount, mobs, collisionMap, 32, items);
             rightEdge = rightEdge + (amount - 1)
             //console.log(rightEdge)

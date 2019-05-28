@@ -21,16 +21,36 @@ function drawMap(map) {
 }
 function drawShadows(lightMap) {
     ctx.save()
+    let position = myGrid(camera.x,camera.y,32);
+    for (let i = 0; i <= canvas.width ; i += 32 ) {
+        for (let j =0; j <= canvas.height; j+= 32) {
+            let mapX = position.x + i;
+            let mapY = position.y + j;
+            if(lightMap !==undefined && lightMap[mapX] !== undefined &&  lightMap[mapX] !== null && lightMap[mapX][mapY] !== undefined){
+                if (lightMap[mapX][mapY] + generalLightAmount < 100) {
 
-    for (let mapX in lightMap) {
-        for (let mapY in lightMap[mapX]) {
-            if (lightMap[mapX][mapY] < 100) {
-                let shadowAmount = 1 - lightMap[mapX][mapY] / 100;
-                ctx.fillStyle = "rgb(0,0,0," + shadowAmount + ")";
+                    let shadowAmount = 1 - ((lightMap[mapX][mapY] + generalLightAmount) / 100);
+                    ctx.fillStyle = "rgb(0,0,0," + shadowAmount + ")";
+                    ctx.fillRect(mapX, mapY, 32, 32);
+                }
+            }else {
+                ctx.fillStyle = "rgb(0,0,0," + (1- generalLightAmount/100) + ")";
                 ctx.fillRect(mapX, mapY, 32, 32);
             }
         }
     }
+
+
+
+    // for (let mapX in lightMap) {
+    //     for (let mapY in lightMap[mapX]) {
+    //         if (lightMap[mapX][mapY] < 100) {
+    //             let shadowAmount = 1 - lightMap[mapX][mapY] / 100;
+    //             ctx.fillStyle = "rgb(0,0,0," + shadowAmount + ")";
+    //             ctx.fillRect(mapX, mapY, 32, 32);
+    //         }
+    //     }
+    // }
     ctx.restore();
 }
 function drawItems(items){
@@ -126,6 +146,7 @@ let yComm = 0
 let uiDelay = 0
 let currentTimeKeepTrack = 0
 let gameLightConnection = {0:0.8,1:0.8,2:0.7,3:0.7,4:0.7,5:0.6,6:0.5,7:0.4,8:0.4,9:0.3,10:0.2,11:0.1,12:0,13:0,14:0,15:0.1,16:0.1,17:0.2,18:0.4,19:0.6,20:0.7,21:0.7,22:0.8,23:0.8}
+
 function game(){
     try {
         if(socket.disconnected){
@@ -133,6 +154,7 @@ function game(){
         }
         meter.tickStart();
         currentTimeKeepTrack = perf.now()
+
         if(!inInventory && leftMousePressed && currentTimeKeepTrack > delayMouseClickEmit){
             socket.emit('leftclick', {x:mousePosition.x+camera.x, y:mousePosition.y+camera.y})
             delayMouseClickEmit = currentTimeKeepTrack + 500
@@ -166,7 +188,7 @@ function game(){
         drawMap(map);
         drawItems(items);
         drawShadows(lightMap);
-        drawProjectiles(projectiles)
+        //drawProjectiles(projectiles)
         drawPopUps()
         drawHealedPops()
         for(let player in players){

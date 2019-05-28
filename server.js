@@ -49,14 +49,14 @@ let gameTime = 0;
 let day = 0;
 let mapChanged = false;
 let images = {};
-let generalLightAmount = 20;
+let generalLightAmount = 100;
 images = getImages(images)
 
 let leftEdge = 0;
 let rightEdge = 70;
 
 let craftingRecipes = []
-let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap, lightMap);
+let maps = mapFunctions.autoMapGenerator(leftEdge, rightEdge, gridSize, collisionMap, fastMap);
 
 //Crafting recipes
 let sword = itemFunctions.generateItem(0, 0, "sword_item", "melee", 250, 66, 0, 0, items, 1)
@@ -155,13 +155,25 @@ io.on('connection', function (socket) {
         };
         let player = players[socket.id]
         let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32)
-        io.sockets.emit('map', partialMap);
-        io.sockets.emit('items', items);
-        io.sockets.emit('state', players);
+        let partialLightMap = illuminationFunctions.getPartialLightMap(player.x, player.y, 32, 30, 20, lightMap)
+        let gameData = {
+            map: partialMap,
+            lightMap: partialLightMap,
+            items: items,
+            state: players,
+            gameTime: gameTime,
+            generalLight: generalLightAmount
+        }
+
+        io.sockets.emit('gameData', gameData);
+        // io.sockets.emit('map', partialMap);
+        // io.sockets.emit('items', items);
+        // io.sockets.emit('state', players);
         io.sockets.emit('mobs', mobs);
-        io.sockets.emit('gametime', gameTime);
+        // io.sockets.emit('gametime', gameTime);
+        // io.sockets.emit('generalLight', generalLightAmount);
         //io.sockets.emit('projectiles', projectiles);
-        io.sockets.emit('mapCollision', collisionMap);
+        // io.sockets.emit('mapCollision', collisionMap);
         let sword = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "sword_item", "melee", 25, 55, 0, 0, items, 1)
         let torchP = itemFunctions.generateItem(players[socket.id].x, players[socket.id].y, "torch_item", "light", 150, 128, 0, 1, items, 1)
 
@@ -344,11 +356,30 @@ io.on('connection', function (socket) {
     socket.on('state', function (some) {
         socket.emit("state", players)
     });
+    socket.on('gameData', function (some) {
+        let player = players[socket.id] || {};
+        let partialMap = mapFunctions.sendPartialMap(player.x, player.y, 30, 20, fastMap, 32);//30//20
+        //partialMap = mapFunctions.calculateUnreachableBlocks(partialMap, collisionMap, gridSize, lightMap);
+        let partialLightMap = illuminationFunctions.getPartialLightMap(player.x, player.y, 32, 30, 20, lightMap)
+        //partialMap = mapFunctions.takeOutFullShadows(partialMap);
+       let gameData = {
+           map: partialMap,
+           lightMap: partialLightMap,
+           items: items,
+           state: players,
+           gameTime: gameTime,
+           generalLight: generalLightAmount
+       }
+       socket.emit("gameData", gameData)
+    });
     socket.on('projectiles', function (some) {
         socket.emit('projectiles', projectiles);
     });
     socket.on('mobs', function (some) {
         socket.emit('mobs', mobs);
+    });
+    socket.on('generalLight', function (some) {
+        socket.emit('generalLight', generalLightAmount);
     });
 })
 ;
@@ -366,12 +397,24 @@ function movePlayers(players) {
     }
 }
 
+let tick = new Date()
 let count = 0;
+let average = 0;
 setInterval(function () {
-    count++;
-    if (count === 30) {
+    let tick2 = new Date()
+
+    average += 1000/(tick2 - tick)
+    if(count%60 ===0){
+        console.log(average/60)
         count = 0;
+        average = 0
+
     }
+    // if(count&2){
+        movePlayers(players);
+    // }
+    tick = tick2;
+    count++;
     //console.log(items)
     //attackFunctions.projectileGravity(projectiles,players,gridSize,collisionMap,items,1)
     for (let player in players) {
@@ -381,11 +424,12 @@ setInterval(function () {
             players[player].xpToLevel *= 2
         }
     }
-    movePlayers(players);
+
     collisionFunctions.checkPlayerCloseToItems(players, items, gridSize, collisionMap);
 
-    let edges = mapFunctions.checkPlayerAtEdge(players, leftEdge, rightEdge, 256, 200, collisionMap, fastMap, mobs, items, lightMap)
-    illuminationFunctions.calculateLighting(lightSources, lightMap, collisionMap, generalLightAmount, players, timeFunctions.getGameTime(gameTime));
+    let edges = mapFunctions.checkPlayerAtEdge(players, leftEdge, rightEdge, 256, 200, collisionMap, fastMap, mobs, items)
+    generalLightAmount = illuminationFunctions.calculateGeneralLight(timeFunctions.getGameTime(gameTime), generalLightAmount);
+    lightMap = illuminationFunctions.calculateLighting(lightSources, lightMap, collisionMap, generalLightAmount, players );
     rightEdge = edges.rightEdge
     leftEdge = edges.leftEdge
     mobs = edges.mobs
@@ -394,6 +438,7 @@ setInterval(function () {
     collisionFunctions.gravity(players, mobs, gridSize, collisionMap, projectiles, 5);
     //io.sockets.in('players').emit('state', players);
     //io.sockets.in('players').emit('items', items);
+    //io.sockets.in('players').emit('items', items);
     //io.sockets.in('players').emit('projectiles',projectiles);
-    gameTime = timeFunctions.updateGameTime(gameTime, 3600)
-}, 1000 / 60);
+    gameTime = timeFunctions.updateGameTime(gameTime, 600)
+}, 1000 / 100);

@@ -38,6 +38,7 @@ let items;
 let projectiles;
 let itemHoldingIndex = 0
 let itemKeyThing = 0
+let generalLightAmount = 0;
 
 cvs = document.getElementById('canvas')
 cvsBackground = document.getElementById('background')
@@ -595,62 +596,77 @@ function loadImagesThen(folders){
   });
 }
 
+function animatePlayers(playersServer) {
+  for (let player in playersServer) {
+    if (playersServer[player] != 0) {
+      if (!players[player]) {
+        console.log('New Player joined');
+        players[player] = new Player(playersServer[player])
+        players[player].addAnimation('idleR', images['dwarf1'], 0, 4, 0, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimation('idleL', images['dwarf1'], 0, 4, 5, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimation('up', images['dwarf1'], 0, 7, 1, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimation('runL', images['dwarf1'], 0, 7, 6, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimation('down', images['dwarf1'], 0, 7, 6, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimation('runR', images['dwarf1'], 0, 7, 1, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimationOnce('attackR', images['dwarf1'], 0, 6, 2, 32, 32, sizeOfChar, sizeOfChar, 50)
+        players[player].addAnimationOnce('attackL', images['dwarf1'], 0, 6, 7, 32, 32, sizeOfChar, sizeOfChar, 50)
+        players[player].addAnimationOnce('gothitR', images['dwarf1'], 0, 3, 3, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimationOnce('gothitL', images['dwarf1'], 0, 3, 8, 32, 32, sizeOfChar, sizeOfChar, 100)
+        players[player].addAnimationFinal('dieR', images['dwarf1'], 0, 6, 4, 32, 32, sizeOfChar, sizeOfChar, 50)
+      } else {
+        if (players[player].state.status != playersServer[player].status) {
+          players[player].resetAnimations()
+        }
+        players[player].state = playersServer[player]
+      }
+    } else if (players[player]) {
+      delete players[player]
+    }
+  }
+}
+
 document.body.onload = () => {
 
   socket = io.connect('http://localhost:5000')
 
   socket.on('connect', () => {
     socket.on('state', (playersServer) => {
-        for(let player in playersServer){
-          if(playersServer[player] != 0){
-            if (!players[player]){
-              console.log('New Player joined');
-              players[player] = new Player(playersServer[player])
-              players[player].addAnimation('idleR',images['dwarf1'],0,4,0,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimation('idleL',images['dwarf1'],0,4,5,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimation('up',images['dwarf1'],0,7,1,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimation('runL',images['dwarf1'],0,7,6,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimation('down',images['dwarf1'],0,7,6,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimation('runR',images['dwarf1'],0,7,1,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimationOnce('attackR',images['dwarf1'],0,6,2,32,32,sizeOfChar,sizeOfChar,50)
-              players[player].addAnimationOnce('attackL',images['dwarf1'],0,6,7,32,32,sizeOfChar,sizeOfChar,50)
-              players[player].addAnimationOnce('gothitR',images['dwarf1'],0,3,3,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimationOnce('gothitL',images['dwarf1'],0,3,8,32,32,sizeOfChar,sizeOfChar,100)
-              players[player].addAnimationFinal('dieR',images['dwarf1'],0,6,4,32,32,sizeOfChar,sizeOfChar,50)
-            }
-            else{
-              if(players[player].state.status != playersServer[player].status){
-                players[player].resetAnimations()
-              }
-              players[player].state = playersServer[player]
-            }
-          }
-          else if(players[player]){
-            delete players[player]
-          }
-        }
+        animatePlayers(playersServer);
         socket.emit('state',);
     });
 
-    socket.on('map', (mapServer) => {
-      map = mapServer.map
-      lightMap = mapServer.lightMap
-      socket.emit('map',)
-    });
+    // socket.on('map', (mapServer) => {
+    //   map = mapServer.map
+    //   lightMap = mapServer.lightMap
+    //   socket.emit('map',)
+    // });
+    //
+    // socket.on('items', (itemsServer) => {
+    //   items = itemsServer
+    //   socket.emit('items',)
+    // });
 
-    socket.on('items', (itemsServer) => {
-      items = itemsServer
-      socket.emit('items',)
-    });
-
+    // socket.on('generalLight', (generalLightAmountServer) => {
+    //   generalLightAmount = generalLightAmountServer
+    //   socket.emit('generalLight',)
+    // });
     socket.on('generalmessage', (message) => {
       messageHistory.push(message)
       shouldUpdateUI = true
     });
-
-    socket.on('projectiles', (projectilesServer) => {
-      projectiles = projectilesServer
+    socket.on('gameData', (gameData) => {
+      map = gameData.map
+      lightMap = gameData.lightMap
+      items = gameData.items
+      generalLightAmount = gameData.generalLight
+      gameTime = gameData.gameTime
+      let playersServer = gameData.state
+      animatePlayers(playersServer);
+      socket.emit('gameData',)
     });
+    // socket.on('projectiles', (projectilesServer) => {
+    //   projectiles = projectilesServer
+    // });
 
     socket.on('mobs', (mobsServer) => {
       for(let mob in mobsServer){
@@ -717,10 +733,10 @@ document.body.onload = () => {
       loadImagesThen(folders)
     });
 
-    socket.on('gametime', (gameTimeServer) => {
-      gameTime = gameTimeServer
-      socket.emit('gametime',)
-    });
+    // socket.on('gametime', (gameTimeServer) => {
+    //   gameTime = gameTimeServer
+    //   socket.emit('gametime',)
+    // });
 
     socket.on('craftingui', (craftingRecipesServer) => {
       inCrafting = true
