@@ -38,6 +38,13 @@ function heal(player, amount) {
     }
     return true
 }
+function checkIfPlayerLeveledUp(player) {
+    if (player.xp >= player.xpToLevel) {
+        player.level++
+        player.xp = 0
+        player.xpToLevel *= 2
+    }
+}
 
 function meleeAttack(players, attackerKey, item,mobs,isMob,items) {
     let peopleHit = {}
@@ -54,6 +61,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob,items) {
                     if(players[otherPlayer].health <= 0){
                       peopleHit.players.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage, xpGained:50, isMob:false})
                       players[attackerKey].xp += 50
+                        checkIfPlayerLeveledUp(players[attackerKey]);
                     }
                     else{
                       peopleHit.players.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage, isMob:false})
@@ -68,6 +76,7 @@ function meleeAttack(players, attackerKey, item,mobs,isMob,items) {
                 if(mobs[otherPlayer].health <= 0){
                   peopleHit.mobs.push({attackerId:attackerKey,attackedId:otherPlayer,damage:item.damage, xpGained:200, isMob:true})
                   players[attackerKey].xp += 200
+                    checkIfPlayerLeveledUp(players[attackerKey]);
                 }
                 else{
                   peopleHit.mobs.push({attackerId:attackerKey,attackedId:otherPlayer, damage:item.damage, isMob:true})
@@ -148,7 +157,9 @@ function generateProjectile(projectiles, name, speed, startx, starty, range, fin
     let yLength = Math.abs(finishY - starty)
     let total = xLength + yLength;
     let xPercentage = Math.floor(xLength * 100 / total)
+    console.log(xPercentage)
     let yPercentage = Math.floor(yLength * 100 / total)
+    console.log(yPercentage)
     let projectile = {
         name: name,
         speed: speed,
@@ -169,10 +180,15 @@ function generateProjectile(projectiles, name, speed, startx, starty, range, fin
 
 async function calculateProjectile(projectiles,projectile, players, items, gridSize, collisionMap) {
     let sleepTime = 25;
-    let speed = 0.002
+    let projectileMaxDistance = 5000;
+    let totalAmountTraveled = 0;
     let gravityAmount = 5
     let indexProjectile = projectile
     projectile = projectiles[projectile]
+    let speed = projectile.speed
+    if(projectile == null){
+        return ;
+    }
     let startPower = projectile.power
 
     let xamountTraveled = 0;
@@ -180,21 +196,24 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
 
     while (projectile.power >= 0) {
 
-        if (projectile.xdirection == "right") {
+        if(totalAmountTraveled > projectileMaxDistance){
+            deleteProjectile(projectiles, indexProjectile)
+            return
+        }
 
-
+        if (projectile.xdirection == 2) {
             xamountTraveled = speed * (startPower * (projectile.xPercentage))
             projectile.x += xamountTraveled
         } else {
             xamountTraveled = speed * projectile.power * (projectile.xPercentage )
             projectile.x -=xamountTraveled
         }
-        if(projectile.ydirection == "up"){
+        if(projectile.ydirection == 1){
             yamountTraveled = speed * (projectile.power * (projectile.yPercentage))
             projectile.y -= yamountTraveled
         }else{
             yamountTraveled = speed * projectile.power * (projectile.yPercentage)
-            projectile.y -=yamountTraveled
+            projectile.y +=yamountTraveled
         }
 
 
@@ -212,21 +231,27 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
                 lowerHealth(player, projectile.damage,items);
             }
         }
-        projectile.angle = getAngleRad(xamountTraveled,yamountTraveled+gravityAmount)
+        if (projectile.xdirection == 2 &&projectile.ydirection == 1){
+            projectile.angle = getAngleRad(xamountTraveled,yamountTraveled-gravityAmount)
+        }else if(projectile.xdirection == 2 &&projectile.ydirection == 2){
+            projectile.angle = getAngleRad(xamountTraveled,(-yamountTraveled)-gravityAmount)
+        }else if(projectile.xdirection == 1 &&projectile.ydirection == 2){
+            projectile.angle = getAngleRad(-xamountTraveled,(-yamountTraveled)-gravityAmount)+Math.PI
+        }else if(projectile.xdirection == 1 &&projectile.ydirection == 1){
+            projectile.angle = getAngleRad(-xamountTraveled,yamountTraveled-gravityAmount)+Math.PI
+        }
+
+        totalAmountTraveled += xamountTraveled + yamountTraveled + gravityAmount
         await sleep(sleepTime)
 
     }
 
-    for (;startPower > projectile.power ;projectile.power++) {
-
-        if (projectile.direction == "right") {
-            xamountTraveled = speed * projectile.power * (projectile.xPercentage / 10)
-            projectile.x += xamountTraveled
-        }{
-            xamountTraveled = speed * projectile.power * (projectile.xPercentage / 10)
-            projectile.x -= xamountTraveled
+    while (true) {
+        if(totalAmountTraveled > projectileMaxDistance){
+            deleteProjectile(projectiles, indexProjectile)
+            return
         }
-
+        xamountTraveled=0;
         projectile.y += gravityAmount
         if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
             deleteProjectile(projectiles, indexProjectile)
@@ -237,9 +262,20 @@ async function calculateProjectile(projectiles,projectile, players, items, gridS
             player = players[player]
             if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
                 lowerHealth(player, projectile.damage,items);
+                deleteProjectile(projectiles, indexProjectile)
+                return
             }
         }
-        projectile.angle = getAngleRad(xamountTraveled,gravityAmount)
+        if (projectile.xdirection == 2 &&projectile.ydirection == 1){
+            projectile.angle = getAngleRad(xamountTraveled,yamountTraveled-gravityAmount)
+        }else if(projectile.xdirection == 2 &&projectile.ydirection == 2){
+            projectile.angle = getAngleRad(xamountTraveled,(-yamountTraveled)-gravityAmount)
+        }else if(projectile.xdirection == 1 &&projectile.ydirection == 2){
+            projectile.angle = getAngleRad(-xamountTraveled,(-yamountTraveled)-gravityAmount)+Math.PI
+        }else if(projectile.xdirection == 1 &&projectile.ydirection == 1){
+            projectile.angle = getAngleRad(-xamountTraveled,yamountTraveled-gravityAmount)+Math.PI
+        }
+        totalAmountTraveled += xamountTraveled + yamountTraveled + gravityAmount
         await sleep(sleepTime)
     }
 
@@ -260,20 +296,21 @@ function projectileGravity(projectiles, players, gridSize, collisionMap, items,g
     for (let projectile in projectiles) {
         let indexProjectile = projectile
         projectile = projectiles[projectile]
+        if(projectile != null) {
 
-        projectile.y += gravityAmount
-        for (let player in players) {
-            player = players[player]
-            if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x+player.sizex, player.y+player.sizey)) {
-                lowerHealth(player, projectile.damage,items);
+            projectile.y += gravityAmount
+            for (let player in players) {
+                player = players[player]
+                if (projectile.range >= calculateDistance(projectile.x, projectile.y, player.x + player.sizex, player.y + player.sizey)) {
+                    lowerHealth(player, projectile.damage, items);
+                }
+            }
+            if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
+                deleteProjectile(projectiles, indexProjectile)
+                generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 64, 0, 1, items, 1, false)
+                break;
             }
         }
-        if (checkCollision(projectile, 32, 32, gridSize, collisionMap)) {
-            deleteProjectile(projectiles, indexProjectile)
-            generateItem(projectile.x, projectile.y, "arrow0_item", "projectile", 10, 64, 0, 1, items, 1, false)
-            break;
-        }
-
     }
 }
 
@@ -282,5 +319,5 @@ function calculateDistance(x1, y1, x2, y2) {
 }
 
 function deleteProjectile(projectiles, indexProjectile) {
-    projectiles.splice(indexProjectile, 1)
-}
+    projectiles[indexProjectile]= null
+ }

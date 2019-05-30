@@ -661,6 +661,7 @@ document.body.onload = () => {
       generalLightAmount = gameData.generalLight
       gameTime = gameData.gameTime
       let playersServer = gameData.state
+      projectiles = gameData.projectiles
       animatePlayers(playersServer);
       socket.emit('gameData',)
     });

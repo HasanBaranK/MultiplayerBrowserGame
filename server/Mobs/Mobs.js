@@ -9,7 +9,7 @@ module.exports = {
     mobController
 }
 
-async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io,items) {
+async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io,items,gridSize) {
     //go a bit right from the current then a bit left
     //check if a player is close if it is go to him
     //if he is close enough then attack not then follow him
@@ -20,7 +20,7 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io,i
             let times = 0;
             let interval = setInterval(function () {
                 times++;
-                move("left", mobs[mob], 32, collisionMap, moveSpeed);
+                move("left", mobs[mob], gridSize, collisionMap, moveSpeed);
 
                 if (times > 5) {
                     mobs[mob].inThread = false;
@@ -33,7 +33,7 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io,i
             let times = 0;
             let interval = setInterval(function () {
                 times++;
-                move("right", mobs[mob], 32, collisionMap, moveSpeed)
+                move("right", mobs[mob], gridSize, collisionMap, moveSpeed)
                 if (times > 5) {
                     mobs[mob].inThread = false;
                     clearInterval(interval);
@@ -47,17 +47,17 @@ async function MobAI(players, player, mobs, mob, collisionMap, attackRange, io,i
 
         if (player.x > mobs[mob].x) {
             let before = mobs[mob].x;
-            move("right", mobs[mob], 32, collisionMap, moveSpeed)
+            move("right", mobs[mob], gridSize, collisionMap, moveSpeed)
             if (before == mobs[mob].x) {
-                jump(mobs[mob], 50, collisionMap, 32, 4, 6);
-                move("right", mobs[mob], 32, collisionMap, moveSpeed)
+                jump(mobs[mob], 50, collisionMap, gridSize, 4, 6);
+                move("right", mobs[mob], gridSize, collisionMap, moveSpeed)
             }
         } else {
             let before = mobs[mob].x;
-            move("left", mobs[mob], 32, collisionMap, moveSpeed)
+            move("left", mobs[mob], gridSize, collisionMap, moveSpeed)
             if (before == mobs[mob].x) {
-                jump(mobs[mob], 50, collisionMap, 32, 4, 6);
-                move("left", mobs[mob], 32, collisionMap, moveSpeed)
+                jump(mobs[mob], 50, collisionMap, gridSize, 4, 6);
+                move("left", mobs[mob], gridSize, collisionMap, moveSpeed)
             }
         }
         let distance = calculateDistance(player.x + player.sizex, player.y + player.sizey, mobs[mob].x + mobs[mob].sizex, mobs[mob].y + mobs[mob].sizey)
@@ -120,7 +120,7 @@ function generateMob(start, collisionMap, gridSize, mobs, items) {
     id = "asd" + id + "asd";
     mobs[id] = {
         name: "Skeleton",
-        x: start * 32,
+        x: start * gridSize,
         y: getHeight(start, collisionMap, gridSize, 640) - gridSize * 2,
         status: 0,
         health: 100,
@@ -184,7 +184,7 @@ function getVisibleMobs(mobs) {
     return mobs
 }
 
-async function mobController(players, mobs, collisionMap, attackRange, range, io,items) {
+async function mobController(players, mobs, collisionMap, attackRange, range, io,items,gridSize) {
     setInterval(function () {
         {
             let visibleMobs = getVisibleMobs(mobs);
@@ -194,7 +194,7 @@ async function mobController(players, mobs, collisionMap, attackRange, range, io
 
                 if (mobs[mob].inThread == false && mobs[mob].isDead == false) {
                     mobs[mob].inThread = true;
-                    MobAI(players, player, mobs, mob, collisionMap, attackRange, io,items);
+                    MobAI(players, player, mobs, mob, collisionMap, attackRange, io,items,gridSize);
                 }
             }
         }

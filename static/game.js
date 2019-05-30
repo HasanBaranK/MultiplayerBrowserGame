@@ -1,3 +1,6 @@
+
+let lightQuality = 16;
+
 function drawMap(map) {
     for(let block in map){
         try {
@@ -19,23 +22,22 @@ function drawMap(map) {
         }
     }
 }
-function drawShadows(lightMap) {
+function drawShadows(lightMap,gridSize) {
     ctx.save()
-    let position = myGrid(camera.x,camera.y,32);
-    for (let i = 0; i <= canvas.width ; i += 32 ) {
-        for (let j =0; j <= canvas.height; j+= 32) {
+    let position = myGrid(camera.x,camera.y,gridSize);
+    for (let i = 0; i <= canvas.width ; i += gridSize ) {
+        for (let j =0; j <= canvas.height; j+= gridSize) {
             let mapX = position.x + i;
             let mapY = position.y + j;
             if(lightMap !==undefined && lightMap[mapX] !== undefined &&  lightMap[mapX] !== null && lightMap[mapX][mapY] !== undefined){
                 if (lightMap[mapX][mapY] + generalLightAmount < 100) {
-
                     let shadowAmount = 1 - ((lightMap[mapX][mapY] + generalLightAmount) / 100);
                     ctx.fillStyle = "rgb(0,0,0," + shadowAmount + ")";
-                    ctx.fillRect(mapX, mapY, 32, 32);
+                    ctx.fillRect(mapX, mapY, gridSize, gridSize);
                 }
             }else {
                 ctx.fillStyle = "rgb(0,0,0," + (1- generalLightAmount/100) + ")";
-                ctx.fillRect(mapX, mapY, 32, 32);
+                ctx.fillRect(mapX, mapY, gridSize, gridSize);
             }
         }
     }
@@ -60,11 +62,13 @@ function drawItems(items){
 }
 function drawProjectiles(projectiles){
     for(let projectile in projectiles){
-        ctx.save()
-        ctx.translate(projectiles[projectile].x, projectiles[projectile].y)
-        ctx.rotate(projectiles[projectile].angle)
-        ctx.drawImage(images[projectiles[projectile].name],-8,-8);
-        ctx.restore()
+        if(projectiles[projectile] !== null) {
+            ctx.save()
+            ctx.translate(projectiles[projectile].x, projectiles[projectile].y)
+            ctx.rotate(-projectiles[projectile].angle)
+            ctx.drawImage(images[projectiles[projectile].name], -8, -8);
+            ctx.restore()
+        }
     }
 }
 function determineAnimation(player){
@@ -145,7 +149,7 @@ let xComm = 0
 let yComm = 0
 let uiDelay = 0
 let currentTimeKeepTrack = 0
-let gameLightConnection = {0:0.8,1:0.8,2:0.7,3:0.7,4:0.7,5:0.6,6:0.5,7:0.4,8:0.4,9:0.3,10:0.2,11:0.1,12:0,13:0,14:0,15:0.1,16:0.1,17:0.2,18:0.4,19:0.6,20:0.7,21:0.7,22:0.8,23:0.8}
+// let gameLightConnection = {0:0.8,1:0.8,2:0.7,3:0.7,4:0.7,5:0.6,6:0.5,7:0.4,8:0.4,9:0.3,10:0.2,11:0.1,12:0,13:0,14:0,15:0.1,16:0.1,17:0.2,18:0.4,19:0.6,20:0.7,21:0.7,22:0.8,23:0.8}
 
 function game(){
     try {
@@ -187,8 +191,8 @@ function game(){
         ctx.clearRect(camera.x, camera.y, cvs.width, cvs.height);
         drawMap(map);
         drawItems(items);
-        drawShadows(lightMap);
-        //drawProjectiles(projectiles)
+        drawShadows(lightMap,lightQuality);
+        drawProjectiles(projectiles)
         drawPopUps()
         drawHealedPops()
         for(let player in players){
@@ -271,7 +275,8 @@ function game(){
         if(shouldUpdateUI || currentTimeKeepTrack > uiDelay){
             updateUI()
             shouldUpdateUI = false
-            uiDelay = currentTimeKeepTrack + 1000
+            uiDelay = currentTimeKeepTrack + 250
+
         }
 
         meter.tick()
